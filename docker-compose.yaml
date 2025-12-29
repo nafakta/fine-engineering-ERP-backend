@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "Danish@321"
+      POSTGRES_DB: "postgres"
+    ports:
+      - "5435:5432"
+    volumes:
+      - compress_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    ports:
+      - "8002:8002"
+    environment:
+      NODE_ENV: production
+      GYMMATEAPIGATEWAY_PORT: 8002
+
+      # --- Add your application secrets here ---
+      JWT_SECRET: "bfe3117dd96060b46e91b565626786ffcbf25b5db7f794ee661f9f60f0f6e1537959c9e89ab53cc5e1a5fef2ae46ce0e5ab575ef447e17cd7093b623712b3a11"
+
+      # Writer DB config
+      PGHOST_WRITER: db
+      PGPORT_WRITER: 5432
+      PGUSER_WRITER: postgres
+      PGPASSWORD_WRITER: Danish@321
+      PGDATABASE_WRITER: postgres
+
+      # Reader DB config
+      PGHOST_READER: db
+      PGPORT_READER: 5432
+      PGUSER_READER: postgres
+      PGPASSWORD_READER: Danish@321
+      PGDATABASE_READER: postgres
+
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+      - ./config:/usr/src/app/config
+
+volumes:
+  compress_pgdata:
