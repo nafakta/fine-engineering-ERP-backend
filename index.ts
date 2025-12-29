@@ -98,7 +98,7 @@ app.use("/api/v1/compresscrmbackend", SystemuserRouter);
 
 // ---- Root ----
 app.get("/", (_req, res) => {
-  res.send("Compress CRM backend is running 🚀");
+  res.send("fine-engineering-erp-backend is running 🚀");
 });
 
 // ---- 404 LAST ----
