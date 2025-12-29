@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: "Danish@321"
       POSTGRES_DB: "postgres"
     ports:
-      - "5435:5432"
+      - "5436:5432"
     volumes:
       - compress_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -24,10 +24,10 @@ services:
       - "8002:8002"
     environment:
       NODE_ENV: production
-      GYMMATEAPIGATEWAY_PORT: 8002
+      GYMMATEAPIGATEWAY_PORT: 8000
 
       # --- Add your application secrets here ---
-      JWT_SECRET: "bfe3117dd96060b46e91b565626786ffcbf25b5db7f794ee661f9f60f0f6e1537959c9e89ab53cc5e1a5fef2ae46ce0e5ab575ef447e17cd7093b623712b3a11"
+      JWT_SECRET: ""
 
       # Writer DB config
       PGHOST_WRITER: db
