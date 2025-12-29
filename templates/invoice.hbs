@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>{{doc_title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111111;
+            margin: 0;
+            padding: 0;
+            max-width: 800px;
+            font-size: 11px;
+            /* Decreased font size globally */
+        }
+
+        .wrap {
+            padding: 16px;
+            border: 2px solid black;
+            /* Changed border to solid black */
+            border-radius: 8px;
+        }
+
+        /* Header Styles */
+        .head-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /*margin-bottom: 10px;
+            padding-bottom: 10px;*/
+        }
+
+        .vertical-divider {
+            width: 2px;
+            height: 120px;
+            /* Adjust height based on logo size */
+            background: #000;
+            /* Pure black */
+            margin: 0 15px;
+        }
+
+        .logo {
+            max-width: 300px;
+            /* adjust width cap */
+            max-height: 150px;
+            /* adjust height cap */
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            padding-right: 60px;
+        }
+
+        .addr {
+            text-align: left;
+            font-size: 10px;
+            /* Decreased address font size */
+            color: #111;
+            max-width: 400px;
+        }
+
+        .addr div+div {
+            margin-top: 3px;
+        }
+
+        /* Divider */
+        .rule {
+            height: 1px;
+            background: black;
+            margin: 12px 0;
+        }
+
+        /* Title */
+        h1 {
+            font-size: 14px;
+            /* Decreased title font size */
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            padding-bottom: 20px;
+            /*border-bottom: 1px solid #ddd;*/
+        }
+
+        /* Quotation Details */
+        .quotation-details {
+            margin-top: 12px;
+            font-size: 11px;
+            /* Decreased font size */
+        }
+
+        .quotation-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .quotation-details td {
+            padding: 4px;
+            /* Removed border from table cells */
+        }
+
+        .quotation-details td strong {
+            font-weight: 700;
+        }
+
+        /* Address Section (Quote To / Shipping To) */
+        .address-section {
+            margin-top: 20px;
+            font-size: 11px;
+            /* Decreased font size */
+        }
+
+        .address-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .address-section td {
+            padding: 4px;
+            /* Removed border from table cells */
+        }
+
+        /* Items Table with Borders */
+        .item-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .item-table th,
+        .item-table td {
+            border: 1px solid #ddd;
+            padding: 7px;
+            text-align: left;
+        }
+
+        .item-table th {
+            background: #f5f5f5;
+            font-weight: 700;
+        }
+
+        /* Total Section */
+        .total-section {
+            margin-top: 20px;
+            font-size: 12px;
+            /* Decreased font size */
+            text-align: right;
+        }
+
+        .total-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .total-section td {
+            padding: 4px;
+            /* Removed border from table cells */
+        }
+
+        .total-section td strong {
+            font-weight: 700;
+        }
+
+        .total-section .grand-total {
+            background-color: #e9f2ff;
+            font-weight: 800;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Words Section */
+        .words {
+            margin-top: 10px;
+            padding: 8px;
+            /*border: 1px dashed #ddd;*/
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        /* Terms & Conditions Section */
+        .terms-conditions {
+            margin-top: 20px;
+            font-size: 12px;
+        }
+
+        .terms-conditions1 {
+            margin-top: 20px;
+            font-size: 12px;
+            padding-left: 20px;
+            text-align: left;
+        }
+
+        .terms-conditions ul {
+            padding-left: 20px;
+            list-style-type: decimal;
+        }
+
+        .terms-conditions li {
+            margin-bottom: 8px;
+        }
+
+        .company_name {
+            font-size: 14px;
+        }
+
+        h4 {
+            padding-bottom: 0px;
+        }
+
+        .thanks {
+            padding-top: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Signatures */
+        .signatures {
+            margin-top: 20px;
+        }
+
+        .signatures table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signatures td {
+            width: 50%;
+            padding: 10px;
+            vertical-align: top;
+        }
+
+        .signatures .label {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .signatures .line {
+            margin-top: 60px;
+            border-top: 1px solid #333;
+            width: 100%;
+        }
+
+        .gst-strip {
+            font-weight: bold;
+            font-size: 12px !important;
+        }
+
+        .signatures .hint {
+            font-size: 9px;
+            color: #555;
+            font-style: italic;
+            padding-top: 100px;
+        }
+
+        .bank-details-heading {
+            font-size: 16px;
+            font-weight: bold;
+            color: black;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .grand-total td {
+            padding: 10px;
+            vertical-align: top;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <!-- Header -->
+        <div class="head-row">
+            <div class="addr">
+                {{#if our_company.legal_name}}
+                <h3><strong>{{our_company.legal_name}}</strong></h3>
+                {{/if}}
+                {{#if our_company.address_line}}<div>{{our_company.address_line}}</div>{{/if}}
+                {{#if our_company.city_state}}<div>{{our_company.city_state}}</div>{{/if}}
+                {{#if our_company.mobile_number}}<div>{{our_company.mobile_number}}</div>{{/if}}
+                {{#if our_company.email_id}}<div>{{our_company.email_id}}</div>{{/if}}
+                {{#if our_company.website}}<div>{{our_company.website}}</div>{{/if}}
+                {{#if our_company.tax_id}}
+                <div class="gst-strip"><strong>GSTIN: {{our_company.tax_id}}</strong></div>
+                {{/if}}
+            </div>
+            <!-- Divider line -->
+            <div class="vertical-divider"></div>
+            <img src="{{logo}}" alt="Company Logo" class="logo" />
+        </div>
+
+        <!-- Divider -->
+        <div class="rule"></div>
+
+        <!-- Title -->
+        <h1 class="">{{doc_title}}</h1>
+
+        <!-- Quotation Details -->
+        <div class="quotation-details">
+            <table>
+                <tr>
+                    <td><strong>Quotation No:</strong></td>
+                    <td>{{invoice_number}}</td>
+                    <td><strong>Contact Person:</strong></td>
+                    <td>{{contact_person}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Quotation Date:</strong></td>
+                    <td>{{invoice_date}}</td>
+                    <td><strong>Contact No:</strong></td>
+                    <td>{{customer_phone}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Due Date:</strong></td>
+                    <td>{{due_date}}</td>
+                    <td><strong>Email ID:</strong></td>
+                    <td>{{customer_email}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Terms:</strong></td>
+                    <td>DUE ON RECEIPT</td>
+                    <td><strong>Designation</strong></td>
+                    <td>{{contact_person_designation}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Service Type:</strong></td>
+                    <td>
+                        {{#if service_type}}
+                        {{service_type}}
+                        {{else}}
+                        MAINTENANCE
+                        {{/if}}
+                    </td>
+                    <td><strong>GST No:</strong></td>
+                    <td>{{customer_gstin}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Place of Supply:</strong></td>
+                    <td>{{shipping_city_state}}</td>
+                    <td><strong>State:</strong></td>
+                    <td>{{shipping_city_state}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Address Section (Quote To / Shipping To) -->
+        <div class="address-section">
+            <table>
+                <tr style="background-color: #f0f8ff;">
+                    <!-- Add background color here -->
+                    <td><strong>QUOTE TO:</strong></td>
+                    <td><strong>SHIPPING TO:</strong></td>
+                </tr>
+                {{!-- <tr>
+                    <td><strong>{{customer_name}}</strong></td> <!-- Client Name -->
+                    <td><strong>{{customer_name}}</strong></td>
+                </tr> --}}
+                <tr>
+                    <td><strong>{{customer_company}}</strong></td> <!-- Client Name -->
+                    <td><strong>{{customer_company}}</strong></td>
+                </tr>
+                <tr>
+                    <td>{{customer_address}}</td>
+                    <td>{{shipping_address}}</td>
+                </tr>
+                {{!-- <tr>
+                    <td><strong>Subject:</strong></td>
+                    <td>{{subject}}</td> <!-- Show Subject -->
+                </tr> --}}
+            </table>
+        </div>
+
+        <div class="footer">
+            <p><strong>Subject:</strong> {{subject}}</p>
+        </div>
+
+        <!-- Items Table -->
+        <!-- Items Table -->
+        <!-- Items Table -->
+        <table class="item-table">
+            <thead>
+                <tr>
+                    <th>SR</th>
+                    <th>DESCRIPTION</th>
+                    <th>HSN CODE</th>
+                    <th>MAKE</th>
+                    <th>QTY</th>
+                    <th>UNIT</th>
+                    <th>PRICE</th>
+                    <th>GST (%)</th>
+                    <th>TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each items}}
+                <tr>
+                    <td>{{inc @index}}</td>
+                    <td>
+                        {{#if name}}
+                        {{#if description}}
+                        <!-- Both name and description exist -->
+                        <div style="font-weight: bold; margin-bottom: 4px;">{{name}}</div>
+                        <div style="font-size: 12px; color: #666; line-height: 1.3;">{{description}}</div>
+                        {{else}}
+                        <!-- Only name exists -->
+                        <div style="font-weight: bold;">{{name}}</div>
+                        {{/if}}
+                        {{else}}
+                        {{#if description}}
+                        <!-- Only description exists -->
+                        <div style="font-weight: bold;">{{description}}</div>
+                        {{else}}
+                        <!-- Neither exists -->
+                        <div style="color: #999; font-style: italic;">No description</div>
+                        {{/if}}
+                        {{/if}}
+                    </td>
+                    <td>{{hsn}}</td>
+                    <td>{{or make "-"}}</td>
+                    <td>{{formatQty qty}}</td>
+                    <td>{{or unit "NOS"}}</td>
+                    <td>{{formatINR price}}</td>
+                    <td>{{gst_percent}}%</td>
+                    <td>{{formatINR line_total}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+
+        <!-- Total Section -->
+        <!-- Total Section -->
+        <div class="total-section">
+            <table>
+                <tr>
+                    <td><strong>SUB. TOTAL</strong></td>
+                    <td>{{formatCurrency sub_total}}</td>
+                </tr>
+
+                {{#if discount_amount}}
+                <tr>
+                    <td><strong>DISCOUNT ({{discount_label}})</strong></td>
+                    <td>{{formatCurrency discount_amount}}</td>
+                </tr>
+
+                <!-- TOTAL AFTER DISCOUNT -->
+                <tr>
+                    <td><strong>TOTAL</strong></td>
+                    <td>{{formatCurrency (subtract sub_total discount_amount)}}</td>
+                </tr>
+                {{/if}}
+
+                <!-- GST BREAKDOWN - FIXED LOGIC -->
+                {{#if is_inter_state}}
+                <!-- Show IGST for inter-state -->
+                {{#if igst_amount}}
+                <tr>
+                    <td><strong>IGST @{{igst_percent}}%</strong></td>
+                    <td>{{formatCurrency igst_amount}}</td>
+                </tr>
+                {{/if}}
+                {{else}}
+                <!-- Show CGST+SGST for intra-state -->
+                {{#if cgst_amount}}
+                <tr>
+                    <td><strong>CGST @{{cgst_percent}}%</strong></td>
+                    <td>{{formatCurrency cgst_amount}}</td>
+                </tr>
+                {{/if}}
+                {{#if sgst_amount}}
+                <tr>
+                    <td><strong>SGST @{{sgst_percent}}%</strong></td>
+                    <td>{{formatCurrency sgst_amount}}</td>
+                </tr>
+                {{/if}}
+                {{/if}}
+
+                {{!-- <tr>
+                    <td><strong>TOTAL AMOUNT</strong></td>
+                    <td>{{formatCurrency total_amount}}</td>
+                </tr> --}}
+            </table>
+            <table>
+                <tr class="grand-total">
+                    <td class="text-left">
+                        <strong>Amount in Words:</strong><br>
+                        {{amount_in_words}}
+                    </td>
+                    <td class="text-right" style="white-space: nowrap; display: inline-block;">
+                        <strong>GRAND TOTAL :-</strong> {{formatCurrency grand_total}}
+                    </td>
+                </tr>
+            </table>
+            <div class="terms-conditions1">
+                <p><strong>Note:</strong>: {{notes}}</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <h3 class="bank-details-heading">Company Bank Details :-</h3>
+            <p><strong>Account Name:</strong> COMPRESS INDIA AIR CONDITIONING PVT. LTD</p>
+            <p><strong>Account Number:</strong> 50200081751743</p>
+            <p><strong>Bank Name:</strong> HDFC BANK LIMITED</p>
+            <p><strong>IFSC / NEFT / RTGS:</strong> HDFC0007811</p>
+            <p><strong>Branch Address:</strong> NEELKANTH IT PARK, VIDYAVIHAR, MUMBAI - 400071</p>
+        </div>
+
+        <!-- Terms & Conditions Section -->
+        <div class="terms-conditions">
+            <h3>Terms & Conditions:</h3>
+            <ul>
+                <li><strong>Payments Terms:</strong> 50% Advance payment along with P.O & remaining 50% immediately
+                    after the completion of the project.</li>
+                <li><strong>No additional works:</strong> No additional works would be accepted after closing the deal.
+                </li>
+                <li><strong>Additional charges:</strong> Additional works would be charged extra, rates would be subject
+                    to market actual cost.</li>
+                <li><strong>Natural damages:</strong> Natural damages are not considered in this estimate.</li>
+                <li><strong>Client's work order:</strong> Client's work order / permission is mandatory to proceed the
+                    work further.</li>
+            </ul>
+        </div>
+
+        <!-- Signature Section -->
+        {{!-- <div class="signatures">
+            <table>
+                <tr>
+                    <td>
+                        <span class="label">
+                            {{or our_company.legal_name "COMPRESS INDIA AIR CONDITIONING PRIVATE LIMITED"}}:
+                        </span>
+                        <div class="hint">Authorised Signatory / Company Seal</div>
+                    </td>
+                    <td style="text-align:right;">
+                        <span class="label">{{customer_company}}:</span>
+                        <div class="hint">Customer Signature & Stamp</div>
+                    </td>
+                </tr>
+            </table>
+        </div> --}}
+
+        <div class="thanks">
+            *** THANKS FOR YOUR VALUABLE BUSINESS WITH COMPRESS INDIA AIR CONDITIONING PRIVATE LIMITED ***
+        </div>
+    </div>
+</body>
+
+</html>

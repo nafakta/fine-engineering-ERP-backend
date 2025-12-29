@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>{{doc_title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111111;
+            margin: 0;
+            padding: 0;
+            max-width: 800px;
+            font-size: 11px;
+        }
+
+        .wrap {
+            padding: 16px;
+            border: 2px solid black;
+            border-radius: 8px;
+        }
+
+        /* Header Styles */
+        .head-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .vertical-divider {
+            width: 2px;
+            height: 120px;
+            background: #000;
+            margin: 0 15px;
+        }
+
+        .logo {
+            max-width: 300px;
+            max-height: 150px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            padding-right: 60px;
+        }
+
+        .addr {
+            text-align: left;
+            font-size: 10px;
+            color: #111;
+            max-width: 400px;
+        }
+
+        .addr div+div {
+            margin-top: 3px;
+        }
+
+        /* Divider */
+        .rule {
+            height: 1px;
+            background: black;
+            margin: 12px 0;
+        }
+
+        /* Title */
+        h1 {
+            font-size: 14px;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            padding-bottom: 20px;
+        }
+
+        /* Details */
+        .quotation-details {
+            margin-top: 12px;
+            font-size: 11px;
+        }
+
+        .quotation-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .quotation-details td {
+            padding: 4px;
+        }
+
+        .quotation-details td strong {
+            font-weight: 700;
+        }
+
+        /* Items Table */
+        .item-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .item-table th,
+        .item-table td {
+            border: 1px solid #ddd;
+            padding: 7px;
+            text-align: left;
+        }
+
+        .item-table th {
+            background: #f5f5f5;
+            font-weight: 700;
+        }
+
+        .optional-item {
+            background-color: #fff9e6;
+        }
+
+        .section-header {
+            background-color: #e8f4ff !important;
+            font-weight: 800 !important;
+            font-size: 12px;
+        }
+
+        /* Files section */
+        .files-section {
+            margin-top: 5px;
+            font-size: 9px;
+            color: #555;
+        }
+
+        .file-item {
+            margin: 2px 0;
+            padding-left: 10px;
+            position: relative;
+        }
+
+        .file-item:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+        }
+
+        .primary-file {
+            font-weight: bold;
+            color: #1a5fb4;
+        }
+
+        /* Totals */
+        .total-section {
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: right;
+        }
+
+        .total-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .total-section td {
+            padding: 4px;
+        }
+
+        .total-section td strong {
+            font-weight: 700;
+        }
+
+        .total-section .grand-total {
+            background-color: #e9f2ff;
+            font-weight: 800;
+        }
+
+        /* Words */
+        .words {
+            margin-top: 10px;
+            padding: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .company_name {
+            font-size: 14px;
+        }
+
+        h4 {
+            padding-bottom: 0px;
+        }
+
+        .thanks {
+            padding-top: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .terms-conditions {
+            margin-top: 20px;
+            font-size: 10px;
+        }
+
+        .terms-conditions h3 {
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+
+        .terms-conditions ul {
+            margin: 0;
+            padding-left: 15px;
+        }
+
+        .terms-conditions li {
+            margin-bottom: 4px;
+        }
+
+        .notes-section {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .notes-section strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <!-- Header -->
+        <div class="head-row">
+            <div class="addr">
+                {{#if our_company.legal_name}}<h4><strong>{{our_company.legal_name}}</strong></h4>{{/if}}
+                {{#if our_company.address_line}}<div>{{our_company.address_line}}</div>{{/if}}
+                {{#if our_company.city_state}}<div>{{our_company.city_state}}</div>{{/if}}
+                {{#if our_company.mobile_number}}<div>{{our_company.mobile_number}}</div>{{/if}}
+                {{#if our_company.email_id}}<div>{{our_company.email_id}}</div>{{/if}}
+                {{#if our_company.website}}<div>{{our_company.website}}</div>{{/if}}
+                {{#if our_company.tax_id}}<div><strong>GSTIN: {{our_company.tax_id}}</strong></div>{{/if}}
+            </div>
+            <div class="vertical-divider"></div>
+            <img src="{{logo}}" alt="Company Logo" class="logo" />
+        </div>
+
+        <div class="rule"></div>
+
+        <!-- Title -->
+        <h1>{{doc_title}}</h1>
+
+        <!-- BOQ Details -->
+        <div class="quotation-details">
+            <table>
+                <tr>
+                    <td><strong>BOQ No:</strong></td>
+                    <td>{{boq_number}}</td>
+                    <td><strong>BOQ Date:</strong></td>
+                    <td>{{formatDate boq_date}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Title:</strong></td>
+                    <td colspan="3">{{title}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Currency:</strong></td>
+                    <td>{{currency}}</td>
+                    <td><strong>Status:</strong></td>
+                    <td>{{status}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Created By:</strong></td>
+                    <td>{{created_by}}</td>
+                    <td><strong>Total Items:</strong></td>
+                    <td>{{items.length}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Notes Section -->
+        {{#if notes}}
+        <div class="notes-section">
+            <strong>Notes:</strong>
+            <div>{{notes}}</div>
+        </div>
+        {{/if}}
+
+        <!-- Items -->
+        <table class="item-table">
+            <thead>
+                <tr>
+                    <th>SR</th>
+                    <th>SECTION</th>
+                    <th>ITEM CODE</th>
+                    <th>DESCRIPTION</th>
+                    <th>MAKE</th>
+                    <th>UNIT</th>
+                    <th>QTY</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each items}}
+                {{#if section_label}}
+                <tr class="section-header">
+                    <td colspan="10"><strong>{{section_label}}</strong></td>
+                </tr>
+                {{/if}}
+                <tr {{#if is_optional}}class="optional-item" {{/if}}>
+                    <td>{{inc @index}}</td>
+                    <td>{{#if section_label}}↳{{else}}-{{/if}}</td>
+                    <td>{{item_code}}</td>
+                    <td>
+                        {{description}}
+                        {{#if is_optional}}<br><small><em>(Optional)</em></small>{{/if}}
+
+                        <!-- Files Section -->
+                        {{#if files.length}}
+                        <div class="files-section">
+                            <strong>Files:</strong>
+                            {{#each files}}
+                            <div class="file-item {{#if is_primary}}primary-file{{/if}}">
+                                {{file_name}} ({{file_type}})
+                                {{#if is_primary}}<small><em> - Primary</em></small>{{/if}}
+                            </div>
+                            {{/each}}
+                        </div>
+                        {{/if}}
+                    </td>
+                    <td>{{#if make}}{{make}}{{else}}-{{/if}}</td>
+                    <td>{{unit}}</td>
+                    <td>{{formatQty quantity}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+
+        <!-- Terms & Conditions -->
+        <div class="terms-conditions">
+            <h3>Terms & Conditions:</h3>
+            <ul>
+                <li><strong>Validity:</strong> This BOQ is valid for 30 days from the date of issue.</li>
+                <li><strong>Scope of Work:</strong> All items mentioned are as per the discussed requirements.</li>
+                <li><strong>Optional Items:</strong> Items marked as optional are not included in the base price and
+                    will be charged separately if selected.</li>
+                <li><strong>Taxes:</strong> All prices are exclusive of GST which will be charged as applicable.</li>
+                <li><strong>Payment Terms:</strong> 50% advance with order confirmation, 50% upon completion.</li>
+                <li><strong>Changes:</strong> Any changes in scope after approval may affect the final pricing and
+                    timeline.</li>
+                <li><strong>Approval:</strong> Work will commence only after written approval of this BOQ.</li>
+                <li><strong>Files & Documentation:</strong> All attached files are part of this BOQ and should be
+                    referenced during execution.</li>
+            </ul>
+        </div>
+
+        <div class="thanks">*** THANKS FOR YOUR VALUABLE BUSINESS WITH COMPRESS INDIA AIR CONDITIONING PRIVATE LIMITED
+            ***</div>
+    </div>
+</body>
+
+</html>

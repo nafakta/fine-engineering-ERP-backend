@@ -1,0 +1,27 @@
+# Node
+node_modules/
+
+# Environment
+.env
+.env.*
+
+# Build output
+dist/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Runtime uploads
+uploads/
+public/uploads/
+public/reports/
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Coverage
+coverage/

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>{{doc_title}}</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 20px;
+            font-size: 12px;
+            color: #222;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .logo {
+            height: 50px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-top: 16px;
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            background: #f5f5f5;
+            border-left: 3px solid #333;
+        }
+
+        .box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .box-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            font-size: 11px;
+            color: #555;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background: #f9f9f9;
+            font-weight: 600;
+        }
+
+        .parties-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .party-box {
+            flex: 1;
+        }
+
+        .payment-details {
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>
+            <div style="font-size: 18px; font-weight: bold;">{{doc_title}}</div>
+            <div style="font-size: 11px; color: #666;">Printed on: {{printedOn}}</div>
+        </div>
+        <div>
+            {{#if logo}}
+            <img class="logo" src="{{logo}}" />
+            {{/if}}
+        </div>
+    </div>
+
+    <div class="section-title">Loan Details</div>
+    <div class="box">
+        <table>
+            <tr>
+                <th style="width: 120px;">Loan ID</th>
+                <td>{{loan.loanId}}</td>
+                <th style="width: 120px;">Type</th>
+                <td>{{loan.loanTypeLabel}}</td>
+            </tr>
+            <tr>
+                <th>Sanctioned Amount</th>
+                <td>{{loan.sanctionedAmount}}</td>
+                <th>Status</th>
+                <td>{{loan.status}}</td>
+            </tr>
+            <tr>
+                <th>Start Date</th>
+                <td>{{loan.startDate}}</td>
+                <th>End Date</th>
+                <td>{{loan.endDate}}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="parties-container">
+        <div class="party-box">
+            <div class="section-title">Lender Details</div>
+            <div class="box">
+                <p><strong>Name:</strong> {{lenderParty.name}}</p>
+                <p><strong>Bank:</strong> {{lenderParty.bank}}</p>
+                <p><strong>Account No.:</strong> {{lenderParty.accountNumber}}</p>
+                <p><strong>IFSC:</strong> {{lenderParty.ifsc}}</p>
+                <p><strong>Branch:</strong> {{lenderParty.branch}}</p>
+                {{#if lenderParty.mobile}}<p><strong>Mobile:</strong> {{lenderParty.mobile}}</p>{{/if}}
+            </div>
+        </div>
+
+        <div class="party-box">
+            <div class="section-title">Borrower Details</div>
+            <div class="box">
+                <p><strong>Name:</strong> {{borrowerParty.name}}</p>
+                <p><strong>Bank:</strong> {{borrowerParty.bank}}</p>
+                <p><strong>Account No.:</strong> {{borrowerParty.accountNumber}}</p>
+                <p><strong>IFSC:</strong> {{borrowerParty.ifsc}}</p>
+                <p><strong>Branch:</strong> {{borrowerParty.branch}}</p>
+                {{#if borrowerParty.mobile}}<p><strong>Mobile:</strong> {{borrowerParty.mobile}}</p>{{/if}}
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">Payment Details</div>
+    <div class="box payment-details">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Loan Type</th>
+                    <th>Description</th>
+                    <th class="text-right">Amount</th>
+                    <th class="text-right">Principal</th>
+                    <th class="text-right">Remaining Balance</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>{{payment.date}}</td>
+
+                    <!-- CHANGED: showing loan type instead of transaction type -->
+                    <td>{{payment.loanTypeLabel}}</td>
+
+                    <td>{{payment.description}}</td>
+                    <td class="text-right">{{payment.amount}}</td>
+                    <td class="text-right">{{payment.principal}}</td>
+                    <td class="text-right">{{payment.remaining}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        {{#if payment.transactionId}}
+        <div style="margin-top: 10px; font-size: 11px; color: #666;">
+            <strong>Transaction ID:</strong> {{payment.transactionId}}
+        </div>
+        {{/if}}
+    </div>
+</body>
+
+</html>

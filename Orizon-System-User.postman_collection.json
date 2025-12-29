@@ -1,0 +1,290 @@
+{
+	"info": {
+		"_postman_id": "7840301c-01b6-4c14-baa9-2d7f3a51f82e",
+		"name": "Orizon-System-User",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "35228799"
+	},
+	"item": [
+		{
+			"name": "User Register",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "name",
+							"value": "xyz",
+							"type": "text"
+						},
+						{
+							"key": "mobileNumber",
+							"value": "8108527593",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "ddkhank321@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "danish@786",
+							"type": "text"
+						},
+						{
+							"key": "roleLevel",
+							"value": "2",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8011/api/v1/Systemuser/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8011",
+					"path": [
+						"api",
+						"v1",
+						"Systemuser",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "email",
+							"value": "ddkhank321@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "danish@786",
+							"type": "text"
+						},
+						{
+							"key": "smsCode",
+							"value": "",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8011/api/v1/Systemuser/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8011",
+					"path": [
+						"api",
+						"v1",
+						"Systemuser",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update User",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "id",
+							"value": "41234500-8e14-443c-b2d7-d57a615e4adc",
+							"type": "text"
+						},
+						{
+							"key": "name",
+							"value": "danishkhanking",
+							"type": "text"
+						},
+						{
+							"key": "mobileNumber",
+							"value": "8108527593",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "danishkkhan0922@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "danish@786",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8011/api/v1/Systemuser/updateuser",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8011",
+					"path": [
+						"api",
+						"v1",
+						"Systemuser",
+						"updateuser"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get User",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "id",
+							"value": "758c658d-80cc-4d3b-956a-4f2e8f85b557",
+							"type": "text"
+						},
+						{
+							"key": "mobileNumber",
+							"value": "8108527593",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "email",
+							"value": "danishkkhan13@gmail.com",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "danish@92",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8011/api/v1/Systemuser/getuser",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8011",
+					"path": [
+						"api",
+						"v1",
+						"Systemuser",
+						"getuser"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "id",
+							"value": "41234500-8e14-443c-b2d7-d57a615e4adc",
+							"type": "text"
+						},
+						{
+							"key": "mobileNumber",
+							"value": "8108527593",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "email",
+							"value": "danishkkhan13@gmail.com",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "danish@92",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8011/api/v1/Systemuser/deleteuser",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8011",
+					"path": [
+						"api",
+						"v1",
+						"Systemuser",
+						"deleteuser"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

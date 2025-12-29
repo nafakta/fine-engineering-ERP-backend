@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Payment Receipt — {{receipt_no}}</title>
+    <style>
+        /* ---------- Base ---------- */
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            color: #111
+        }
+
+        .page {
+            padding: 16mm 12mm
+        }
+
+        .right {
+            text-align: right
+        }
+
+        .tiny {
+            font-size: 11px;
+            color: #333;
+            line-height: 1.35;
+            font-style: bold;
+        }
+
+        .tiny1 {
+            font-size: 12px;
+            color: #070707;
+            line-height: 1.35;
+        }
+
+        .small {
+            font-size: 12px
+        }
+
+        .h1 {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: .2px;
+            text-transform: uppercase
+        }
+
+        /* ---------- Letterhead (matches PDF) ---------- */
+        .letterhead {
+            border: 2px solid #000;
+        }
+
+        .brand {
+            display: flex;
+            align-items: stretch;
+            /* NEW — ensures divider touches top & bottom */
+            justify-content: space-between;
+            gap: 0px;
+            padding: 10px 12px;
+            min-height: 110px;
+            /* slightly increased height for clean look */
+        }
+
+        .brand .info {
+            flex: 0 0 60%
+        }
+
+        .brand-divider {
+            width: 2px;
+            background: #000;
+            /* no height needed – align-items: stretch makes it full height */
+            margin: 0 14px;
+            /* space between text and logo */
+        }
+
+        .brand .info .h1 {
+            margin: 0 0 2px
+        }
+
+        .brand .logo-pane {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            /* vertical center */
+            justify-content: center;
+            /* horizontal center */
+            padding: 0;
+            /* remove padding so image is centered perfectly */
+        }
+
+
+        .brand .logo-pane img {
+            max-width: 80%;
+            /* increased from 70% */
+            max-height: 85%;
+            /* increased from 80% */
+            object-fit: contain;
+            display: block;
+        }
+
+        /* ---------- Document title (center, bold) ---------- */
+        .doc-title {
+            text-align: center;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 10px 0 6px
+        }
+
+        /* ---------- Meta grid (label/value like PDF) ---------- */
+        .meta {
+            width: 100%;
+            border-left: 2px solid #000;
+            border-right: 2px solid #000;
+            border-bottom: 2px solid #000;
+            border-collapse: collapse;
+            margin: 0 0 10px;
+        }
+
+        .meta td {
+            border-top: 2px solid #000;
+            padding: 6px 8px;
+            font-size: 11px;
+            vertical-align: top;
+        }
+
+        .meta .label {
+            font-weight: 700;
+            text-transform: uppercase;
+            width: 20%
+        }
+
+        .meta .value {
+            width: 30%
+        }
+
+        /* ---------- Two cards side by side ---------- */
+        .grid2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .card {
+            border: 1px solid #000;
+            border-radius: 0;
+            padding: 10px 12px
+        }
+
+        .card .h2 {
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin: 0 0 6px
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 8px;
+            margin: 2px 0
+        }
+
+        .row>div:first-child {
+            font-weight: 600;
+            font-size: 11px
+        }
+
+        /* ---------- Table (thick border aesthetic) ---------- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px
+        }
+
+        th,
+        td {
+            border: 1.5px solid #000;
+            padding: 7px;
+            font-size: 12px
+        }
+
+        th {
+            background: #f6f6f6;
+            font-weight: 800;
+            text-transform: uppercase
+        }
+
+        /* ---------- Payment history highlight ---------- */
+        .history-table th {
+            background: #f0f8ff
+        }
+
+        .current-invoice {
+            background: #f0fff0;
+            font-weight: 600
+        }
+
+        /* ---------- Totals / footer ---------- */
+        .foot {
+            margin-top: 16px
+        }
+
+        .terms {
+            font-size: 11px;
+        }
+
+        .sign {
+            text-align: right;
+            font-size: 11px
+        }
+
+        /* print safety (avoid page-break inside header/meta) */
+        .letterhead,
+        .meta {
+            page-break-inside: avoid
+        }
+
+        .card .h2 {
+            font-size: 12px;
+            /* smaller title */
+        }
+
+        .card .row {
+            grid-template-columns: 120px 1fr;
+            /* tighter column width */
+            gap: 6px;
+            /* less gap between label/value */
+            margin: 1px 0;
+        }
+
+        .card .row div {
+            font-size: 10px;
+            /* smaller text inside */
+            line-height: 1.2;
+        }
+
+        .card {
+            padding: 6px 8px;
+            /* shrink padding around content */
+        }
+
+        /* Compact right-aligned totals box */
+        .summary-wrap {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            /* push box to the right */
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .mini-totals {
+            border: 2px solid #000;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .mini-totals tr td {
+            border-top: 2px solid #000;
+            padding: 6px 8px;
+            font-size: 12px;
+        }
+
+        .mini-totals tr:first-child td {
+            border-top: none;
+        }
+
+        .mini-totals .label {
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .mini-totals .val {
+            font-weight: 800;
+            text-align: right;
+        }
+
+        .mini-totals .emph td {
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <!-- Header (boxed, divider, exact proportions) -->
+        <div class="letterhead">
+            <div class="brand">
+                <div class="info">
+                    <div class="h1">COMPRESS INDIA AIR CONDITIONING PRIVATE
+                        LIMITED.</div>
+                    <div class="tiny">
+                        Off No.103, 1st Floor, Hi-Tech Premises Co-Op. Soc. Ltd, Near SCLR Road, Kurla (W)
+                    </div>
+                    <div class="tiny">Mumbai, Maharashtra, India</div>
+                    <div class="tiny">Phone: +91 9920529961 / +91 8655011465 / +91 9152157114</div>
+                    <div class="tiny">Email: info@compressindia.com, sales.compressindia@gmail.com</div>
+                    <div class="tiny">
+                        Website:
+                        www.compressindia.com
+                    </div>
+                    <div class="tiny1"><b>GSTIN: 27AAECC4392N1Z8</b></div>
+                </div>
+
+                <!-- NEW full-height vertical divider -->
+                <div class="brand-divider"></div>
+
+                <div class="logo-pane">
+                    <img src="{{logo}}" alt="logo" />
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Big centered title like the sample -->
+        <div class="doc-title">Payment Receipt</div>
+        <!-- Meta grid (uses thick borders, 2 cols of label/value per row like your PDF) -->
+        <table class="meta">
+            <tr>
+                <td class="label">Receipt No</td>
+                <td class="value"><b>{{receipt_no}}</b></td>
+                <td class="label">Receipt Date</td>
+                <td class="value"><b>{{receipt_date}}</b></td>
+            </tr>
+            {{#if invoice.invoice_no}}
+            <tr>
+                <td class="label">Invoice No</td>
+                <td class="value"><b>{{invoice.invoice_no}}</b></td>
+                <td class="label">Invoice Date</td>
+                <td class="value">{{invoice.invoice_date}}</td>
+            </tr>
+            {{/if}}
+            <tr>
+                <td class="label">Payment Mode</td>
+                <td class="value">{{payment.payment_mode}}</td>
+                <td class="label">Payment Date</td>
+                <td class="value">{{payment.payment_date}}</td>
+            </tr>
+            <tr>
+                <td class="label">Payment In</td>
+                <td class="value">{{payment.payment_in}}</td>
+                <td class="label">Paid By</td>
+                <td class="value">{{payment.paid_by}}</td>
+            </tr>
+            {{#if place_of_supply}}
+            <tr>
+                {{!-- <td class="label">Place of Supply</td>
+                <td class="value">{{place_of_supply}}</td> --}}
+                <td class="label">Subject</td>
+                <td class="value">{{subject}}</td>
+            </tr>
+            {{/if}}
+        </table>
+
+        <!-- Parties -->
+        <div class="grid2">
+            <div class="card">
+                <div class="h2">Received From (Bill To)</div>
+                <div class="small"><b>{{customer.company}}</b></div>
+                {{#if customer.name}}<div class="tiny">Attn: {{customer.name}}</div>{{/if}}
+                {{#if customer.address}}<div class="tiny">{{customer.address}}</div>{{/if}}
+                {{#if customer.city_state}}<div class="tiny">{{customer.city_state}}</div>{{/if}}
+                {{#if customer.gstin}}<div class="tiny">GSTIN: {{customer.gstin}}</div>{{/if}}
+                {{#if customer.contact}}<div class="tiny">Phone: {{customer.contact}}</div>{{/if}}
+            </div>
+
+            <div class="card">
+                <div class="h2">Bank Details</div>
+                <div class="column-gap row">
+                    <div>Account Name</div>
+                    <div>COMPRESS INDIA AIR CONDITIONING PVT. LTD.</div>
+                </div>
+                <div class="column-gap row">
+                    <div>Account No.</div>
+                    <div>50200081751743</div>
+                </div>
+                <div class="column-gap row">
+                    <div>Bank</div>
+                    <div>HDFC BANK LIMITED</div>
+                </div>
+                <div class="column-gap row">
+                    <div>IFSC</div>
+                    <div>HDFC0007811</div>
+                </div>
+                <div class="column-gap row">
+                    <div>Branch</div>
+                    <div>NEELKANTH IT PARK, VIDYAVIHAR, MUMBAI - 400071</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Payment History (optional) -->
+        {{#if payment_history}}
+        <div class="card" style="margin-top:12px;">
+            <div class="h2">Payment History for {{customer.company}}</div>
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Invoice Number</th>
+                        <th>Payment Date</th>
+                        <th class="right">Invoice Amount (₹)</th>
+                        <th class="right">Recived Amount (₹)</th>
+                        <th class="right">OUt Standing Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each payment_history}}
+                    <tr class="{{#if is_current_invoice}}current-invoice{{/if}}">
+                        <td>{{invoice_number}}</td>
+                        <td>{{payment_date}}</td>
+                        <td class="right">{{formatINR invoice_amount}}</td>
+                        <td class="right">{{formatINR payment_amount}}</td>
+                        <td class="right">{{formatINR remaining_amount}}</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        {{/if}}
+
+        <!-- Amount in words & notes -->
+        <div class="small" style="margin-top:10px;">
+            Amount in words: <b>{{amount_in_words}}</b>
+            {{#if payment.notes}}<div class="tiny">Notes: {{payment.notes}}</div>{{/if}}
+        </div>
+
+
+    </div>
+</body>
+
+</html>

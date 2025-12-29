@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>{{doc_title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111111;
+            margin: 0;
+            padding: 0;
+            max-width: 800px;
+            font-size: 11px;
+        }
+
+        .wrap {
+            padding: 16px;
+            border: 2px solid black;
+            border-radius: 8px;
+        }
+
+        /* Header Styles */
+        .head-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .vertical-divider {
+            width: 2px;
+            height: 120px;
+            background: #000;
+            margin: 0 15px;
+        }
+
+        .logo {
+            max-width: 300px;
+            max-height: 150px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            padding-right: 60px;
+        }
+
+        .addr {
+            text-align: left;
+            font-size: 10px;
+            color: #111;
+            max-width: 400px;
+        }
+
+        .addr div+div {
+            margin-top: 3px;
+        }
+
+        /* Divider */
+        .rule {
+            height: 1px;
+            background: black;
+            margin: 12px 0;
+        }
+
+        /* Title */
+        h1 {
+            font-size: 14px;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            padding-bottom: 20px;
+        }
+
+        /* Details */
+        .quotation-details {
+            margin-top: 12px;
+            font-size: 11px;
+        }
+
+        .quotation-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .quotation-details td {
+            padding: 4px;
+        }
+
+        .quotation-details td strong {
+            font-weight: 700;
+        }
+
+        /* Address Section */
+        .address-section {
+            margin-top: 20px;
+            font-size: 11px;
+        }
+
+        .address-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .address-section td {
+            padding: 4px;
+        }
+
+        /* Items Table */
+        .item-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .item-table th,
+        .item-table td {
+            border: 1px solid #ddd;
+            padding: 7px;
+            text-align: left;
+        }
+
+        .item-table th {
+            background: #f5f5f5;
+            font-weight: 700;
+        }
+
+        /* Totals */
+        .total-section {
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: right;
+        }
+
+        .total-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .total-section td {
+            padding: 4px;
+        }
+
+        .total-section td strong {
+            font-weight: 700;
+        }
+
+        .total-section .grand-total {
+            background-color: #e9f2ff;
+            font-weight: 800;
+        }
+
+        /* Words */
+        .words {
+            margin-top: 10px;
+            padding: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .company_name {
+            font-size: 14px;
+        }
+
+        h4 {
+            padding-bottom: 0px;
+        }
+
+        .thanks {
+            padding-top: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Terms & Conditions Styles */
+        .terms-conditions {
+            margin-top: 20px;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        .terms-conditions h3 {
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .terms-conditions ol {
+            margin: 0;
+            padding-left: 15px;
+        }
+
+        .terms-conditions li {
+            margin-bottom: 8px;
+            text-align: justify;
+        }
+
+        .terms-conditions strong {
+            font-weight: 700;
+        }
+
+        /* Signature Section Styles */
+        .signature-section {
+            margin-top: 30px;
+            font-size: 11px;
+        }
+
+
+        .signature-section table {
+            border-collapse: collapse;
+        }
+
+        .signature-section td {
+            padding: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <!-- Header -->
+        <div class="head-row">
+            <div class="addr">
+                {{#if our_company.legal_name}}<h4><strong>{{our_company.legal_name}}</strong></h4>{{/if}}
+                {{#if our_company.address_line}}<div>{{our_company.address_line}}</div>{{/if}}
+                {{#if our_company.city_state}}<div>{{our_company.city_state}}</div>{{/if}}
+                {{#if our_company.mobile_number}}<div>{{our_company.mobile_number}}</div>{{/if}}
+                {{#if our_company.email_id}}<div>{{our_company.email_id}}</div>{{/if}}
+                {{#if our_company.website}}<div>{{our_company.website}}</div>{{/if}}
+                {{#if our_company.tax_id}}<div><strong>GSTIN: {{our_company.tax_id}}</strong></div>{{/if}}
+            </div>
+            <div class="vertical-divider"></div>
+            <img src="{{logo}}" alt="Company Logo" class="logo" />
+        </div>
+
+        <div class="rule"></div>
+
+        <!-- Title -->
+        <h1>{{doc_title}}</h1>
+
+        <!-- PO Details -->
+        <!-- PO Details -->
+        <div class="quotation-details">
+            <table>
+                <tr>
+                    <td><strong>PO No:</strong></td>
+                    <td>{{po_number}}</td>
+                    <td><strong>Contact No:</strong></td>
+                    <td>{{vendor.mobile}}</td>
+                </tr>
+                <tr>
+                    <td><strong>PO Date:</strong></td>
+                    <td>{{formatDate po_date}}</td>
+                    <td><strong>Email ID:</strong></td>
+                    <td>{{vendor.email_id}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Terms:</strong></td>
+                    <td>DUE ON RECEIPT</td>
+                    <td><strong>Place of Supply:</strong></td>
+                    <td>{{place_of_supply}}</td>
+
+                </tr>
+                <tr>
+                    <td><strong>Purchase Type:</strong></td> <!-- ADD THIS ROW -->
+                    <td>{{purchase_type}}</td>
+                    <td><strong>GST No:</strong></td>
+                    <td>{{vendor.gstin}}</td>
+                </tr>
+                <tr>
+                    <td><strong>State:</strong></td>
+                    <td>{{vendor.state}}</td>
+                    <td><strong>Issuing Site:</strong></td>
+                    <td colspan="3">{{site_issue}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Address Section -->
+        <div class="address-section">
+            <table>
+                <tr style="background-color: #f0f8ff;">
+                    <td><strong>VENDOR:</strong></td>
+                    <td><strong>SHIPPING TO:</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>{{vendor.company}}</strong></td>
+                    <td><strong>{{our_company.legal_name}}</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>{{vendor.vendor}}</strong></td>
+                    <td><strong>{{our_company.name}}</strong></td>
+                </tr>
+                <tr>
+                    <td>{{vendor.address}}</td>
+                    <td>{{delivery_address}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Note:</strong></td>
+                    <td>{{subject}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Items -->
+        <table class="item-table">
+            <thead>
+                <tr>
+                    <th>SR</th>
+                    <th>DESCRIPTION</th>
+                    <th>MAKE</th>
+                    <th>HSN CODE</th>
+                    <th>QTY</th>
+                    <th>UNIT</th>
+                    <th>PRICE</th>
+                    {{!-- <th>GST (%)</th> --}}
+                    <th>TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each items}}
+                <tr>
+                    <td>{{inc @index}}</td>
+                    <td>
+                        {{#if item}}
+                        <div style="font-weight: bold; margin-bottom: 2px;">{{item}}</div>
+                        {{#if description}}<div style="font-size: 10px; color: #262525; line-height: 1.2;">
+                            {{description}}
+                        </div>{{/if}}
+                        {{else}}
+                        {{description}}
+                        {{/if}}
+                    </td>
+                    <td>{{make}}</td>
+                    <td>{{hsn_sac}}</td>
+                    <td>{{formatQty qty}}</td>
+                    <td>{{unit}}</td>
+                    <td>{{formatCurrency rate}}</td>
+                    {{!-- <td>{{gst_percent}}</td> --}}
+                    <td>{{formatCurrency total}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        {{!-- <div class="total-section">
+            <table>
+                <tr>
+                    <td><strong>SUB. TOTAL</strong></td>
+                    <td>{{formatCurrency sub_total}}</td>
+                </tr>
+                {{!-- <tr>
+                    <td><strong>DISCOUNT</strong></td>
+                    <td>{{formatCurrency discount_value}}</td>
+                </tr> --}}
+                {{!-- <tr>
+                    <td><strong>TOTAL AMOUNT</strong></td>
+                    <td>{{formatCurrency total_amount}}</td>
+                </tr> --}}
+                {{!-- GST breakdown: show CGST+SGST when same_state, else show IGST --}}
+                {{!-- {{#if same_state}}
+                <tr>
+                    <td><strong>CGST @{{cgst_percent}}%</strong></td>
+                    <td>{{formatCurrency cgst_amount}}</td>
+                </tr>
+                <tr>
+                    <td><strong>SGST @{{sgst_percent}}%</strong></td>
+                    <td>{{formatCurrency sgst_amount}}</td>
+                </tr>
+                {{else}}
+                <tr>
+                    <td><strong>IGST @{{igst_percent}}%</strong></td>
+                    <td>{{formatCurrency igst_amount}}</td>
+                </tr>
+                {{/if}}
+
+                <tr class="grand-total">
+                    <td><strong>GRAND TOTAL</strong></td>
+                    <td>{{formatCurrency grand_total}}</td>
+                </tr>
+            </table>
+            <div class="words grand-total">
+                Amount in Words: {{amount_in_words}}
+            </div>
+
+        </div> --}}
+
+        <!-- Inside your purchaseOrder.hbs file, replace the GST section -->
+
+        <!-- Totals -->
+        <div class="total-section">
+            <table>
+                <tr>
+                    <td><strong>SUB. TOTAL</strong></td>
+                    <td>{{formatCurrency sub_total}}</td>
+                </tr>
+
+                {{! Only show discount if it exists }}
+                {{#if discount_value}}
+                <tr>
+                    <td><strong>DISCOUNT</strong></td>
+                    <td>{{formatCurrency discount_value}}</td>
+                </tr>
+                {{/if}}
+
+                {{! Show total before tax if there's GST }}
+                {{#if hasGST}}
+                <tr>
+                    <td><strong>TOTAL BEFORE TAX</strong></td>
+                    <td>{{formatCurrency total_amount}}</td>
+                </tr>
+                {{/if}}
+
+                {{! GST breakdown: show only if hasGST is true }}
+                {{#if hasGST}}
+                {{#if same_state}}
+                <tr>
+                    <td><strong>CGST @{{cgst_percent}}%</strong></td>
+                    <td>{{formatCurrency cgst_amount}}</td>
+                </tr>
+                <tr>
+                    <td><strong>SGST @{{sgst_percent}}%</strong></td>
+                    <td>{{formatCurrency sgst_amount}}</td>
+                </tr>
+                {{else}}
+                <tr>
+                    <td><strong>IGST @{{igst_percent}}%</strong></td>
+                    <td>{{formatCurrency igst_amount}}</td>
+                </tr>
+                {{/if}}
+                {{/if}}
+
+                <tr class="grand-total">
+                    <td><strong>GRAND TOTAL</strong></td>
+                    <td>{{formatCurrency grand_total}}</td>
+                </tr>
+            </table>
+            <div class="words grand-total">
+                Amount in Words: {{amount_in_words}}
+            </div>
+        </div>
+
+        <!-- Words -->
+
+        <!-- Bank Footer -->
+
+
+        <!-- Terms -->
+        <!-- Terms & Conditions -->
+        <div class="terms-conditions">
+            <h3>Terms & Conditions for Work Order (Software Procurement Department)</h3>
+            <ol>
+                <li><strong>General Scope</strong><br>
+                    These Terms & Conditions (T&C) form an integral part of the Work Order (WO) issued by
+                    {{our_company.legal_name}}, an HVAC & Engineering Solutions provider engaged in supply of machines,
+                    components, design consultancy, installations, testing, commissioning, and complete project
+                    execution services. The Vendor/Supplier shall be bound by these T&Cs unless otherwise agreed in
+                    writing.
+                </li>
+                <li><strong>Definitions</strong><br>
+                    - Company: Refers to {{our_company.legal_name}}.<br>
+                    - Vendor: Refers to the party receiving the Work Order.<br>
+                    - Materials/Equipment: Any item, component, product, software, or service specified in the WO.<br>
+                    - Project Site: Location where goods/services are to be delivered or executed.
+                </li>
+                <li><strong>Financial Terms</strong><br>
+                    - All prices quoted by the Vendor shall be firm and final, inclusive of packing, forwarding,
+                    transportation, and loading/unloading unless stated otherwise.<br>
+                    - Any increase in cost, taxes, duties, or surcharges post WO date will not be borne by the Company
+                    unless pre-approved in writing.<br>
+                    - All pricing must comply with applicable GST laws and include proper tax invoices.
+                </li>
+                <li><strong>Payment Terms</strong><br>
+                    - Standard payment terms shall be as stated in the WO.<br>
+                    - Payments will be processed only upon receipt of invoice, delivery challan/MRN, inspection
+                    clearance, and compliance documents.<br>
+                    - No payment will be made for rejected or non-conforming materials.
+                </li>
+                <li><strong>Delivery Terms</strong><br>
+                    - Delivery shall be as per schedule in the WO.<br>
+                    - Vendor must notify the Company 48 hours prior to dispatch.<br>
+                    - Damage during transit is Vendor's responsibility.
+                </li>
+                <li><strong>Quality & Inspection</strong><br>
+                    - Materials must meet specifications and standards.<br>
+                    - Company reserves rights to inspect or reject materials.<br>
+                    - Rejected materials must be replaced within 48–72 hours.
+                </li>
+                <li><strong>Warranty & Guarantee</strong><br>
+                    - Minimum warranty: 12–18 months from commissioning or 24 months from delivery.<br>
+                    - Defects must be rectified within 24–48 hours.
+                </li>
+                <li><strong>Project Execution Terms</strong><br>
+                    - Vendor must deploy competent manpower and tools.<br>
+                    - Work must comply with HVAC engineering, safety, and site standards.
+                </li>
+                <li><strong>Safety & Statutory Compliance</strong><br>
+                    - Full compliance with safety standards, labour laws, PPE requirements.<br>
+                    - Vendor is fully responsible for any accidents or damages.
+                </li>
+                <li><strong>Confidentiality & Data Protection</strong><br>
+                    - All shared data, drawings, software, and documents are confidential.<br>
+                    - Vendor shall not share or reproduce without approval.
+                </li>
+                <li><strong>Intellectual Property Rights</strong><br>
+                    - All engineering, software, and design documents belong to the Company.
+                </li>
+                <li><strong>Penalties & Liquidated Damages</strong><br>
+                    - Delay may attract 0.5%–1% LD per week, max 5–10%.<br>
+                    - Quality failures may lead to penalties or termination.
+                </li>
+                <li><strong>Termination Rights</strong><br>
+                    - Company may terminate for delays, quality issues, compliance breach, or unethical practices.<br>
+                    - Vendor must refund advances for undelivered work.
+                </li>
+                <li><strong>Governing Laws & Dispute Resolution</strong><br>
+                    - Governed by Indian laws.<br>
+                    - Disputes fall under Mumbai jurisdiction.
+                </li>
+                <li><strong>Additional Terms</strong><br>
+                    - No WO deviations allowed without written approval.<br>
+                    - Vendor must maintain transparency on lead times and constraints.
+                </li>
+                <li><strong>Acceptance of Terms</strong><br>
+                    By accepting the Work Order, the Vendor agrees to all Terms & Conditions.
+                </li>
+            </ol>
+        </div>
+
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <table style="width: 100%; margin-top: 40px;">
+                <tr>
+
+                    <td style="width: 50%; vertical-align: top;">
+                        <div style="border-top: 1px solid #000; width: 80%; margin-top: 60px;">
+                            <strong>Vendor's Acceptance</strong><br>
+                            Signature & Stamp<br>
+                            Date: ________________
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="thanks">*** THANKS FOR YOUR VALUABLE BUSINESS WITH COMPRESS INDIA AIR CONDITIONING PRIVATE LIMITED
+            ***</div>
+    </div>
+</body>
+
+</html>

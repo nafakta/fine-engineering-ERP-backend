@@ -1,0 +1,1068 @@
+// src/models/index.ts
+import { Sequelize } from "sequelize";
+import { db } from "../database/DBService";
+
+// ── Model initializers ─────────────────────────────────────────────────────────
+
+// ── Model initializers (1 file = 1 init function) ──────────────────────────────
+import { initAccountModel } from "./Banks";
+import { initSystemUserModel } from "./SystemUser";
+import { initUserRoleModel } from "./UserRole";
+import { initRoleModel } from "./Role";
+import { initPermissionModel } from "./Permission";
+import { initRolePermissionModel } from "./RolePermission";
+import { initSystemUserSecretModel } from "./SystemUserSecret";
+
+import { initExpenseModel } from "./expenses";
+import { initExpenseMediaModel } from "./ExpenseMedia";
+
+import { initMarketModel } from "./market";
+import { initTicketerpModel } from "./ticketerp";
+import { initLoanModel } from "./loan";
+import { initVendorModel } from "./vendor";
+import { initPurchaseOrderModel } from "./purchaseorder";
+import { initOrderItemModel } from "./orderitem";
+import { initAccountTransfer } from "./AccountTransfer";
+import { initClientModel } from "./Client";
+import { initTicketFollowupModel } from "./ticket_followup";
+import { initEstimateModel } from "./Estimate";
+import { initEstimateItemModel } from "./EstimateItem";
+import { initHVACTicketModel } from "./hvacticket";
+import { initHVACTicketMediaModel } from "./hvac_ticket_media";
+import { initHVACTicketFollowupModel } from "./hvac_ticket_followup";
+import { initTicketMediaModel } from "./ticket_media";
+import { initPiModel } from "./Pi";
+import { initPiItemModel } from "./PiItem";
+import { initInvoiceModel } from "./Invoice";
+import { initInvoiceItemModel } from "./InvoiceItem";
+import { initGstRecordModel } from "./gst_record";
+import { initInvoicePaymentModel } from "./invoicePayment";
+import TdsRecord from "./tds_records";
+import { initOrderBillModel } from "./OrderBill";
+import { initVendorBillPaymentModel } from "./VendorBillPayment";
+import { AmcEstimate } from "./AmcEstimate";
+import { AmcAcDetail } from "./AmcAcDetail";
+import { initVendorDocumentModel } from "./VendorDocument";
+import { initBoqModel } from "./boq";
+import { initBoqItemModel } from "./boqitem";
+import { initQuotationModel } from "./Quotation";
+import { initErpServiceReportModel } from "./erp_service_report";
+import { initLoanTransactionModel } from "./LoanTransaction";
+import { initHvacErpServiceReportModel } from "./hvac_erp_service_report";
+import { initDepartmentModel } from "./Department";
+import { initUserDepartmentModel } from "./UserDepartment";
+import { initExpensePaymentModel } from './ExpensePayment';
+
+// AMC Contract models
+import { AmcContract } from "./AmcContract";
+import { AmcacContractDetails } from "./AmcacContractDetails";
+import { AmcContractServiceSchedule } from "./AmcContractServiceSchedule";
+import { AmcPackage } from "./AmcPackage";
+import { BillingRequest } from "./BillingRequest";
+import { AmcPaymentHistory } from "./AmcPaymentHistory";
+import { BillingRequestPaymentHistory } from "./BillingRequestPaymentHistory";
+import { initAMCOfferModel } from "./AMCOffer";
+import { initVendorPaymentClearanceModel } from "./VendorPaymentClearance";
+import { initBoqItemFileModel } from "./boq-item-file";
+
+const sequelize = db.write;
+
+// ── 1) Initialize all models ───────────────────────────────────────────────────
+const dbModels: any = {
+  Sequelize,
+  sequelize,
+
+  // Core / AuthZ
+  SystemUser: initSystemUserModel(sequelize),
+  UserRole: initUserRoleModel(sequelize),
+  Role: initRoleModel(sequelize),
+  Permission: initPermissionModel(sequelize),
+  RolePermission: initRolePermissionModel(sequelize),
+  SystemUserSecret: initSystemUserSecretModel(sequelize),
+
+  // Banking / Accounts
+  Account: initAccountModel(sequelize),
+  AccountTransfer: initAccountTransfer(sequelize),
+
+  // Domain models
+  Expense: initExpenseModel(sequelize),
+  ExpenseMedia: initExpenseMediaModel(sequelize),
+  ExpensePayment: initExpensePaymentModel(sequelize),
+
+  Market: initMarketModel(sequelize),
+  TicketERP: initTicketerpModel(sequelize),
+  TicketFollowup: initTicketFollowupModel(sequelize),
+  TicketMedia: initTicketMediaModel(sequelize),
+
+  Loan: initLoanModel(sequelize),
+  LoanTransaction: initLoanTransactionModel(sequelize),
+
+  Vendor: initVendorModel(sequelize),
+  PurchaseOrder: initPurchaseOrderModel(sequelize),
+  OrderItem: initOrderItemModel(sequelize),
+
+  Client: initClientModel(sequelize),
+
+  Estimate: initEstimateModel(sequelize),
+  EstimateItem: initEstimateItemModel(sequelize),
+
+  Pi: initPiModel(sequelize),
+  PiItem: initPiItemModel(sequelize),
+
+  Invoice: initInvoiceModel(sequelize),
+  InvoiceItem: initInvoiceItemModel(sequelize),
+  InvoicePayment: initInvoicePaymentModel(sequelize),
+
+  HVACTicket: initHVACTicketModel(sequelize),
+  HVACTicketMedia: initHVACTicketMediaModel(sequelize),
+  HVACTicketFollowup: initHVACTicketFollowupModel(sequelize),
+
+  GstRecord: initGstRecordModel(sequelize),
+  TdsRecord: TdsRecord(sequelize),
+
+  OrderBill: initOrderBillModel(sequelize),
+  VendorBillPayment: initVendorBillPaymentModel(sequelize),
+
+  AmcEstimate: AmcEstimate.initModel(sequelize),
+  AmcAcDetail: AmcAcDetail.initModel(sequelize),
+  VendorDocument: initVendorDocumentModel(sequelize),
+  AmcPackage: AmcPackage.initModel(sequelize),
+
+  // BOQ MODELS
+  Boq: initBoqModel(sequelize),
+  BoqItem: initBoqItemModel(sequelize),
+  Quotation: initQuotationModel(sequelize),
+
+  // AMC Contract models
+  AmcContract: AmcContract.initModel(sequelize),
+  AmcacContractDetails: AmcacContractDetails.initModel(sequelize),
+  AmcContractServiceSchedule: AmcContractServiceSchedule.initModel(sequelize),
+  AmcPaymentHistory: AmcPaymentHistory.initModel(sequelize),
+  BillingRequest: BillingRequest.initModel(sequelize),
+  BillingRequestPaymentHistory: BillingRequestPaymentHistory.initModel(sequelize),
+  AMCOffer: initAMCOfferModel(sequelize),
+  ErpServiceReport: initErpServiceReportModel(sequelize),
+  HvacErpServiceReport: initHvacErpServiceReportModel(sequelize),
+
+  // Department models
+  Department: initDepartmentModel(sequelize),
+  UserDepartment: initUserDepartmentModel(sequelize),
+  VendorPaymentClearance: initVendorPaymentClearanceModel(sequelize),
+  BoqItemFile: initBoqItemFileModel(sequelize),
+};
+
+// ── 2) Associations ───────────────────────────────────────────────────────────
+
+// ==================== RBAC ASSOCIATIONS ====================
+dbModels.Role.belongsToMany(dbModels.Permission, {
+  through: dbModels.RolePermission,
+  foreignKey: "role_id",
+  otherKey: "permission_id",
+  as: "permissions",
+});
+dbModels.Permission.belongsToMany(dbModels.Role, {
+  through: dbModels.RolePermission,
+  foreignKey: "permission_id",
+  otherKey: "role_id",
+  as: "roles",
+});
+
+dbModels.SystemUser.belongsToMany(dbModels.Role, {
+  through: dbModels.UserRole,
+  foreignKey: "system_user_id",
+  otherKey: "role_id",
+  as: "roles",
+});
+dbModels.Role.belongsToMany(dbModels.SystemUser, {
+  through: dbModels.UserRole,
+  foreignKey: "role_id",
+  otherKey: "system_user_id",
+  as: "users",
+});
+
+dbModels.SystemUser.hasMany(dbModels.SystemUserSecret, {
+  foreignKey: "user_id",
+  as: "secrets",
+});
+dbModels.SystemUserSecret.belongsTo(dbModels.SystemUser, {
+  foreignKey: "user_id",
+  as: "user",
+});
+
+// ==================== CLIENT ASSOCIATIONS ====================
+dbModels.Client.hasMany(dbModels.TicketERP, {
+  foreignKey: "client_id",
+  as: "tickets",
+  onDelete: "SET NULL",
+});
+dbModels.Client.hasMany(dbModels.Estimate, {
+  foreignKey: "client_id",
+  as: "estimates",
+  onDelete: "SET NULL",
+});
+// ✅ CRITICAL FIX: Add Pi association from Client side
+dbModels.Client.hasMany(dbModels.Pi, {
+  foreignKey: "client_id",
+  as: "pis",
+  onDelete: "SET NULL",
+});
+dbModels.Client.hasMany(dbModels.Invoice, {
+  foreignKey: "client_id",
+  as: "invoices",
+  onDelete: "SET NULL",
+});
+dbModels.Client.hasMany(dbModels.HVACTicket, {
+  foreignKey: "client_id",
+  as: "hvacTickets",
+  onDelete: "SET NULL",
+});
+dbModels.Client.hasMany(dbModels.AmcEstimate, {
+  foreignKey: "client_id",
+  as: "amcEstimates",
+  onDelete: "SET NULL",
+});
+dbModels.Client.hasMany(dbModels.AmcContract, {
+  foreignKey: "client_id",
+  as: "amcContracts",
+  onDelete: "SET NULL",
+});
+dbModels.Client.hasMany(dbModels.ErpServiceReport, {
+  foreignKey: "client_id",
+  as: "erpServiceReports",
+  onDelete: "SET NULL",
+});
+
+// ==================== SYSTEMUSER ASSOCIATIONS ====================
+dbModels.SystemUser.hasMany(dbModels.TicketERP, {
+  foreignKey: "created_by",
+  as: "createdTickets",
+});
+dbModels.SystemUser.hasMany(dbModels.Estimate, {
+  foreignKey: "created_by",
+  as: "estimates",
+});
+dbModels.SystemUser.hasMany(dbModels.Pi, {
+  foreignKey: "created_by",
+  as: "pis",
+});
+dbModels.SystemUser.hasMany(dbModels.Invoice, {
+  foreignKey: "created_by",
+  as: "invoices",
+});
+dbModels.SystemUser.hasMany(dbModels.InvoicePayment, {
+  foreignKey: "created_by",
+  as: "createdPayments",
+});
+dbModels.SystemUser.hasMany(dbModels.PurchaseOrder, {
+  foreignKey: "created_by",
+  as: "purchaseOrders",
+});
+dbModels.SystemUser.hasMany(dbModels.OrderBill, {
+  foreignKey: "created_by",
+  as: "orderBills",
+});
+dbModels.SystemUser.hasMany(dbModels.VendorBillPayment, {
+  foreignKey: "created_by",
+  as: "vendorCreatedPayments",
+});
+dbModels.SystemUser.hasMany(dbModels.Boq, {
+  foreignKey: "created_by",
+  as: "boqs",
+});
+dbModels.SystemUser.hasMany(dbModels.Boq, {
+  foreignKey: "updated_by",
+  as: "updatedBoqs",
+});
+dbModels.SystemUser.hasMany(dbModels.Quotation, {
+  foreignKey: "created_by",
+  as: "createdQuotations",
+});
+dbModels.SystemUser.hasMany(dbModels.Quotation, {
+  foreignKey: "updated_by",
+  as: "updatedQuotations",
+});
+dbModels.SystemUser.hasMany(dbModels.AmcEstimate, {
+  foreignKey: "created_by",
+  as: "amcEstimatesCreated",
+});
+dbModels.SystemUser.hasMany(dbModels.AmcContract, {
+  foreignKey: "created_by",
+  as: "amcContracts",
+});
+dbModels.SystemUser.hasMany(dbModels.ExpensePayment, {
+  foreignKey: 'created_by',
+  as: 'createdExpensePayments',
+});
+dbModels.SystemUser.hasMany(dbModels.VendorPaymentClearance, {
+  foreignKey: 'created_by',
+  as: 'createdVendorPaymentClearances',
+});
+dbModels.SystemUser.hasMany(dbModels.VendorPaymentClearance, {
+  foreignKey: 'updated_by',
+  as: 'updatedVendorPaymentClearances',
+});
+dbModels.SystemUser.hasMany(dbModels.ErpServiceReport, {
+  foreignKey: "created_by",
+  as: "createdErpServiceReports",
+});
+dbModels.SystemUser.hasMany(dbModels.HvacErpServiceReport, {
+  foreignKey: "created_by",
+  as: "createdHvacErpServiceReports",
+});
+
+// ==================== TICKET ERP ASSOCIATIONS ====================
+dbModels.TicketERP.belongsTo(dbModels.Client, {
+  foreignKey: "client_id",
+  as: "client",
+  onDelete: "SET NULL",
+});
+dbModels.TicketERP.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "creator",
+  onDelete: "SET NULL",
+});
+dbModels.TicketERP.hasMany(dbModels.TicketFollowup, {
+  foreignKey: "ticket_id",
+  as: "followups",
+  onDelete: "CASCADE",
+});
+dbModels.TicketERP.hasMany(dbModels.TicketMedia, {
+  foreignKey: "ticket_id",
+  as: "media",
+  onDelete: "CASCADE",
+});
+dbModels.TicketERP.hasMany(dbModels.ErpServiceReport, {
+  foreignKey: "erp_id",
+  as: "serviceReports",
+  onDelete: "CASCADE",
+});
+
+dbModels.TicketFollowup.belongsTo(dbModels.TicketERP, {
+  foreignKey: "ticket_id",
+  as: "ticket",
+  onDelete: "CASCADE",
+});
+
+dbModels.TicketMedia.belongsTo(dbModels.TicketERP, {
+  foreignKey: "ticket_id",
+  as: "ticket",
+  onDelete: "CASCADE",
+});
+
+// ==================== PURCHASE ORDER ASSOCIATIONS ====================
+dbModels.PurchaseOrder.belongsTo(dbModels.Vendor, {
+  foreignKey: "vendor_id",
+  as: "vendorRef",
+  onDelete: "SET NULL",
+});
+dbModels.PurchaseOrder.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "creator",
+  onDelete: "SET NULL",
+});
+dbModels.PurchaseOrder.hasMany(dbModels.OrderItem, {
+  foreignKey: "po_id",
+  as: "items",
+  onDelete: "CASCADE",
+});
+dbModels.PurchaseOrder.hasOne(dbModels.OrderBill, {
+  foreignKey: "po_id",
+  as: "bill",
+  onDelete: "CASCADE",
+});
+
+dbModels.Vendor.hasMany(dbModels.PurchaseOrder, {
+  foreignKey: "vendor_id",
+  as: "purchaseOrders",
+  onDelete: "SET NULL",
+});
+
+dbModels.OrderItem.belongsTo(dbModels.PurchaseOrder, {
+  foreignKey: "po_id",
+  as: "purchaseOrder",
+  onDelete: "CASCADE",
+});
+
+// ==================== ESTIMATE ASSOCIATIONS ====================
+dbModels.Estimate.belongsTo(dbModels.Client, {
+  foreignKey: "client_id",
+  as: "client",
+  onDelete: "SET NULL",
+});
+dbModels.Estimate.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "createdBy",
+  onDelete: "SET NULL",
+});
+dbModels.Estimate.hasMany(dbModels.EstimateItem, {
+  foreignKey: "estimate_id",
+  as: "items",
+  onDelete: "CASCADE",
+});
+dbModels.Estimate.hasMany(dbModels.Pi, {
+  foreignKey: "estimate_id",
+  as: "pis",
+  onDelete: "SET NULL",
+});
+dbModels.Estimate.hasOne(dbModels.Invoice, {
+  foreignKey: "estimate_id",
+  as: "invoice",
+  onDelete: "SET NULL",
+  onUpdate: "CASCADE",
+});
+
+dbModels.EstimateItem.belongsTo(dbModels.Estimate, {
+  foreignKey: "estimate_id",
+  as: "estimate",
+  onDelete: "CASCADE",
+});
+
+// ==================== PI ASSOCIATIONS ====================
+// ✅ CRITICAL FIX: Keep only ONE association between Pi and Client
+dbModels.Pi.belongsTo(dbModels.Estimate, {
+  foreignKey: "estimate_id",
+  as: "estimate",
+  onDelete: "SET NULL",
+});
+dbModels.Pi.belongsTo(dbModels.Client, {
+  foreignKey: "client_id",
+  as: "client", // ✅ MUST BE "client" (not "clientRef")
+  onDelete: "SET NULL",
+});
+dbModels.Pi.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "createdBy",
+  onDelete: "SET NULL",
+});
+dbModels.Pi.hasMany(dbModels.PiItem, {
+  foreignKey: "pi_id",
+  as: "items",
+  onDelete: "CASCADE",
+});
+// ✅ CRITICAL FIX: Add Pi to Invoice association
+dbModels.Pi.hasOne(dbModels.Invoice, {
+  foreignKey: "pi_id",
+  as: "invoice",
+  onDelete: "SET NULL",
+  onUpdate: "CASCADE",
+});
+// ✅ CRITICAL FIX: Add AmcContract association to Pi
+dbModels.Pi.belongsTo(dbModels.AmcContract, {
+  foreignKey: "amc_contract_id",
+  as: "amcContract",
+  onDelete: "SET NULL",
+  onUpdate: "CASCADE",
+});
+
+dbModels.PiItem.belongsTo(dbModels.Pi, {
+  foreignKey: "pi_id",
+  as: "pi",
+  onDelete: "CASCADE",
+});
+
+// ==================== INVOICE ASSOCIATIONS ====================
+dbModels.Invoice.belongsTo(dbModels.Client, {
+  foreignKey: "client_id",
+  as: "client", // ✅ Use "client" for consistency
+  onDelete: "SET NULL",
+});
+dbModels.Invoice.belongsTo(dbModels.Estimate, {
+  foreignKey: "estimate_id",
+  as: "estimate",
+  onDelete: "SET NULL",
+  onUpdate: "CASCADE",
+});
+// ✅ CRITICAL FIX: Add Pi association to Invoice
+dbModels.Invoice.belongsTo(dbModels.Pi, {
+  foreignKey: "pi_id",
+  as: "pi",
+  onDelete: "SET NULL",
+  onUpdate: "CASCADE",
+});
+dbModels.Invoice.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "createdBy",
+  onDelete: "SET NULL",
+});
+dbModels.Invoice.hasMany(dbModels.InvoiceItem, {
+  foreignKey: "invoice_id",
+  as: "items",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+dbModels.Invoice.hasMany(dbModels.InvoicePayment, {
+  foreignKey: "invoice_id",
+  as: "payments",
+  onDelete: "CASCADE",
+});
+dbModels.Invoice.belongsTo(dbModels.Account, {
+  foreignKey: "account_id",
+  as: "account",
+  onDelete: "SET NULL",
+});
+
+dbModels.InvoiceItem.belongsTo(dbModels.Invoice, {
+  foreignKey: "invoice_id",
+  as: "invoice",
+  onDelete: "CASCADE",
+});
+
+// ==================== INVOICE PAYMENT ASSOCIATIONS ====================
+dbModels.InvoicePayment.belongsTo(dbModels.Invoice, {
+  foreignKey: "invoice_id",
+  as: "invoice",
+  onDelete: "CASCADE",
+});
+dbModels.InvoicePayment.belongsTo(dbModels.Account, {
+  foreignKey: "account_id",
+  as: "account",
+  onDelete: "SET NULL",
+});
+dbModels.InvoicePayment.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "createdBy",
+  onDelete: "SET NULL",
+});
+
+dbModels.Account.hasMany(dbModels.InvoicePayment, {
+  foreignKey: "account_id",
+  as: "invoicePayments",
+});
+
+// ==================== HVAC TICKET ASSOCIATIONS ====================
+dbModels.HVACTicket.belongsTo(dbModels.Client, {
+  foreignKey: "client_id",
+  as: "client",
+  onDelete: "SET NULL",
+});
+dbModels.HVACTicket.hasMany(dbModels.HVACTicketMedia, {
+  foreignKey: "hvac_ticket_id",
+  as: "media",
+  onDelete: "CASCADE",
+});
+dbModels.HVACTicket.hasMany(dbModels.HVACTicketFollowup, {
+  foreignKey: "hvac_ticket_id",
+  as: "followups",
+  onDelete: "CASCADE",
+});
+dbModels.HVACTicket.hasOne(dbModels.HvacErpServiceReport, {
+  foreignKey: 'hvac_erp_id',
+  as: 'serviceReport',
+  onDelete: "CASCADE",
+});
+
+dbModels.HVACTicketMedia.belongsTo(dbModels.HVACTicket, {
+  foreignKey: "hvac_ticket_id",
+  as: "ticket",
+  onDelete: "CASCADE",
+});
+
+dbModels.HVACTicketFollowup.belongsTo(dbModels.HVACTicket, {
+  foreignKey: "hvac_ticket_id",
+  as: "ticket",
+  onDelete: "CASCADE",
+});
+
+// ==================== EXPENSE ASSOCIATIONS ====================
+dbModels.Expense.hasMany(dbModels.ExpenseMedia, {
+  foreignKey: "expense_id",
+  as: "media",
+  onDelete: "CASCADE",
+});
+dbModels.Expense.hasMany(dbModels.ExpensePayment, {
+  foreignKey: 'expense_id',
+  as: 'payments',
+  onDelete: "CASCADE",
+});
+dbModels.Expense.belongsTo(dbModels.Department, {
+  foreignKey: 'department_id',
+  as: 'department',
+  onDelete: "SET NULL",
+});
+
+dbModels.ExpenseMedia.belongsTo(dbModels.Expense, {
+  foreignKey: "expense_id",
+  as: "expense",
+  onDelete: "CASCADE",
+});
+
+// ==================== EXPENSE PAYMENT ASSOCIATIONS ====================
+dbModels.ExpensePayment.belongsTo(dbModels.Expense, {
+  foreignKey: 'expense_id',
+  as: 'expense',
+  onDelete: "CASCADE",
+});
+dbModels.ExpensePayment.belongsTo(dbModels.Account, {
+  foreignKey: 'account_id',
+  as: 'account',
+  onDelete: "SET NULL",
+});
+dbModels.ExpensePayment.belongsTo(dbModels.Department, {
+  foreignKey: 'department_id',
+  as: 'department',
+  onDelete: "SET NULL",
+});
+dbModels.ExpensePayment.belongsTo(dbModels.SystemUser, {
+  foreignKey: 'created_by',
+  as: 'creator',
+  onDelete: "SET NULL",
+});
+
+dbModels.Account.hasMany(dbModels.ExpensePayment, {
+  foreignKey: 'account_id',
+  as: 'expensePayments',
+});
+
+// ==================== ORDER BILL ASSOCIATIONS ====================
+dbModels.OrderBill.belongsTo(dbModels.PurchaseOrder, {
+  foreignKey: "po_id",
+  as: "purchaseOrder",
+  onDelete: "CASCADE",
+});
+dbModels.OrderBill.belongsTo(dbModels.Vendor, {
+  foreignKey: "vendor_id",
+  as: "vendor",
+  onDelete: "SET NULL",
+});
+dbModels.OrderBill.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "createdBy",
+  onDelete: "SET NULL",
+});
+dbModels.OrderBill.hasMany(dbModels.VendorBillPayment, {
+  foreignKey: "bill_id",
+  as: "billPayments",
+  onDelete: "CASCADE",
+});
+dbModels.OrderBill.hasMany(dbModels.VendorPaymentClearance, {
+  foreignKey: 'bill_id',
+  as: 'orderBillClearances',
+  onDelete: "CASCADE",
+});
+
+dbModels.Vendor.hasMany(dbModels.OrderBill, {
+  foreignKey: "vendor_id",
+  as: "bills",
+  onDelete: "SET NULL",
+});
+
+// ==================== VENDOR BILL PAYMENT ASSOCIATIONS ====================
+dbModels.VendorBillPayment.belongsTo(dbModels.OrderBill, {
+  foreignKey: "bill_id",
+  as: "orderBill",
+  onDelete: "CASCADE",
+});
+dbModels.VendorBillPayment.belongsTo(dbModels.Vendor, {
+  foreignKey: "vendor_id",
+  as: "vendor",
+  onDelete: "SET NULL",
+});
+dbModels.VendorBillPayment.belongsTo(dbModels.Account, {
+  foreignKey: "account_id",
+  as: "account",
+  onDelete: "SET NULL",
+});
+dbModels.VendorBillPayment.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "createdBy",
+  onDelete: "SET NULL",
+});
+dbModels.VendorBillPayment.hasMany(dbModels.VendorPaymentClearance, {
+  foreignKey: 'vendor_bill_payment_id',
+  as: 'vendorBillPaymentClearances',
+  onDelete: "CASCADE",
+});
+
+dbModels.Vendor.hasMany(dbModels.VendorBillPayment, {
+  foreignKey: "vendor_id",
+  as: "vendorPayments",
+  onDelete: "SET NULL",
+});
+dbModels.Account.hasMany(dbModels.VendorBillPayment, {
+  foreignKey: "account_id",
+  as: "vendorBillPayments",
+});
+
+// ==================== VENDOR DOCUMENT ASSOCIATIONS ====================
+dbModels.VendorDocument.belongsTo(dbModels.Vendor, {
+  foreignKey: "vendor_id",
+  as: "vendor",
+  onDelete: "CASCADE",
+});
+
+dbModels.Vendor.hasMany(dbModels.VendorDocument, {
+  foreignKey: "vendor_id",
+  as: "documents",
+  onDelete: "CASCADE",
+});
+
+// ==================== BOQ ASSOCIATIONS ====================
+dbModels.Boq.hasMany(dbModels.BoqItem, {
+  foreignKey: "boq_id",
+  as: "items",
+  onDelete: "CASCADE",
+});
+dbModels.Boq.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "creator",
+  onDelete: "SET NULL",
+});
+dbModels.Boq.belongsTo(dbModels.SystemUser, {
+  foreignKey: "updated_by",
+  as: "updater",
+  onDelete: "SET NULL",
+});
+dbModels.Boq.hasMany(dbModels.Quotation, {
+  foreignKey: "boq_id",
+  as: "quotations",
+  onDelete: "CASCADE",
+});
+
+dbModels.BoqItem.belongsTo(dbModels.Boq, {
+  foreignKey: "boq_id",
+  as: "boq",
+  onDelete: "CASCADE",
+});
+
+// ==================== BOQ ITEM FILE ASSOCIATIONS ====================
+dbModels.BoqItem.hasMany(dbModels.BoqItemFile, {
+  foreignKey: "boq_item_id",
+  as: "files",
+  onDelete: "CASCADE",
+});
+
+dbModels.BoqItemFile.belongsTo(dbModels.BoqItem, {
+  foreignKey: "boq_item_id",
+  as: "boqItem",
+  onDelete: "CASCADE",
+});
+
+dbModels.BoqItemFile.belongsTo(dbModels.SystemUser, {
+  foreignKey: "uploaded_by",
+  as: "uploader",
+  onDelete: "SET NULL",
+});
+
+// ==================== QUOTATION ASSOCIATIONS ====================
+dbModels.Quotation.belongsTo(dbModels.Boq, {
+  foreignKey: "boq_id",
+  as: "quotationBoq",
+  onDelete: "CASCADE",
+});
+dbModels.Quotation.belongsTo(dbModels.Vendor, {
+  foreignKey: "vendor_id",
+  as: "vendor",
+  onDelete: "SET NULL",
+});
+dbModels.Quotation.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "creator",
+  onDelete: "SET NULL",
+});
+dbModels.Quotation.belongsTo(dbModels.SystemUser, {
+  foreignKey: "updated_by",
+  as: "updater",
+  onDelete: "SET NULL",
+});
+
+dbModels.Vendor.hasMany(dbModels.Quotation, {
+  foreignKey: "vendor_id",
+  as: "quotations",
+  onDelete: "SET NULL",
+});
+
+// ==================== LOAN ASSOCIATIONS ====================
+dbModels.Loan.hasMany(dbModels.LoanTransaction, {
+  foreignKey: "loan_id",
+  as: "transactions",
+  onDelete: "CASCADE",
+});
+
+dbModels.LoanTransaction.belongsTo(dbModels.Loan, {
+  foreignKey: "loan_id",
+  as: "loan",
+  onDelete: "CASCADE",
+});
+dbModels.LoanTransaction.belongsTo(dbModels.Account, {
+  foreignKey: "account_id",
+  as: "account",
+  onDelete: "SET NULL",
+});
+
+dbModels.Account.hasMany(dbModels.LoanTransaction, {
+  foreignKey: "account_id",
+  as: "loanTransactions",
+});
+
+// ==================== AMC ESTIMATE ASSOCIATIONS ====================
+dbModels.AmcEstimate.belongsTo(dbModels.Client, {
+  foreignKey: "client_id",
+  as: "client",
+  onDelete: "SET NULL",
+});
+dbModels.AmcEstimate.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "createdBy",
+  onDelete: "SET NULL",
+});
+dbModels.AmcEstimate.hasMany(dbModels.AmcAcDetail, {
+  foreignKey: "amc_estimate_id",
+  as: "acDetails",
+  onDelete: "CASCADE",
+});
+
+dbModels.AmcAcDetail.belongsTo(dbModels.AmcEstimate, {
+  foreignKey: "amc_estimate_id",
+  as: "estimate",
+  onDelete: "CASCADE",
+});
+
+// ==================== AMC CONTRACT ASSOCIATIONS ====================
+dbModels.AmcContract.belongsTo(dbModels.Client, {
+  foreignKey: "client_id",
+  as: "client",
+  onDelete: "SET NULL",
+});
+dbModels.AmcContract.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "createdBy",
+  onDelete: "SET NULL",
+});
+dbModels.AmcContract.hasMany(dbModels.AmcacContractDetails, {
+  foreignKey: "amc_contract_id",
+  as: "acDetails",
+  onDelete: "CASCADE",
+});
+dbModels.AmcContract.hasMany(dbModels.AmcContractServiceSchedule, {
+  foreignKey: "amc_contract_id",
+  as: "serviceSchedules",
+  onDelete: "CASCADE",
+});
+dbModels.AmcContract.hasMany(dbModels.AmcPaymentHistory, {
+  foreignKey: "amc_contract_id",
+  as: "paymentHistory",
+  onDelete: "CASCADE",
+});
+dbModels.AmcContract.hasMany(dbModels.BillingRequest, {
+  foreignKey: "amc_contract_id",
+  as: "billingRequests",
+  onDelete: "CASCADE",
+});
+// ✅ CRITICAL FIX: Add hasMany association from AmcContract to Pi
+dbModels.AmcContract.hasMany(dbModels.Pi, {
+  foreignKey: "amc_contract_id",
+  as: "pis",
+  onDelete: "SET NULL",
+});
+
+dbModels.AmcacContractDetails.belongsTo(dbModels.AmcContract, {
+  foreignKey: "amc_contract_id",
+  as: "contract",
+  onDelete: "CASCADE",
+});
+
+dbModels.AmcContractServiceSchedule.belongsTo(dbModels.AmcContract, {
+  foreignKey: "amc_contract_id",
+  as: "contract",
+  onDelete: "CASCADE",
+});
+
+dbModels.AmcPaymentHistory.belongsTo(dbModels.AmcContract, {
+  foreignKey: "amc_contract_id",
+  as: "contract",
+  onDelete: "CASCADE",
+});
+
+// ==================== BILLING REQUEST ASSOCIATIONS ====================
+dbModels.BillingRequest.belongsTo(dbModels.AmcContract, {
+  foreignKey: "amc_contract_id",
+  as: "contract",
+  onDelete: "CASCADE",
+});
+dbModels.BillingRequest.hasMany(dbModels.BillingRequestPaymentHistory, {
+  foreignKey: "billing_request_id",
+  as: "paymentHistory",
+  onDelete: "CASCADE",
+});
+
+dbModels.BillingRequestPaymentHistory.belongsTo(dbModels.BillingRequest, {
+  foreignKey: "billing_request_id",
+  as: "billingRequest",
+  onDelete: "CASCADE",
+});
+
+// ==================== ERP SERVICE REPORT ASSOCIATIONS ====================
+dbModels.ErpServiceReport.belongsTo(dbModels.TicketERP, {
+  foreignKey: "erp_id",
+  as: "ticket",
+  onDelete: "CASCADE"
+});
+dbModels.ErpServiceReport.belongsTo(dbModels.Client, {
+  foreignKey: "client_id",
+  as: "client",
+  onDelete: "CASCADE"
+});
+dbModels.ErpServiceReport.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "createdBy",
+  onDelete: "SET NULL"
+});
+
+dbModels.HvacErpServiceReport.belongsTo(dbModels.HVACTicket, {
+  foreignKey: 'hvac_erp_id',
+  as: 'ticket',
+  onDelete: 'CASCADE'
+});
+dbModels.HvacErpServiceReport.belongsTo(dbModels.SystemUser, {
+  foreignKey: "created_by",
+  as: "createdBy",
+  onDelete: "SET NULL"
+});
+
+// ==================== DEPARTMENT ASSOCIATIONS ====================
+dbModels.SystemUser.belongsToMany(dbModels.Department, {
+  through: dbModels.UserDepartment,
+  foreignKey: "user_id",
+  otherKey: "department_id",
+  as: "departments",
+});
+dbModels.Department.belongsToMany(dbModels.SystemUser, {
+  through: dbModels.UserDepartment,
+  foreignKey: "department_id",
+  otherKey: "user_id",
+  as: "users",
+});
+
+dbModels.SystemUser.hasMany(dbModels.UserDepartment, {
+  foreignKey: "user_id",
+  as: "userDepartments",
+});
+dbModels.UserDepartment.belongsTo(dbModels.SystemUser, {
+  foreignKey: "user_id",
+  as: "user",
+  onDelete: "CASCADE",
+});
+
+dbModels.Department.hasMany(dbModels.UserDepartment, {
+  foreignKey: "department_id",
+  as: "departmentUsers",
+});
+dbModels.UserDepartment.belongsTo(dbModels.Department, {
+  foreignKey: "department_id",
+  as: "department",
+  onDelete: "CASCADE",
+});
+
+dbModels.Department.hasMany(dbModels.Expense, {
+  foreignKey: 'department_id',
+  as: 'expenses',
+  onDelete: "SET NULL",
+});
+dbModels.Department.hasMany(dbModels.ExpensePayment, {
+  foreignKey: 'department_id',
+  as: 'expensePayments',
+  onDelete: "SET NULL",
+});
+
+// ==================== VENDOR PAYMENT CLEARANCE ASSOCIATIONS ====================
+dbModels.VendorPaymentClearance.belongsTo(dbModels.Vendor, {
+  foreignKey: 'vendor_id',
+  as: 'vendor',
+  onDelete: "CASCADE",
+});
+dbModels.VendorPaymentClearance.belongsTo(dbModels.Account, {
+  foreignKey: 'account_id',
+  as: 'account',
+  onDelete: "SET NULL",
+});
+dbModels.VendorPaymentClearance.belongsTo(dbModels.VendorBillPayment, {
+  foreignKey: 'vendor_bill_payment_id',
+  as: 'vendorBillPayment',
+  onDelete: "CASCADE",
+});
+dbModels.VendorPaymentClearance.belongsTo(dbModels.OrderBill, {
+  foreignKey: 'bill_id',
+  as: 'orderBill',
+  onDelete: "CASCADE",
+});
+dbModels.VendorPaymentClearance.belongsTo(dbModels.SystemUser, {
+  foreignKey: 'created_by',
+  as: 'creator',
+  onDelete: "SET NULL",
+});
+dbModels.VendorPaymentClearance.belongsTo(dbModels.SystemUser, {
+  foreignKey: 'updated_by',
+  as: 'updater',
+  onDelete: "SET NULL",
+});
+
+dbModels.Vendor.hasMany(dbModels.VendorPaymentClearance, {
+  foreignKey: 'vendor_id',
+  as: 'vendorClearances',
+  onDelete: "CASCADE",
+});
+dbModels.Account.hasMany(dbModels.VendorPaymentClearance, {
+  foreignKey: 'account_id',
+  as: 'accountClearances',
+});
+dbModels.VendorBillPayment.hasMany(dbModels.VendorPaymentClearance, {
+  foreignKey: 'vendor_bill_payment_id',
+  as: 'billPaymentClearances',
+  onDelete: "CASCADE",
+});
+dbModels.OrderBill.hasMany(dbModels.VendorPaymentClearance, {
+  foreignKey: 'bill_id',
+  as: 'orderBillClearancesList',
+  onDelete: "CASCADE",
+});
+
+// ==================== GST RECORD ASSOCIATIONS ====================
+dbModels.GstRecord.belongsTo(dbModels.Invoice, {
+  foreignKey: "invoice_id",
+  as: "invoice",
+  onDelete: "CASCADE",
+});
+dbModels.GstRecord.belongsTo(dbModels.OrderBill, {
+  foreignKey: "bill_id",
+  as: "orderBill",
+  onDelete: "CASCADE",
+});
+
+// ==================== TDS RECORD ASSOCIATIONS ====================
+dbModels.TdsRecord.belongsTo(dbModels.InvoicePayment, {
+  foreignKey: "payment_id",
+  as: "invoicePayment",
+  onDelete: "CASCADE",
+});
+dbModels.TdsRecord.belongsTo(dbModels.VendorBillPayment, {
+  foreignKey: "vendor_payment_id",
+  as: "vendorBillPayment",
+  onDelete: "CASCADE",
+});
+
+// ── 3) Export registry & bound sequelize ───────────────────────────────────────
+export default dbModels;
+export const {
+  Expense,
+  ExpensePayment,
+  Account,
+  UserDepartment,
+  Department,
+  ExpenseMedia,
+  SystemUser,
+  Pi,
+  PiItem,
+  Estimate,
+  EstimateItem,
+  Invoice,
+  InvoiceItem,
+  Client,
+  Vendor,
+  PurchaseOrder,
+  OrderBill,
+  VendorBillPayment,
+  VendorPaymentClearance,
+  // Add other models you need
+} = dbModels;
+export const { sequelize: sequelizeWriterBound } = dbModels;
+export { sequelize };

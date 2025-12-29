@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{doc_title}}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    *{box-sizing:border-box}
+
+    :root{
+      --pdf-blue:#293791;
+      --pdf-red:#FF0000;
+      --pdf-magenta:#DF1D85;
+      --pdf-line:#D6D6D6;
+      --pdf-row:#F2F2F2;
+      --text:#111;
+      --muted:#666;
+    }
+
+    html,body{
+      background:#fff;
+      font-family:Arial,Helvetica,sans-serif;
+      color:var(--text);
+      margin:0;
+      padding:0;
+      max-width:800px;
+      font-size:11px;
+    }
+
+    .wrap{
+      padding:16px;
+      border:none;
+      border-radius:0;
+    }
+
+    .head-row{display:flex;justify-content:space-between;align-items:center}
+    .vertical-divider{width:2px;height:120px;background:#000;margin:0 15px}
+    .logo{max-width:300px;max-height:150px;width:auto;height:auto;object-fit:contain;display:block}
+    .addr{text-align:left;font-size:10px;color:#111;max-width:400px}
+    .addr div+div{margin-top:3px}
+    .gst-strip{font-weight:bold;font-size:12px !important}
+
+    .rule{height:1px;background:black;margin:10px 0 18px 0}
+
+    .pdf-title{
+      font-size:30px;
+      font-weight:500;
+      color:var(--pdf-blue);
+      margin:0 0 14px 0;
+    }
+
+    .top-grid{
+      display:grid;
+      grid-template-columns:auto auto auto auto auto;
+      gap:26px;
+      align-items:start;
+      margin-bottom:16px;
+    }
+    /* reduced bold + slightly reduced size */
+    .top-block .k{font-weight:700;color:#333;margin-bottom:6px;font-size:12px}
+    .top-block .v{font-size:12px;color:#111;font-weight:700}
+    .top-block.contract .k,
+    .top-block.contract .v{color:var(--pdf-red);font-weight:800}
+
+    .mid-grid{
+      display:grid;
+      grid-template-columns:auto auto auto;
+      gap:70px;
+      align-items:start;
+      margin-top:6px;
+    }
+    .mid-block .k{font-weight:700;color:#444;font-size:13px;margin-bottom:6px}
+    .mid-block .v{font-size:12.5px;color:#111;font-weight:700}
+
+    /* middle line: add top/bottom gap */
+    .thin-line{height:2px;background:var(--pdf-line);margin:24px 0}
+
+    .cust-title{font-weight:700;color:#444;font-size:14px;margin:0 0 10px 0}
+
+    .cust-table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:4px;
+      border-top:2px solid var(--pdf-line);
+      border-bottom:2px solid var(--pdf-line);
+    }
+    .cust-table td{padding:6px 6px;vertical-align:top;font-size:12px}
+    .cust-table .label{width:32%;color:#666;font-weight:700}
+    .cust-table .value{
+      width:68%;
+      font-weight:700;
+      color:#111;
+      border-left:2px solid #111;
+      padding-left:10px;
+    }
+
+    .items{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:18px;
+      font-size:12px;
+    }
+    .items thead th{
+      text-align:left;
+      font-weight:700;
+      color:var(--pdf-blue);
+      padding:10px 8px;
+      border-bottom:2px solid var(--pdf-line);
+      white-space:nowrap;
+    }
+    .items tbody td{
+      padding:10px 8px;
+      border-bottom:2px solid var(--pdf-line);
+      vertical-align:top;
+    }
+    .items .col-sr{width:60px;text-align:center;color:#777;font-weight:700}
+    .items .col-qty{width:70px;text-align:center}
+    .items .col-tr{width:70px;text-align:center}
+    .items .col-unit,
+    .items .col-total{
+      width:130px;
+      text-align:right;
+      color:#777;
+      white-space:nowrap;
+      font-weight:700;
+    }
+    .items tbody tr.data-row:nth-child(odd) td{background:var(--pdf-row)}
+    .note-row td{
+      background:var(--pdf-row);
+      font-weight:700;
+      color:#111;
+      border-bottom:2px solid var(--pdf-line);
+      padding:10px 8px;
+    }
+
+    .totals{
+      margin-top:10px;
+      display:flex;
+      justify-content:space-between;
+      gap:20px;
+      align-items:flex-start;
+    }
+    .words-left{width:55%;padding-top:20px;font-size:12px;color:#555}
+    .words-left .k{font-weight:500;margin-bottom:10px}
+    .words-left .v{
+      font-weight:500;
+      font-size:16px;
+      color:#111;
+      text-transform:uppercase;
+    }
+    .totals-right{width:45%;text-align:right;font-size:12px}
+    .totals-right .row{display:flex;justify-content:flex-end;gap:20px;margin:10px 0}
+    .totals-right .k{
+      font-weight:500;
+      color:var(--pdf-blue);
+      min-width:170px;
+      text-align:right;
+      white-space:nowrap;
+    }
+    .totals-right .v{
+      font-weight:500;
+      color:#111;
+      min-width:100px;
+      text-align:right;
+      white-space:nowrap;
+    }
+    .grand{
+      margin-top:18px;
+      font-size:30px;
+      font-weight:500;
+      color:var(--pdf-magenta);
+      white-space:nowrap;
+    }
+
+    .page-break{page-break-before:always}
+
+    .bn-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:40px;
+      margin-top:16px;
+    }
+    .bn-title{font-weight:700;color:#111;font-size:13px;margin:0 0 10px 0}
+    .bn-list{margin:0;padding-left:0;list-style:none;font-size:12.5px;line-height:1.5;color:#111}
+    .bn-list li{margin:0 0 8px 0}
+
+    .for-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      margin-top:12px;
+      font-size:12px;
+    }
+    .for-col{width:48%}
+    .for-col.right{text-align:right}
+    .for-col .for{font-weight:700;margin-bottom:8px}
+    .for-col .name{font-weight:700;margin-top:6px}
+    .for-col .phone{margin-top:4px;font-weight:700}
+
+    .schedule-title{margin-top:14px;font-weight:700;font-size:13px;color:#111}
+
+    .schedule{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:8px;
+      font-size:12px;
+    }
+    .schedule th{
+      text-align:left;
+      font-weight:700;
+      color:#111;
+      padding:8px 6px;
+      border-bottom:2px solid var(--pdf-line);
+      white-space:nowrap;
+    }
+    .schedule td{
+      padding:10px 6px;
+      border-bottom:2px solid var(--pdf-line);
+      vertical-align:top;
+      height:30px;
+    }
+    .c{text-align:center}
+
+    /* ===== NEW: Screenshot-like block below schedule (STATIC) ===== */
+    .assurance-static{
+      margin-top:40px;
+      text-align:center;
+      font-size:12px;
+      line-height:1.45;
+      font-weight:700;
+      color:#111;
+    }
+
+    .address-box{
+      margin-top:30px;
+      margin-bottom: 30px;
+      border:1px solid #111;
+      padding:10px 12px;
+      text-align:center;
+      font-size:10px;
+      color:#444;
+    }
+
+    .bottom-grid{
+      margin-top:22px;
+      display:flex;
+      justify-content:space-between;
+      gap:20px;
+      font-size:12px;
+      color:#444;
+    }
+    .bottom-left{width:55%;line-height:1.6}
+    .bottom-right{width:45%;text-align:right;line-height:1.6}
+    .bottom-right .label{font-weight:700;color:#444}
+    .bottom-right .value{font-weight:700;color:#444}
+    .bottom-right a{color:#0057ff;text-decoration:underline;font-weight:700}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <!-- HEADER (UNCHANGED) -->
+    <div class="head-row">
+      <div class="addr">
+        {{#if our_company.legal_name}}<h3><strong>{{our_company.legal_name}}</strong></h3>{{/if}}
+        {{#if our_company.address_line}}<div>{{our_company.address_line}}</div>{{/if}}
+        {{#if our_company.city_state}}<div>{{our_company.city_state}}</div>{{/if}}
+        {{#if our_company.phone}}<div>Phone: {{our_company.phone}}</div>{{/if}}
+        {{#if our_company.email}}<div>Email: {{our_company.email}}</div>{{/if}}
+        {{#if our_company.website}}<div>{{our_company.website}}</div>{{/if}}
+        {{#if our_company.tax_id}}<div class="gst-strip"><strong>GSTIN: {{our_company.tax_id}}</strong></div>{{/if}}
+      </div>
+      <div class="vertical-divider"></div>
+      {{#if logo}}<img src="{{logo}}" alt="Company Logo" class="logo" />{{/if}}
+    </div>
+
+    <div class="rule"></div>
+
+    <!-- ===== PAGE 1 ===== -->
+    <div class="pdf-title">Contract Paper</div>
+
+    <div class="top-grid">
+      <div class="top-block">
+        <div class="k">Start Date</div>
+        <div class="v">{{amc_details.start_date}}</div>
+      </div>
+
+      <div class="top-block">
+        <div class="k">End Date</div>
+        <div class="v">{{amc_details.end_date}}</div>
+      </div>
+
+      <!-- ✅ A/C = AC TYPE -->
+      <div class="top-block">
+        <div class="k">A/C</div>
+        <div class="v">
+          {{#if ac_details.length}}
+            {{ac_details.[0].ac_type}}
+          {{else}}
+            -
+          {{/if}}
+        </div>
+      </div>
+
+      <!-- ✅ QTY -->
+      <div class="top-block">
+        <div class="k">QTY</div>
+        <div class="v">
+          {{#if ac_details.length}}
+            {{ac_details.[0].quantity}}
+          {{else}}
+            -
+          {{/if}}
+        </div>
+      </div>
+
+      <div class="top-block contract">
+        <div class="k">Contract No</div>
+        <div class="v">{{contract_number}}</div>
+      </div>
+    </div>
+
+    <div class="mid-grid">
+      <div class="mid-block">
+        <div class="k">Contract Duration</div>
+        <div class="v">{{amc_details.start_date}} to {{amc_details.end_date}}</div>
+      </div>
+
+      <div class="mid-block">
+        <div class="k">No.of.Service</div>
+        <div class="v">{{amc_details.no_of_services}}</div>
+      </div>
+
+      <div class="mid-block">
+        <div class="k">Service Type</div>
+        <div class="v">{{amc_details.service_type}}</div>
+      </div>
+    </div>
+
+    <div class="thin-line"></div>
+
+    <div class="cust-title">Customer Details :</div>
+
+    <table class="cust-table">
+      <tr><td class="label">Customer Name :</td><td class="value">{{customer.name}}</td></tr>
+      <tr><td class="label">Company Name :</td><td class="value">{{customer.company}}</td></tr>
+      <tr><td class="label">Contact No :</td><td class="value">{{customer.phone}}</td></tr>
+      <tr><td class="label">E.mail :</td><td class="value">{{customer.email}}</td></tr>
+      <tr><td class="label">Address :</td><td class="value">{{customer.address}}</td></tr>
+      <tr><td class="label">GSTIN :</td><td class="value">{{customer.gstin}}</td></tr>
+    </table>
+
+    <table class="items">
+      <thead>
+        <tr>
+          <th class="col-sr">Item #</th>
+          <th>Description</th>
+          <th class="col-qty">Qty</th>
+          <th class="col-tr">TR</th>
+          <th class="col-unit">Unit price</th>
+          <th class="col-total">Total price</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{#each ac_details}}
+        <tr class="data-row">
+          <td class="col-sr">{{inc @index}}</td>
+          <td style="font-weight:700;">
+            {{this.ac_type}} {{#if this.maker}}- {{this.maker}}{{/if}}
+          </td>
+          <td class="col-qty">{{this.quantity}}</td>
+          <td class="col-tr">{{this.tr_ac}}</td>
+          <td class="col-unit">{{formatINR this.rate_per_ac}}</td>
+          <td class="col-total">{{formatINR this.total_rate}}</td>
+        </tr>
+        {{/each}}
+
+        {{#unless ac_details.length}}
+        <tr class="data-row">
+          <td class="col-sr">1</td>
+          <td></td>
+          <td class="col-qty"></td>
+          <td class="col-tr"></td>
+          <td class="col-unit">{{formatINR 0}}</td>
+          <td class="col-total">{{formatINR 0}}</td>
+        </tr>
+        {{/unless}}
+
+        {{#if amc_details.notes}}
+        <tr class="note-row">
+          <td colspan="6"><strong>Note :-</strong> {{amc_details.notes}}</td>
+        </tr>
+        {{/if}}
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <div class="words-left">
+        <div class="k">Total in words :</div>
+        <div class="v">{{amount_in_words}}</div>
+      </div>
+
+      <div class="totals-right">
+        <div class="row">
+          <div class="k">Subtotal</div>
+          <div class="v">{{formatINR financial_summary.subtotal}}</div>
+        </div>
+
+        <div class="row">
+          <div class="k">Discount</div>
+          <div class="v">{{formatINR 0}}</div>
+        </div>
+
+        <div class="row">
+          <div class="k">SERVICE TAX@ {{financial_summary.gst_percentage}}%</div>
+          <div class="v">{{formatINR financial_summary.gst_amount}}</div>
+        </div>
+
+        <div class="grand">{{formatINR financial_summary.grand_total}}</div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE 2 ===== -->
+    <div class="page-break"></div>
+
+    <div class="bn-grid">
+      <div>
+        <div class="bn-title">BENEFITS :</div>
+        <ul class="bn-list">
+          <li>Issues regarding minor problems will be covered from our side wich may lies on,</li>
+          <li>Short circuit of wirings. Failure of compressors, circuit boards, fan motors, contactors &amp; switch gears etc.</li>
+          <li>Noisy operation of Air-Conditioners. Gas leakage problems in units may be in evaporators (cooling coil), pipings, condensers, Drier etc.</li>
+          <li>Water leakage problems. Blockage of Driers, copper tubes (may be Headers, Distributors, Expansion valves)</li>
+          <li>Damages of Insulations of wires &amp; copper tubes.</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="bn-title">NOTE :</div>
+        <ul class="bn-list">
+          <li>Issues regarding maintenance jobs are additional &amp; not covered in service contract, Hence the cost of repairing will be additional &amp; rates will be subjected as per market values.</li>
+          <li>Natural damages will not be considered in this format.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="for-row">
+      <div class="for-col">
+        <div class="for">for,</div>
+        <div class="name">{{customer.name}}</div>
+        <div class="phone">{{customer.phone}}</div>
+      </div>
+
+      <div class="for-col right">
+        <div class="for">for,</div>
+        <div class="name">{{our_company.name}}</div>
+        <div class="phone">{{our_company.phone}}</div>
+      </div>
+    </div>
+
+    <div class="schedule-title">SERVICE SCHEDULE :</div>
+
+    <!-- ✅ ONLY PLANNED DATE FROM service_schedules -->
+    <table class="schedule">
+      <thead>
+        <tr>
+          <th style="width:8%;">SRV.</th>
+          <th style="width:14%;">PLANNED DATE</th>
+          <th>SERVICE DESCRIPTION</th>
+          <th style="width:18%;">A/C WORKING STATUS</th>
+          <th style="width:12%;">CLIENT SIGN</th>
+          <th style="width:12%;">TECH. SIGN</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{#if service_schedules.length}}
+          {{#each service_schedules}}
+          <tr>
+            <td class="c">
+              {{service_no}}
+              {{#if (eq service_no 1)}}st{{else}}{{#if (eq service_no 2)}}nd{{else}}{{#if (eq service_no 3)}}rd{{else}}th{{/if}}{{/if}}{{/if}}
+            </td>
+            <td class="c">{{planned_date}}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          {{/each}}
+        {{else}}
+          <tr><td class="c">1st</td><td class="c"></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td class="c">2nd</td><td class="c"></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td class="c">3rd</td><td class="c"></td><td></td><td></td><td></td><td></td></tr>
+        {{/if}}
+      </tbody>
+    </table>
+
+    <!-- ✅ NEW: EXACT SCREENSHOT STYLE (STATIC VALUES ONLY) -->
+    <div class="assurance-static">
+      COMPRESS INDIA PVT.LTD. assures you for providing services in excellence at the best and hope you are satisfied and cleared regarding
+      the contract. Please feel free for any kind of queries/discussions regarding contract.
+    </div>
+
+    <div class="address-box">
+      103, 1st Floor, HI-Tech Commercial Complex, Near SCLR Road, V.B Nagar, Kurla (w), Mumbai-4000.70. Maharashtra (INDIA)
+    </div>
+
+    <div class="bottom-grid">
+      <div class="bottom-left">
+        <div>Contact : 93244 08798 / 72082 19016.</div>
+        <div>info@compressindia.com / compressindia@gmail.com</div>
+      </div>
+
+      <div class="bottom-right">
+        <div><span class="label">GSTIN :</span> <span class="value">27AAKCC6103D1Z0</span></div>
+        <div><span class="label">Website :</span> <a href="https://www.compressindia.com">www.compressindia.com</a></div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

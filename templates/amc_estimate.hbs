@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>{{doc_title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111111;
+            margin: 0;
+            padding: 0;
+            max-width: 800px;
+            font-size: 11px;
+        }
+
+        .wrap {
+            padding: 16px;
+            border: 2px solid black;
+            border-radius: 8px;
+        }
+
+        /* Header Styles */
+        .head-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .vertical-divider {
+            width: 2px;
+            height: 120px;
+            background: #000;
+            margin: 0 15px;
+        }
+
+        .logo {
+            max-width: 300px;
+            max-height: 150px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        .addr {
+            text-align: left;
+            font-size: 10px;
+            color: #111;
+            max-width: 400px;
+        }
+
+        .addr div+div {
+            margin-top: 3px;
+        }
+
+        /* Divider */
+        .rule {
+            height: 1px;
+            background: black;
+            margin: 12px 0;
+        }
+
+        /* Title */
+        h1 {
+            font-size: 14px;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            padding-bottom: 20px;
+        }
+
+        /* Details Section */
+        .details-section {
+            margin-top: 12px;
+            font-size: 11px;
+        }
+
+        .details-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .details-section td {
+            padding: 4px;
+        }
+
+        .details-section td strong {
+            font-weight: 700;
+        }
+
+        /* Address Section */
+        .address-section {
+            margin-top: 20px;
+            font-size: 11px;
+        }
+
+        .address-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .address-section td {
+            padding: 4px;
+        }
+
+        /* Items Table with Borders */
+        .item-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .item-table th,
+        .item-table td {
+            border: 1px solid #ddd;
+            padding: 7px;
+            text-align: left;
+        }
+
+        .item-table th {
+            background:  #f0f8ff;
+            font-weight: 700;
+        }
+
+        /* Total Section */
+        .total-section {
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: right;
+        }
+
+        .total-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .total-section td {
+            padding: 4px;
+        }
+
+        .total-section td strong {
+            font-weight: 700;
+        }
+
+        .total-section .grand-total {
+            background-color: #e9f2ff;
+            font-weight: 800;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* GST Calculation Styles */
+        .gst-calculation {
+            margin-top: 10px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .gst-calculation table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .gst-calculation td {
+            padding: 5px 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .gst-calculation .gst-row {
+            border-top: 1px solid #ddd;
+        }
+
+        .gst-calculation .grand-total-row {
+            border-top: 2px solid #333;
+            font-weight: bold;
+            background-color: #f0f8ff;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        /* Words Section */
+        .words {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        /* Terms & Conditions Section */
+        .terms-conditions {
+            margin-top: 20px;
+            font-size: 12px;
+        }
+
+        .terms-conditions ul {
+            padding-left: 20px;
+            list-style-type: decimal;
+        }
+
+        .terms-conditions li {
+            margin-bottom: 8px;
+        }
+
+        .company_name {
+            font-size: 14px;
+        }
+
+        h4 {
+            padding-bottom: 0px;
+        }
+
+        .thanks {
+            padding-top: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* Signatures */
+        .signatures {
+            margin-top: 20px;
+        }
+
+        .signatures table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signatures td {
+            width: 50%;
+            padding: 10px;
+            vertical-align: top;
+        }
+
+        .signatures .label {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .signatures .line {
+            margin-top: 60px;
+            border-top: 1px solid #333;
+            width: 100%;
+        }
+
+        .gst-strip {
+            font-weight: bold;
+            font-size: 12px !important;
+        }
+
+        .signatures .hint {
+            font-size: 9px;
+            color: #555;
+            font-style: italic;
+            padding-top: 100px;
+        }
+
+        .service-progress {
+            margin: 15px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .progress-grid {
+            display: grid;
+            grid-template-columns: auto 1fr auto 1fr auto 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .progress-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .progress-value {
+            color: #333;
+        }
+
+        .amount-in-words {
+            margin-top: 10px;
+            padding: 5px;
+            background-color: #f0f8ff;
+            border-radius: 4px;
+           
+        }
+
+        /* ✅ NAYA: Deal Offer Description Styles */
+        .deal-offer-desc {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <!-- Header -->
+        <div class="head-row">
+            <div class="addr">
+                {{#if our_company.legal_name}}<h3><strong>{{our_company.legal_name}}</strong></h3>{{/if}}
+                {{#if our_company.address_line}}<div>{{our_company.address_line}}</div>{{/if}}
+                {{#if our_company.city_state}}<div>{{our_company.city_state}}</div>{{/if}}
+                {{#if our_company.phone}}<div>Phone: {{our_company.phone}}</div>{{/if}}
+                {{#if our_company.email}}<div>Email: {{our_company.email}}</div>{{/if}}
+                   {{#if our_company.website}}<div>{{our_company.website}}</div>{{/if}}
+                {{#if our_company.tax_id}}<div class="gst-strip"><strong>GSTIN: {{our_company.tax_id}}</strong></div>{{/if}}
+                
+            </div>
+            <!-- Divider line -->
+            <div class="vertical-divider"></div>
+            {{#if logo}}<img src="{{logo}}" alt="Company Logo" class="logo" />{{/if}}
+        </div>
+
+        <!-- Divider -->
+        <div class="rule"></div>
+
+        <!-- Title -->
+        <h1>{{doc_title}}</h1>
+
+        <!-- Document Details -->
+        <div class="details-section">
+            <table>
+                <tr>
+                    <td><strong>{{doc_label}}:</strong></td>
+                    <td>{{estimate_number}}</td>
+                    <td><strong>Contact Person:</strong></td>
+                    <td>{{customer.contact_person}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Date:</strong></td>
+                    <td>{{estimate_date}}</td>
+                    <td><strong>Contact No:</strong></td>
+                    <td>{{customer.phone}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Valid Until:</strong></td>
+                    <td>{{valid_until}}</td>
+                    <td><strong>Email ID:</strong></td>
+                    <td>{{customer.email}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Service Type:</strong></td>
+                    <td>{{amc_details.service_type}}</td>
+                    <td><strong>Designation:</strong></td>
+                    <td>{{customer.designation}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Service Frequency:</strong></td>
+                    <td>{{amc_details.service_frequency}}</td>
+                    <td><strong>GST No:</strong></td>
+                    <td>{{customer.gstin}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Address Section -->
+        <div class="address-section">
+            <table>
+                <tr style="background-color: #f0f8ff;">
+                    <td><strong>CLIENT DETAILS:</strong></td>
+                    <td><strong>AMC DETAILS:</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>{{customer.company}}</strong></td>
+                    <td><strong>Contract Period:</strong> {{amc_details.start_date}} to {{amc_details.end_date}}</td>
+                </tr>
+                <tr>
+                    <td>{{customer.address}}</td>
+                    <td><strong>No. of Services:</strong> {{amc_details.no_of_services}}</td>
+                </tr>
+                <tr>
+                    <td>{{customer.city}}, {{customer.state}} - {{customer.pin_code}}</td>
+                    <td><strong>Working Address:</strong> {{amc_details.working_address}}</td>
+                </tr>
+                <tr>
+                    <td><strong>GSTIN:</strong> {{customer.gstin}}</td>
+                    <td><strong>Deal Offer:</strong> {{amc_details.deal_offer}}</td> <!-- ✅ Title display -->
+                </tr>
+            </table>
+        </div>
+
+        <!-- AC Equipment Details -->
+        <table class="item-table">
+            <thead>
+                <tr>
+                    <th>SR</th>
+                    <th>AC TYPE</th>
+                    <th>MAKER</th>
+                    <th>QUANTITY</th>
+                    <th>TR/AC</th>
+                    <th>RATE PER AC</th>
+                    <th>TOTAL AMOUNT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each ac_details}}
+                <tr>
+                    <td>{{inc @index}}</td>
+                    <td>{{this.ac_type}}</td>
+                    <td>{{this.maker}}</td>
+                    <td>{{this.quantity}}</td>
+                    <td>{{this.tr_ac}}</td>
+                    <td>{{formatINR this.rate_per_ac}}</td>
+                    <td>{{formatINR this.total_rate}}</td>
+                </tr>
+                {{/each}}
+                {{#unless ac_details.length}}
+                <tr>
+                    <td colspan="7" class="text-center">No AC equipment details available</td>
+                </tr>
+                {{/unless}}
+            </tbody>
+        </table>
+
+        <!-- GST Calculation Section -->
+        <div class="gst-calculation">
+<table style="width:100%; border-collapse:collapse;">
+  <tr>
+    <td style="width:60%;"></td>
+
+    <td style="width:40%;">
+      <table style="width:100%; border-collapse:collapse;">
+        <tr>
+          <td style="text-align:left; font-weight:600; border:none;">Subtotal</td>
+          <td style="text-align:right; border:none;">
+            {{formatINR financial_summary.subtotal}}
+          </td>
+        </tr>
+
+        {{#if financial_summary.gst_percentage}}
+        <tr>
+          <td style="text-align:left; border:none;">
+            GST ({{financial_summary.gst_percentage}}%)
+          </td>
+          <td style="text-align:right; border:none;">
+            {{formatINR financial_summary.gst_amount}}
+          </td>
+        </tr>
+        {{/if}}
+
+        <tr style="font-weight:bold;">
+          <td style="text-align:left; border:none;">Grand Total</td>
+          <td style="text-align:right; border:none;">
+            {{formatINR financial_summary.grand_total}}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+        </div>
+
+        <!-- Amount in Words -->
+        <div class="amount-in-words">
+            <p><strong>Amount in Words:</strong> {{amount_in_words}}</p>
+        </div>
+
+        <!-- Notes -->
+        {{#if amc_details.notes}}
+        <div class="footer">
+            <p><strong>Special Notes:</strong> {{amc_details.notes}}</p>
+        </div>
+        {{/if}}
+
+        <!-- ✅ NAYA: Deal Offer Description Section -->
+        {{#if amc_details.deal_offer_description}}
+        <div class="deal-offer-desc">
+            <p><strong>Deal Offer Details:</strong></p>
+            <p style="margin-left: 10px; font-size: 11px;">{{amc_details.deal_offer_description}}</p>
+        </div>
+        {{/if}}
+
+        <!-- Terms & Conditions Section -->
+        <div class="terms-conditions">
+            <h3>Terms & Conditions:</h3>
+            <ul>
+                {{#each terms}}
+                <li>{{this}}</li>
+                {{/each}}
+            </ul>
+        </div>
+
+        <!-- Signature Section -->
+        <div class="signatures">
+            <table>
+                <tr>
+                    <td>
+                        <span class="label">{{our_company.name}}:</span>
+                        <div class="hint">Authorised Signatory / Company Seal</div>
+                    </td>
+                    <td style="text-align:right;">
+                        <span class="label">{{customer.company}}:</span>
+                        <div class="hint">Customer Signature & Stamp</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="thanks">
+            *** THANKS FOR YOUR VALUABLE BUSINESS WITH {{our_company.name}} ***
+        </div>
+    </div>
+</body>
+</html>

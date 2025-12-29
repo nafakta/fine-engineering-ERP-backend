@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Loan Ledger - {{loan.loanId}}</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 20px;
+            font-size: 12px;
+            color: #222;
+            width: 100%;
+        }
+
+        .letterhead {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #333;
+            width: 100%;
+        }
+
+        .company-details {
+            flex: 1;
+            text-align: left;
+            font-size: 12px;
+            line-height: 1.6;
+            min-width: 0;
+            /* Prevents overflow */
+        }
+
+        .company-name {
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            word-wrap: break-word;
+        }
+
+        .logo-container {
+            flex-shrink: 0;
+            text-align: right;
+            margin-left: 30px;
+            display: flex;
+            align-items: center;
+            height: 60px;
+            max-width: 100px;
+        }
+
+        .letterhead-logo {
+            max-height: 60px;
+            max-width: 120px;
+            height: auto;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .document-title {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #333;
+            text-decoration: underline;
+            width: 100%;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            font-size: 11px;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .meta-row>div {
+            flex: 1;
+            min-width: 0;
+            /* Prevents flex item overflow */
+        }
+
+        .box {
+            border: 1px solid #ccc;
+            padding: 10px 12px;
+            margin-bottom: 0;
+            background-color: #f9f9f9;
+            height: 100%;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .box-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-size: 11px;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            flex-shrink: 0;
+        }
+
+        .box-content {
+            flex: 1;
+            min-height: 0;
+            /* ✅ make details show continuously (no separated blocks) */
+            display: block;
+        }
+
+        .box p {
+            margin: 4px 0;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            table-layout: fixed;
+        }
+
+        table thead {
+            background: #333;
+            color: white;
+        }
+
+        th,
+        td {
+            padding: 8px 6px;
+            border: 1px solid #ddd;
+            font-size: 11px;
+            word-wrap: break-word;
+        }
+
+        th {
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .footer-note {
+            margin-top: 20px;
+            font-size: 10px;
+            color: #666;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            width: 100%;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .parties-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .party-box {
+            flex: 1;
+            min-width: 0;
+            /* Prevents flex item overflow */
+        }
+
+        .party-box .box {
+            min-height: 200px;
+            /* Consistent height for party boxes */
+            height: auto;
+        }
+
+        .header-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 11px;
+            width: 100%;
+            gap: 20px;
+        }
+
+        .header-info-left,
+        .header-info-right {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .header-info-right {
+            text-align: right;
+        }
+
+        .highlight {
+            background-color: #f0f0f0;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .info-row {
+            display: flex;
+            padding: 2px 0;
+            width: 100%;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+            min-width: 100px;
+            flex-shrink: 0;
+        }
+
+        .info-value {
+            color: #222;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .reason-box {
+            margin-top: 8px;
+            padding: 8px;
+            background-color: #f0f8ff;
+            border-left: 3px solid #0066cc;
+            font-size: 11px;
+            line-height: 1.4;
+            width: 100%;
+        }
+
+        /* Ensure tables don't overflow */
+        td,
+        th {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Fixed column widths for table */
+        th:nth-child(1),
+        td:nth-child(1) {
+            width: 40px;
+        }
+
+        /* # */
+        th:nth-child(2),
+        td:nth-child(2) {
+            width: 90px;
+        }
+
+        /* Date */
+        th:nth-child(3),
+        td:nth-child(3) {
+            width: auto;
+        }
+
+        /* Description */
+        th:nth-child(4),
+        td:nth-child(4) {
+            width: 100px;
+        }
+
+        /* Amount */
+        th:nth-child(5),
+        td:nth-child(5) {
+            width: 120px;
+        }
+
+        /* Principal Portion */
+        th:nth-child(6),
+        td:nth-child(6) {
+            width: 120px;
+        }
+
+        /* Remaining Balance */
+
+        /* Responsive adjustments */
+        @media print {
+            body {
+                margin: 0;
+                padding: 10px;
+            }
+
+            .box {
+                page-break-inside: avoid;
+            }
+
+            table {
+                page-break-inside: auto;
+            }
+
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Letterhead Section -->
+    <div class="letterhead">
+        <div class="company-details">
+            <div class="company-name">{{our_company.name}}</div>
+            <div class="company-legal">{{our_company.legal_name}}</div>
+            <div class="company-address">{{our_company.address_line}}</div>
+            <div class="company-contact">
+                <p><strong>Phone:</strong> {{our_company.mobile_number}}</p>
+                <p><strong>Email:</strong> {{our_company.email_id}}</p>
+                <p><strong>Website:</strong> {{our_company.website}}</p>
+                <p><strong>GSTIN:</strong> {{our_company.tax_id}}</p>
+            </div>
+        </div>
+
+        <div class="logo-container">
+            {{#if logo}}
+            <img src="{{logo}}" alt="Company Logo" class="letterhead-logo" />
+            {{/if}}
+        </div>
+    </div>
+
+    <!-- Document Title -->
+    <div class="document-title">
+        Loan Ledger
+    </div>
+
+    <!-- Document Info -->
+    <div class="header-info">
+        <div class="header-info-left">
+            <p><strong>Loan ID:</strong> <span class="highlight">{{loan.loanId}}</span></p>
+            <p><strong>Loan Type:</strong> {{loan.loanTypeLabel}}</p>
+
+            {{#if loan.isLoanTaken}}
+            <p><strong>Nature:</strong> <span style="color: #8B0000;">(You are borrowing money)</span></p>
+            {{else}}
+            <p><strong>Nature:</strong> <span style="color: #006400;">(You are lending money)</span></p>
+            {{/if}}
+        </div>
+
+        <div class="header-info-right">
+            <p><strong>Printed On:</strong> {{printedOn}}</p>
+            <p><strong>Document No:</strong> LEDGER-{{loan.loanId}}</p>
+        </div>
+    </div>
+
+    <div class="meta-row">
+        <div>
+            <div class="box">
+                <div class="box-title">Loan Details</div>
+                <div class="box-content">
+                    <p><strong>Sanctioned Amount:</strong> {{loan.sanctionedAmount}}</p>
+                    <p><strong>Start Date:</strong> {{loan.startDate}}</p>
+                    <p><strong>End Date:</strong> {{loan.endDate}}</p>
+                    <p><strong>Status:</strong> {{loan.status}}</p>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="box">
+                <div class="box-title">Balance Summary</div>
+                <div class="box-content">
+                    <p><strong>Total Principal Paid:</strong> {{loan.totalPrincipalPaid}}</p>
+                    <p><strong>Remaining Balance:</strong> {{loan.remainingBalance}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Party Details -->
+    <div class="parties-container">
+
+        <!-- Lender Details -->
+        <div class="party-box">
+            <div class="box">
+                <div class="box-title">Lender Details</div>
+                <div class="box-content">
+                    <p><strong>Name:</strong> {{lenderParty.name}}</p>
+                    <p><strong>Bank:</strong> {{lenderParty.bank}}</p>
+                    <p><strong>Account No.:</strong> {{lenderParty.accountNumber}}</p>
+                    <p><strong>IFSC:</strong> {{lenderParty.ifsc}}</p>
+                    <p><strong>Branch:</strong> {{lenderParty.branch}}</p>
+                    {{#if lenderParty.mobile}}<p><strong>Mobile:</strong> {{lenderParty.mobile}}</p>{{/if}}
+
+                    {{!-- ✅ Loan Taken => extra fields must show in LENDER --}}
+                    {{#if loan.isLoanTaken}}
+                    {{#if lenderParty.job_position}}<p><strong>Job Position:</strong> {{lenderParty.job_position}}</p>
+                    {{/if}}
+                    {{#if lenderParty.aadhar_number}}<p><strong>Aadhar No.:</strong> {{lenderParty.aadhar_number}}</p>
+                    {{/if}}
+                    {{#if lenderParty.pan_number}}<p><strong>PAN No.:</strong> {{lenderParty.pan_number}}</p>{{/if}}
+                    {{#if lenderParty.reason}}<p><strong>Loan Purpose / Reason:</strong> {{lenderParty.reason}}</p>
+                    {{/if}}
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Borrower Details -->
+        <div class="party-box">
+            <div class="box">
+                <div class="box-title">Borrower Details</div>
+                <div class="box-content">
+                    <p><strong>Name:</strong> {{borrowerParty.name}}</p>
+                    <p><strong>Bank:</strong> {{borrowerParty.bank}}</p>
+                    <p><strong>Account No.:</strong> {{borrowerParty.accountNumber}}</p>
+                    <p><strong>IFSC:</strong> {{borrowerParty.ifsc}}</p>
+                    <p><strong>Branch:</strong> {{borrowerParty.branch}}</p>
+                    {{#if borrowerParty.mobile}}<p><strong>Mobile:</strong> {{borrowerParty.mobile}}</p>{{/if}}
+                    {{!-- ✅ Loan Given => extra fields must show in BORROWER --}}
+                    {{#if loan.isLoanGiven}}
+                    {{#if borrowerParty.job_position}}<p><strong>Job Position:</strong> {{borrowerParty.job_position}}
+                    </p>{{/if}}
+                    {{#if borrowerParty.aadhar_number}}<p><strong>Aadhar No.:</strong> {{borrowerParty.aadhar_number}}
+                    </p>{{/if}}
+                    {{#if borrowerParty.pan_number}}<p><strong>PAN No.:</strong> {{borrowerParty.pan_number}}</p>{{/if}}
+                    {{#if borrowerParty.reason}}<p><strong>Loan Purpose / Reason:</strong> {{borrowerParty.reason}}</p>
+                    {{/if}}
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction History -->
+    <div class="box">
+        <div class="box-title">Transaction History</div>
+        <div class="box-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th class="text-right">Amount</th>
+                        <th class="text-right">Principal Portion</th>
+                        <th class="text-right">Remaining Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#if rows.length}}
+                    {{#each rows}}
+                    <tr>
+                        <td>{{index}}</td>
+                        <td>{{date}}</td>
+                        <td>{{description}}</td>
+                        <td class="text-right">{{amount}}</td>
+                        <td class="text-right">{{principal}}</td>
+                        <td class="text-right">{{remaining}}</td>
+                    </tr>
+                    {{/each}}
+                    {{else}}
+                    <tr>
+                        <td colspan="6" class="text-center">No transactions found</td>
+                    </tr>
+                    {{/if}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        <p>This is a system-generated statement of loan payment activity. Please verify entries with your internal
+            records.</p>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>{{#if doc_title}}{{doc_title}}{{else}}Order Bill {{bill_number}}{{/if}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
+            color: #111111;
+            margin: 0;
+            padding: 0;
+            max-width: 800px;
+            font-size: 11px;
+        }
+
+        .wrap {
+            padding: 16px;
+            border: 2px solid black;
+            border-radius: 8px;
+        }
+
+        /* Header Styles */
+        .head-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .vertical-divider {
+            width: 2px;
+            height: 120px;
+            background: #000;
+            margin: 0 15px;
+        }
+
+        .logo {
+            max-width: 300px;
+            max-height: 150px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            padding-right: 60px;
+        }
+
+        .addr {
+            text-align: left;
+            font-size: 10px;
+            color: #111;
+            max-width: 400px;
+        }
+
+        .addr div+div {
+            margin-top: 3px;
+        }
+
+        /* Divider */
+        .rule {
+            height: 1px;
+            background: black;
+            margin: 12px 0;
+        }
+
+        /* Title */
+        h1 {
+            font-size: 14px;
+            font-weight: 700;
+            text-align: center;
+            text-transform: uppercase;
+            padding-bottom: 20px;
+        }
+
+        /* Details */
+        .quotation-details {
+            margin-top: 12px;
+            font-size: 11px;
+        }
+
+        .quotation-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .quotation-details td {
+            padding: 4px;
+        }
+
+        .quotation-details td strong {
+            font-weight: 700;
+        }
+
+        /* Address Section */
+        .address-section {
+            margin-top: 20px;
+            font-size: 11px;
+        }
+
+        .address-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .address-section td {
+            padding: 4px;
+        }
+
+        /* Items Table */
+        .item-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .item-table th,
+        .item-table td {
+            border: 1px solid #ddd;
+            padding: 7px;
+            text-align: left;
+        }
+
+        .item-table th {
+            background: #f5f5f5;
+            font-weight: 700;
+        }
+
+        /* Totals */
+        .total-section {
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: right;
+        }
+
+        .total-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .total-section td {
+            padding: 4px;
+        }
+
+        .total-section td strong {
+            font-weight: 700;
+        }
+
+        .total-section .grand-total {
+            background-color: #e9f2ff;
+            font-weight: 800;
+        }
+
+        /* Words */
+        .words {
+            margin-top: 10px;
+            padding: 8px;
+            font-weight: 600;
+            background-color: #e9f2ff;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .company_name {
+            font-size: 14px;
+        }
+
+        h4 {
+            padding-bottom: 0px;
+        }
+
+        .thanks {
+            padding-top: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .signature-section {
+            margin-top: 30px;
+            font-size: 11px;
+        }
+
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signature-table td {
+            padding-top: 40px;
+            text-align: center;
+            vertical-align: bottom;
+        }
+
+        .signature-label {
+            display: block;
+            margin-top: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .signature-line {
+            display: block;
+            border-top: 1px solid #000;
+            width: 70%;
+            margin: 0 auto;
+            padding-top: 2px;
+        }
+
+        /* Hide GST row when no tax */
+        .gst-row {
+            display: table-row;
+        }
+
+        .no-gst {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <!-- Header -->
+        <div class="head-row">
+            <div class="addr">
+                {{#if our_company.legal_name}}<h4><strong>{{our_company.legal_name}}</strong></h4>{{/if}}
+                {{#if our_company.address_line}}<div>{{our_company.address_line}}</div>{{/if}}
+                {{#if our_company.city_state}}<div>{{our_company.city_state}}</div>{{/if}}
+                {{#if our_company.mobile_number}}<div>{{our_company.mobile_number}}</div>{{/if}}
+                {{#if our_company.email_id}}<div>{{our_company.email_id}}</div>{{/if}}
+                {{#if our_company.website}}<div>{{our_company.website}}</div>{{/if}}
+                {{#if our_company.tax_id}}<div><strong>GSTIN: {{our_company.tax_id}}</strong></div>{{/if}}
+            </div>
+            <div class="vertical-divider"></div>
+            {{#if logo}}<img src="{{logo}}" alt="Company Logo" class="logo" />{{/if}}
+        </div>
+
+        <div class="rule"></div>
+
+        <!-- Title -->
+        <h1>{{#if doc_title}}{{doc_title}}{{else}}ORDER BILL{{/if}}</h1>
+
+        <!-- Bill Details -->
+        <div class="quotation-details">
+            <table>
+                <tr>
+                    <td><strong>Bill No:</strong></td>
+                    <td>{{bill_number}}</td>
+                    <td><strong>Bill Date:</strong></td>
+                    <td>{{formatDate bill_date}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Purchase Type:</strong></td>
+                    <td>{{#if po.purchase_type}}{{po.purchase_type}}{{else}}N/A{{/if}}</td>
+                    <td><strong>PO No:</strong></td>
+                    <td>{{#if po.po_number}}{{po.po_number}}{{else}}—{{/if}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Payment Status:</strong></td>
+                    <td>{{#if payment_status}}{{payment_status}}{{else}}N/A{{/if}}</td>
+                    <td><strong>Place of Supply:</strong></td>
+                    <td>{{place_of_supply}}</td>
+                </tr>
+                <tr>
+                    <td><strong>GST No:</strong></td>
+                    <td>{{#if vendor.gstin}}{{vendor.gstin}}{{else}}—{{/if}}</td>
+                    <td><strong>Contact Person:</strong></td>
+                    <td>{{#if po.creator_name}}{{po.creator_name}}{{else}}—{{/if}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Email ID:</strong></td>
+                    <td>{{#if vendor.email_id}}{{vendor.email_id}}{{else}}—{{/if}}</td>
+                    <td><strong>Mobile No:</strong></td>
+                    <td>{{#if vendor.mobile_number}}{{vendor.mobile_number}}{{else}}—{{/if}}</td>
+                </tr>
+                <tr>
+                    <td><strong>State:</strong></td>
+                    <td>{{#if vendor.state}}{{vendor.state}}{{else}}—{{/if}}</td>
+                    <td><strong>Issuing Site:</strong></td>
+                    <td>{{#if po.site_issue}}{{po.site_issue}}{{else}}—{{/if}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Address Section -->
+        <div class="address-section">
+            <table>
+                <tr style="background-color: #f0f8ff;">
+                    <td><strong>VENDOR:</strong></td>
+                    <td><strong>SHIPPING TO:</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>{{#if vendor.vendor}}{{vendor.vendor}}{{/if}}</strong></td>
+                    <td><strong>{{#if our_company.legal_name}}{{our_company.legal_name}}{{/if}}</strong></td>
+                </tr>
+                <tr>
+                    <td><strong>{{#if vendor.company}}{{vendor.company}}{{/if}}</strong></td>
+                    <td><strong>{{#if our_company.name}}{{our_company.name}}{{/if}}</strong></td>
+                </tr>
+                <tr>
+                    <td>{{#if vendor.address}}{{vendor.address}}{{/if}}</td>
+                    <td>{{#if delivery_address}}{{delivery_address}}{{/if}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Note:</strong></td>
+                    <td colspan="3">{{#if po.notes}}{{po.notes}}{{else}}—{{/if}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Items -->
+        <table class="item-table">
+            <thead>
+                <tr>
+                    <th>SR</th>
+                    <th>DESCRIPTION</th>
+                    <th>MAKE</th>
+                    <th>HSN CODE</th>
+                    <th>QTY</th>
+                    <th>UNIT</th>
+                    <th>PRICE</th>
+                    <th>GST (%)</th>
+                    <th>TOTAL</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#if items.length}}
+                {{#each items}}
+                <tr>
+                    <td>{{inc @index}}</td>
+                    <td>
+                        {{#if this.item}}
+                        <div style="font-weight: bold; margin-bottom: 2px;">{{this.item}}</div>
+                        {{#if this.description}}<div style="font-size: 10px; color: #262525; line-height: 1.2;">
+                            {{this.description}}
+                        </div>{{/if}}
+                        {{else}}
+                        {{this.description}}
+                        {{/if}}
+                    </td>
+                    <td>{{this.make}}</td>
+                    <td>{{this.hsn_sac}}</td>
+                    <td>{{formatQty this.qty}}</td>
+                    <td>{{this.unit}}</td>
+                    <td>{{formatCurrency this.rate}}</td>
+                    <td>
+                        {{#if this.gst_percent}}
+                        {{this.gst_percent}}
+                        {{else if ../default_gst_percent}}
+                        {{../default_gst_percent}}
+                        {{else}}—
+                        {{/if}}
+                    </td>
+                    <td>{{formatCurrency this.total}}</td>
+                </tr>
+                {{/each}}
+                {{else}}
+                <tr>
+                    <td colspan="9">No items found.</td>
+                </tr>
+                {{/if}}
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="total-section">
+            <table>
+                <!-- SUBTOTAL -->
+                <tr>
+                    <td><strong>SUB. TOTAL</strong></td>
+                    <td>
+                        {{#if totals.subtotal}}
+                        {{formatCurrency totals.subtotal}}
+                        {{else if sub_total}}
+                        {{formatCurrency sub_total}}
+                        {{else}}
+                        {{formatCurrency 0}}
+                        {{/if}}
+                    </td>
+                </tr>
+
+                <!-- TOTAL AMOUNT (taxable base / before GST) -->
+                <tr>
+                    <td><strong>TOTAL AMOUNT</strong></td>
+                    <td>
+                        {{#if totals.total_before_tax}}
+                        {{formatCurrency totals.total_before_tax}}
+                        {{else if totals.total_amount}}
+                        {{formatCurrency totals.total_amount}}
+                        {{else if total_amount}}
+                        {{formatCurrency total_amount}}
+                        {{else if totals.subtotal}}
+                        {{formatCurrency totals.subtotal}}
+                        {{else if sub_total}}
+                        {{formatCurrency sub_total}}
+                        {{else}}
+                        {{formatCurrency 0}}
+                        {{/if}}
+                    </td>
+                </tr>
+
+                <!-- GST BREAKDOWN: Only show if applyGST is true and tax > 0 -->
+                {{#if totals.applyGST}}
+                {{#if totals.tax}}
+                {{#if totals.same_state}}
+                <tr class="gst-row">
+                    <td>
+                        <strong>
+                            CGST
+                            {{#if totals.cgst_percent}}@{{totals.cgst_percent}}%{{else}}
+                            (part of @{{#if
+                            totals.gst_percent}}{{totals.gst_percent}}%{{else}}{{default_gst_percent}}%{{/if}})
+                            {{/if}}
+                        </strong>
+                    </td>
+                    <td>
+                        {{#if totals.cgst_amount}}
+                        {{formatCurrency totals.cgst_amount}}
+                        {{else}}
+                        {{formatCurrency 0}}
+                        {{/if}}
+                    </td>
+                </tr>
+                <tr class="gst-row">
+                    <td>
+                        <strong>
+                            SGST
+                            {{#if totals.sgst_percent}}@{{totals.sgst_percent}}%{{else}}
+                            (part of @{{#if
+                            totals.gst_percent}}{{totals.gst_percent}}%{{else}}{{default_gst_percent}}%{{/if}})
+                            {{/if}}
+                        </strong>
+                    </td>
+                    <td>
+                        {{#if totals.sgst_amount}}
+                        {{formatCurrency totals.sgst_amount}}
+                        {{else}}
+                        {{formatCurrency 0}}
+                        {{/if}}
+                    </td>
+                </tr>
+                {{else}}
+                <tr class="gst-row">
+                    <td>
+                        <strong>
+                            IGST
+                            {{#if totals.igst_percent}}@{{totals.igst_percent}}%{{else}}
+                            @{{#if totals.gst_percent}}{{totals.gst_percent}}{{else}}{{default_gst_percent}}{{/if}}%
+                            {{/if}}
+                        </strong>
+                    </td>
+                    <td>
+                        {{#if totals.igst_amount}}
+                        {{formatCurrency totals.igst_amount}}
+                        {{else if totals.tax}}
+                        {{formatCurrency totals.tax}}
+                        {{else if gst_amount}}
+                        {{formatCurrency gst_amount}}
+                        {{else}}
+                        {{formatCurrency 0}}
+                        {{/if}}
+                    </td>
+                </tr>
+                {{/if}}
+                {{/if}}
+                {{/if}}
+
+                <!-- GRAND TOTAL -->
+                <tr class="grand-total">
+                    <td><strong>GRAND TOTAL</strong></td>
+                    <td>
+                        {{#if totals.grand}}
+                        {{formatCurrency totals.grand}}
+                        {{else if grand_total}}
+                        {{formatCurrency grand_total}}
+                        {{else if totals.total_amount}}
+                        {{formatCurrency totals.total_amount}}
+                        {{else if total_amount}}
+                        {{formatCurrency total_amount}}
+                        {{else}}
+                        {{#if totals.subtotal}}
+                        {{#if totals.tax}}
+                        {{formatCurrency (add totals.subtotal totals.tax)}}
+                        {{else}}
+                        {{formatCurrency totals.subtotal}}
+                        {{/if}}
+                        {{else if sub_total}}
+                        {{formatCurrency sub_total}}
+                        {{else}}
+                        {{formatCurrency 0}}
+                        {{/if}}
+                        {{/if}}
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Words -->
+        <div class="words grand-total">
+            Amount in Words:
+            {{#if totals.amount_in_words}}
+            {{totals.amount_in_words}}
+            {{else if amount_in_words}}
+            {{amount_in_words}}
+            {{else}}
+            —
+            {{/if}}
+        </div>
+
+        <!-- Signatures -->
+        <div class="signature-section">
+            <table class="signature-table">
+                <tr>
+                    <td>
+                        <span class="signature-line"></span>
+                        <span class="signature-label">Created By</span>
+                    </td>
+                    <td>
+                        <span class="signature-line"></span>
+                        <span class="signature-label">Approved By</span>
+                    </td>
+                    <td>
+                        <span class="signature-line"></span>
+                        <span class="signature-label">Transfer By</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="thanks">
+            *** THANKS FOR YOUR VALUABLE BUSINESS WITH COMPRESS INDIA AIR CONDITIONING PRIVATE LIMITED ***
+        </div>
+    </div>
+</body>
+
+</html>

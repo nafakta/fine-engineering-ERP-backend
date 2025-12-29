@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{doc_title}}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            color: #000;
+            margin: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        /* Outer page box */
+        .page {
+            border: 1px solid #000;
+            padding: 5px;
+            margin: 10px;
+            background: #fff;
+        }
+
+        /* Header box (with vertical divider) */
+        .hdr-box {
+            padding: 10px;
+            position: relative;
+            border-bottom: 1px solid #1a1a1a;
+            /* Alternative: use this instead of the div line */
+        }
+
+        .hdr-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 0;
+        }
+
+        .hdr-left {
+            flex: 1;
+            padding-right: 12px;
+        }
+
+        .hdr-left b {
+            font-size: 13px;
+        }
+
+        .hdr-left div {
+            line-height: 1.3;
+        }
+
+        .hdr-divider {
+            width: 1px;
+            background: #1a1a1a;
+            margin: 0 15px;
+        }
+
+        .hdr-right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hdr-right img {
+            width: 230px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .gst-strip {
+            font-weight: bold;
+            font-size: 12px !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* Info 3-column table (hard borders) */
+        .info td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+            vertical-align: top;
+        }
+
+        .info td b {
+            text-transform: uppercase;
+        }
+
+        /* Quote/Ship section */
+        .qs {
+            margin-top: 6px;
+        }
+
+        .qs-head td {
+            background: #f5f5f5;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 8px;
+        }
+
+        .qs td {
+            padding: 8px;
+            vertical-align: top;
+        }
+
+        /* exact UI: no borders visible on qs */
+        .qs td,
+        .qs tr {
+            border: none !important;
+        }
+
+        /* Items (light gray borders) */
+        .items th,
+        .items td {
+            border: 1px solid #ccc !important;
+            padding: 6px 8px;
+        }
+
+        .items th {
+            font-weight: bold;
+            text-align: center;
+            background: #f5f5f5;
+        }
+
+        .ta-c {
+            text-align: center;
+        }
+
+        .ta-r {
+            text-align: right;
+        }
+
+        /* Bank + Totals split */
+        .bt-wrap {
+            display: grid;
+            grid-template-columns: 1fr 260px;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Bank table (hard borders) */
+        .bank td {
+            border: 1px solid #000;
+            padding: 6px 8px;
+        }
+
+        .bank td b {
+            text-transform: uppercase;
+        }
+
+        /* Totals table (hard borders, exact labels) */
+        .totals td {
+            border: 1px solid #000;
+            padding: 2px 2px;
+        }
+
+        .totals td:first-child {
+            width: 58%;
+        }
+
+        .totals .grand {
+            font-weight: bold;
+        }
+
+        /* Amount in words / Terms / Thanks (no borders) */
+        .words,
+        .terms,
+        .thanks {
+            border: none !important;
+        }
+
+        .words {
+            padding: 8px;
+            font-weight: bold;
+            text-transform: lowercase;
+        }
+
+        .terms {
+            padding: 10px 12px;
+        }
+
+        .terms b {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .terms ol {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .terms li {
+            margin: 3px 0;
+        }
+
+        .thanks {
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        /* Remove all visible borders for INFO, BANK, and TOTAL tables */
+        .info td,
+        .info tr,
+        .bank td,
+        .bank tr,
+        .totals td,
+        .totals tr {
+            border: none !important;
+        }
+
+        /* Signatures */
+        .signatures {
+            margin-top: 20px;
+        }
+
+        .signatures table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signatures td {
+            width: 50%;
+            padding: 10px;
+            vertical-align: top;
+        }
+
+        .signatures .label {
+            font-weight: 700;
+            align-items: flex-end;
+            display: grid;
+            justify-content: end;
+        }
+
+        .signatures .hint {
+            font-size: 9px;
+            color: #555;
+            font-style: italic;
+            padding-top: 60px;
+            display: grid;
+            justify-content: end;
+        }
+
+        /* GST breakdown styles */
+        .gst-breakdown {
+            padding: 4px;
+            margin: 2px 0;
+        }
+
+        .info td {
+            padding-bottom: 8px;
+            vertical-align: top;
+        }
+
+        .info b {
+            display: inline-block;
+            min-width: 140px;
+            /* Adjust as needed */
+            margin-right: 20px;
+            /* Space between label and data */
+        }
+
+        /* Or if you want to keep using &nbsp; */
+        .info b:after {
+            content: ":";
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+
+        <!-- Header -->
+        <!-- Header -->
+        <div class="hdr-box" style="border: none; padding-bottom: 5px; position: relative;">
+            <div class="hdr-row">
+                <div class="hdr-left">
+                    <h3> <strong>{{or our_company.legal_name "COMPRESS INDIA AIR CONDITIONING PRIVATE
+                            LIMITED."}}</strong></h3>
+                    <div>{{or our_company.address_line "Off no. 103, 1st Floor , Hi-Tech Commercial Complex, VB Nagar,
+                        Near SCLR Road, Kurla (west) Mumbai - 400070. Maharashtra (INDIA) Mumbai, Maharashtra
+                        "}}</div>
+                    <div>{{or our_company.phone "8655 0114 65 /9920 5299 61 / 9152 1571 14"}}</div>
+                    <div>{{or our_company.customer_email "sales.compressindia@gmail.com info@compressindia.com"}}</div>
+                    <div>
+                        <a>www.compressindia.com</a>
+                    </div>
+                    <div class="gst-strip">GST NUMBER : &nbsp; {{or our_company.tax_id "27AAKCC6103D1Z0"}}</div>
+                </div>
+
+                <div class="hdr-divider"></div>
+
+                <div class="hdr-right">
+                    <img src="{{logo}}" alt="Company Logo">
+                </div>
+            </div>
+            <!-- Bottom line -->
+            <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 1px; background: #1a1a1a;"></div>
+        </div>
+
+        <h2 class="text-center">{{or doc_title "TAX INVOICE"}}</h2>
+
+        <!-- 3-column info (exact labels)-->
+
+        <table class="info" style="margin-top:8px;">
+            <tr>
+                <td width="50%"><b>INVOICE NO</b> {{or pi_no invoice_number}}</td>
+                <td width="50%"><b>CONTACT PERSON</b> {{or customer.contact.person customer_name}}</td>
+            </tr>
+            <tr>
+                <td><b>INVOICE DATE</b> {{or quotation_date invoice_date}}</td>
+                <td><b>CONTACT NO</b> {{or customer.contact.phone customer_phone}}</td>
+            </tr>
+            <tr>
+                <td><b>TERMS</b> {{or terms_label "DUE ON RECEIPT."}}</td>
+                <td><b>EMAIL ID</b> {{or customer.contact.email customer_email}}</td>
+            </tr>
+            <tr>
+                <td><b>GST NO</b> {{or customer.gstin customer_gstin}}</td>
+                <td><b>DESIGNATION</b> {{or customer.contact.person_designation "MANAGER"}}</td>
+            </tr>
+            <tr>
+                <td><b>STATE</b> {{or customer_state shipping_state our_company.city_state}}</td>
+                <td><b>TRANSACTION</b> {{#if isInterState}}INTER-STATE{{else}}INTRA-STATE{{/if}}</td>
+            </tr>
+            <tr>
+                <td><b>PLACE OF SUPPLY</b>
+                    {{#if customer_city_state}}{{customer_city_state}}{{else}}{{or shipping.city_state
+                    shipping_city_state}}{{/if}}
+                </td>
+                <td><b>Service Type</b> {{service_type}}</td>
+            </tr>
+            <tr>
+                <td colspan="2"><b>Notes</b> {{notes}}</td>
+            </tr>
+        </table>
+
+        <!-- QUOTE TO / SHIPPING TO (no borders visible) -->
+        <table class="qs">
+            <tr class="qs-head">
+                <td><b>BILLING TO :</b></td>
+                <td><b>SHIPPING TO :</b></td>
+            </tr>
+            <tr>
+                <td>
+                    <b>{{or customer.company customer_company customer_name "-"}}</b><br />
+                    {{or customer.address customer_address "-"}}<br />
+                    {{#if customer_city_state}}{{customer_city_state}}<br />{{/if}}
+                </td>
+                <td>
+                    <b>{{or shipping.company customer.company customer_company "-"}}</b><br />
+                    {{or shipping.address shipping_address "-"}}<br />
+                    {{#if shipping_city_state}}{{shipping_city_state}}<br />{{/if}}
+                </td>
+            </tr>
+        </table>
+
+        <!-- Items with minimal styling -->
+        <table class="items" style="margin-top:6px; border: 1px solid #000;">
+            <thead>
+                <tr>
+                    <th style="width:36px; border-bottom: 2px solid #000;">SR.</th>
+                    <th style="border-bottom: 2px solid #000; width:30%;">DESCRIPTION</th>
+                    <th style="width:90px; border-bottom: 2px solid #000; width:8%;">HSN CODE</th>
+                    <th style="border-bottom: 2px solid #000; width:15%;">MAKE</th>
+                    <th style="width:60px; border-bottom: 2px solid #000;">QTY</th>
+                    <th style="width:60px; border-bottom: 2px solid #000;">UNIT</th>
+                    <th style="width:90px; border-bottom: 2px solid #000; width:5%;">RATE</th>
+                    <th style="width:100px; border-bottom: 2px solid #000; width:5%;">AMOUNT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each items}}
+                <tr>
+                    <td class="ta-c" style="border-bottom: 1px solid #eee;">{{inc @index}}</td>
+                    <td style="border-bottom: 1px solid #eee; width:30%;">
+                        {{#if item_name}}
+                        <div style="font-weight: bold; margin-bottom: 2px;">{{item_name}}</div>
+                        {{#if description}}<div style="font-size: 11px; color: #262525; line-height: 1.2;">
+                            {{description}}
+                        </div>{{/if}}
+                        {{else}}
+                        {{description}}
+                        {{/if}}
+                    </td>
+                    <td class="ta-c" style="border-bottom: 1px solid #eee;">{{or hsn_sac hsn "-"}}</td>
+                    <td class="ta-c" style="border-bottom: 1px solid #eee;">{{or make ""}}</td>
+                    <td class="ta-c" style="border-bottom: 1px solid #eee;">{{formatQty (or qty quantity 0)}}</td>
+                    <td class="ta-c" style="border-bottom: 1px solid #eee;">{{or unit "NOS"}}</td>
+                    <td class="ta-r" style="border-bottom: 1px solid #eee;">{{formatINR (or rate price 0)}}</td>
+                    <td class="ta-r" style="border-bottom: 1px solid #eee;">{{formatINR (or line_total total 0)}}</td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+
+        <!-- Bank (left) + Totals (right) — EXACT LABELS -->
+        <div class="bt-wrap">
+            <table class="bank">
+                <tr style="background: #f5f5f5;">
+                    <th colspan="2" style="text-transform: uppercase; padding: 10px;">Bank
+                        Account Details</th>
+                </tr>
+                <tr>
+                    <td><b>ACCOUNT NAME :</b></td>
+                    <td>COMPRESS INDIA AIR CONDITIONING PVT. LTD</td>
+                </tr>
+                <tr>
+                    <td><b>ACCOUNT NUMBER :</b></td>
+                    <td>50200081751743</td>
+                </tr>
+                <tr>
+                    <td><b>BANK NAME :</b></td>
+                    <td>HDFC BANK LIMITED</td>
+                </tr>
+                <tr>
+                    <td><b>IFSC / NEFT / RTGS :</b></td>
+                    <td>HDFC0007811</td>
+                </tr>
+                <tr>
+                    <td><b>BRANCH ADDRESS :</b></td>
+                    <td>NEELKANTH IT PARK, VIDYAVIHAR, MUMBAI - 400071.</td>
+                </tr>
+            </table>
+
+            <table class="totals">
+                <tr>
+                    <td class="ta-r"><b>SUB. TOTAL :</b></td>
+                    <td class="ta-r">{{formatINR sub_total}}</td>
+                </tr>
+
+                {{#if discount_amount}}
+                <tr class="discount-row">
+                    <td class="ta-r"><b>DISCOUNT ({{discount_label}}) :</b></td>
+                    <td class="ta-r">{{formatINR discount_amount}}</td>
+                </tr>
+                {{/if}}
+
+                <tr>
+                    <td class="ta-r"><b>TOTAL :</b></td>
+                    <td class="ta-r">{{formatINR (subtract sub_total discount_amount)}}</td>
+                </tr>
+
+                <!-- GST BREAKDOWN - CORRECTED LOGIC -->
+                {{#if isInterState}}
+                <!-- Inter-State: Show IGST -->
+                {{#if igst_amount}}
+                <tr class="gst-breakdown">
+                    <td class="ta-r"><b>IGST @{{igst_percent}}% :</b></td>
+                    <td class="ta-r">{{formatINR igst_amount}}</td>
+                </tr>
+                {{/if}}
+                {{else}}
+                <!-- Intra-State: Show CGST + SGST -->
+                {{#if cgst_amount}}
+                <tr class="gst-breakdown">
+                    <td class="ta-r"><b>CGST @{{cgst_percent}}% :</b></td>
+                    <td class="ta-r">{{formatINR cgst_amount}}</td>
+                </tr>
+                {{/if}}
+                {{#if sgst_amount}}
+                <tr class="gst-breakdown">
+                    <td class="ta-r"><b>SGST @{{sgst_percent}}% :</b></td>
+                    <td class="ta-r">{{formatINR sgst_amount}}</td>
+                </tr>
+                {{/if}}
+                {{/if}}
+
+                <!-- TDS BREAKDOWN (Only show if TDS is applicable) -->
+                {{#if tds_applicable}}
+                {{#if tds_amount}}
+                <tr class="tds-breakdown">
+                    <td class="ta-r"><b style="color: #28a745;">TDS @{{tds_percent}}% :</b></td>
+                    <td class="ta-r"><b style="color: #28a745;">{{formatINR tds_amount}}</td>
+                </tr>
+                {{/if}}
+                {{/if}}
+
+                <tr class="grand">
+                    <td class="ta-r"><b>GRAND TOTAL :</b></td>
+                    <td class="ta-r"><b>{{formatINR grand_total}}</b></td>
+                </tr>
+
+                <!-- NET AMOUNT AFTER TDS (Only show if TDS is applicable) -->
+                {{#if tds_applicable}}
+                {{#if net_amount_credited}}
+                <tr class="net-after-tds" style="background-color: #f8f9fa;">
+                    <td class="ta-r"><b style="color: #28a745;">NET AMOUNT (After TDS) :</b></td>
+                    <td class="ta-r"><b style="color: #28a745;">{{formatINR net_amount_credited}}</b></td>
+                </tr>
+                {{/if}}
+                {{/if}}
+            </table>
+        </div>
+
+        <!-- Amount in words (lowercase per UI) -->
+        <table style="width: 100%; border: none; margin-top: 10px; background: #f0f8ff; font-size: 12px;">
+            <tr>
+                <td style="border: none; padding: 8px; vertical-align: top; width: 120px;">
+                    <b>Amount in Words:</b>
+                </td>
+                <td style="border: none; padding: 8px; font-weight: bold; text-transform: lowercase; text-align: left;">
+                    {{amount_in_words}}
+                </td>
+            </tr>
+        </table>
+
+        <!-- Signature Section -->
+        <div class="signatures">
+            <table>
+                <tr>
+                    <td>
+                        <span class="label">{{or our_company.legal_name "COMPRESS INDIA PRIVATE
+                            LIMITED"}}:</span>
+                        <div class="hint">Authorised Signatory / Company Seal</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="terms">
+            <b>Declaration :</b>
+            <p>
+                We declare that this invoice shows the actual price of goods described & that all particulars are true
+                and correct. As materials are received by us,
+                we are the trusty of the said property, till the consideration is not paid by the bill amount.
+                Misappropriation of the property & diversion of money is illegal &
+                subjected to mumbai jurisdiction
+            </p>
+        </div>
+        <!-- Thanks (exact line) -->
+        <div class="thanks">*** THANKS FOR YOUR VALUABLE BUSINESS WITH {{or our_company.legal_name "COMPRESS INDIA AIR
+            CONDITIONING PRIVATE LIMITED"}} ***</div>
+    </div>
+</body>
+
+</html>

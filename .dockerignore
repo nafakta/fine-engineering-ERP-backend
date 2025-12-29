@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+npm-debug.log
+
+# Env
+.env
+.env.*
+
+# Logs
+logs
+*.log
+
+# Runtime data
+uploads/*
+public/uploads/*
+public/reports/*
+
+# Local build output
+dist
+
+# OS / Editor
+.DS_Store
+.vscode
+.idea
+
+# Docs / compose
+README.md
+docker-compose.yml

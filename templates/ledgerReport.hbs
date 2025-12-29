@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>{{doc_title}}</title>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+            padding: 20px;
+        }
+
+        /* Header styles */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #333;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .header .subtitle {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        /* Company header */
+        .company-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+
+        .company-logo {
+            height: 115px;
+        }
+
+        .company-info {
+            text-align: left;
+            line-height: 1.6;
+        }
+
+        /* Client info */
+        .client-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .client-info h2 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: auto 1fr auto 1fr;
+            gap: 10px 20px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* Transactions table */
+        .transactions-section {
+            margin: 20px 0;
+        }
+
+        .transactions-section h2 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0 20px 0;
+            font-size: 11px;
+        }
+
+        th {
+            background: #34495e;
+            color: white;
+            font-weight: bold;
+            padding: 10px 8px;
+            text-align: left;
+            border: 1px solid #2c3e50;
+        }
+
+        td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        /* Amount formatting */
+        .debit {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .credit {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .balance {
+            color: #2980b9;
+            font-weight: bold;
+        }
+
+        /* Totals row */
+        .totals-row {
+            background: #2c3e50 !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        .totals-row td {
+            border-color: #2c3e50;
+        }
+
+        /* Summary section */
+        .summary {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .summary h2 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .summary-total-debit {
+            color: #e74c3c;
+        }
+
+        .summary-total-credit {
+            color: #27ae60;
+        }
+
+        .summary-closing {
+            color: #2980b9;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 10px;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                padding: 0;
+            }
+
+            .header {
+                border-bottom-color: #000;
+            }
+
+            th {
+                background: #000 !important;
+                color: white !important;
+            }
+
+            .totals-row {
+                background: #000 !important;
+                color: white !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Company Header -->
+    <div class="company-header">
+        <div class="company-info">
+            <div>Office no. 103 , 1st Floor , Hi Tech Commercial Complex , V.B Nagar , Kurla west , Mumbai 400070 ,
+                Maharashtra ( INDIA )</div>
+            <div>Phone : +91 7208219016 +91 9920529961 </div>
+            <div>Email : info@compressindia.com </div>
+            <div>Website : compressindia.com</div>
+            <div>GSTIN: 72AAKCC6103D1Z0</div>
+        </div>
+        <div>
+            <img src="{{logo}}" alt="Compress India Logo" class="company-logo" />
+        </div>
+    </div>
+
+    <!-- Report Header -->
+    <div class="header">
+        <h1>{{doc_title}}</h1>
+        <div class="subtitle">Generated on {{formatDate (now)}}</div>
+    </div>
+
+    <!-- Client Information -->
+    <div class="client-info">
+        <h2>Client Information</h2>
+        <div class="info-grid">
+            <div class="info-label">Company:</div>
+            <div>{{or company_name "N/A"}}</div>
+            <div class="info-label">Client Name:</div>
+            <div>{{or client_name "N/A"}}</div>
+            <div class="info-label">Mobile Number:</div>
+            <div>{{or mobile "N/A"}}</div>
+            <div class="info-label">Email ID:</div>
+            <div>{{or email "N/A"}}</div>
+
+            <div class="info-label">GSTIN:</div>
+            <div>{{or gstin "N/A"}}</div>
+            <div class="info-label">Address:</div>
+            <div>{{or address "N/A"}}</div>
+
+            <div class="info-label">Report Period:</div>
+            <div>
+                {{#if filters.start_date}}{{formatDate filters.start_date}}{{else}}Start{{/if}}
+                to
+                {{#if filters.end_date}}{{formatDate filters.end_date}}{{else}}End{{/if}}
+            </div>
+        </div>
+    </div>
+
+    <!-- Transactions -->
+    <div class="transactions-section">
+        <h2>Transaction Details</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th width="40">Sr.</th>
+                    <th width="80">Date</th>
+                    <th width="80">Type</th>
+                    <th width="100">Reference No.</th>
+                    <th width="100" class="text-right">Amount</th>
+                    <th width="100" class="text-right">Payment</th>
+                    <th width="100" class="text-right">Running Balance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each transactions}}
+                <tr>
+                    <td class="text-center">{{inc @index}}</td>
+                    <td>{{formatDate date}}</td>
+                    <td>{{transaction}}</td>
+                    <td>{{ref_no}}</td>
+                    <td class="text-right debit">{{#if amount}}{{formatINR amount}}{{else}}-{{/if}}</td>
+                    <td class="text-right credit">{{#if payment}}{{formatINR payment}}{{else}}-{{/if}}</td>
+                    <td class="text-right balance">{{formatINR running_balance}}</td>
+                </tr>
+                {{/each}}
+                <!-- Totals Row -->
+                <tr class="totals-row">
+                    <td colspan="4" class="text-center"><strong>GRAND TOTALS</strong></td>
+                    <td class="text-right"><strong>{{formatINR totals.totalAmount}}</strong></td>
+                    <td class="text-right"><strong>{{formatINR totals.totalPayment}}</strong></td>
+                    <td class="text-right"><strong>{{formatINR totals.totalBalance}}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary">
+        <h2>Summary</h2>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <div class="summary-label">Total Amount</div>
+                <div class="summary-value summary-total-debit">{{formatINR totals.totalAmount}}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Payment Recived</div>
+                <div class="summary-value summary-total-credit">{{formatINR totals.totalPayment}}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Out Standing Payment</div>
+                <div class="summary-value summary-closing">{{formatINR totals.totalBalance}}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>{{footer_note}}</p>
+        <p>Page generated on {{formatDate (now)}}</p>
+    </div>
+
+    <script>
+        // Add current date helper for Handlebars
+        Handlebars.registerHelper('now', () => new Date());
+    </script>
+</body>
+
+</html>
