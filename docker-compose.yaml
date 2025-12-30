@@ -11,7 +11,7 @@ services:
     ports:
       - "5436:5432"
     volumes:
-      - fine_erp_pgdata:/var/lib/postgresql/data
+      - compress_pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -51,4 +51,4 @@ services:
       - ./config:/usr/src/app/config
 
 volumes:
-  fine_erp_pgdata:
+  compress_pgdata:
