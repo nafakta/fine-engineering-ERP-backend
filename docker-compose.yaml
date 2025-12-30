@@ -6,7 +6,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "019427"
+      POSTGRES_PASSWORD: "Shams@19427"
       POSTGRES_DB: "fine_erp"
     ports:
       - "5436:5432"
@@ -33,14 +33,14 @@ services:
       PGHOST_WRITER: db
       PGPORT_WRITER: 5432
       PGUSER_WRITER: postgres
-      PGPASSWORD_WRITER: "019427"
+      PGPASSWORD_WRITER: Shams@19427
       PGDATABASE_WRITER: fine_erp
 
       # Reader DB config
       PGHOST_READER: db
       PGPORT_READER: 5432
       PGUSER_READER: postgres
-      PGPASSWORD_READER: "019427"
+      PGPASSWORD_READER: Shams@19427
       PGDATABASE_READER: fine_erp
 
     depends_on:
