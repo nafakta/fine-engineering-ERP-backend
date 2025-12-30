@@ -11,7 +11,7 @@ services:
     ports:
       - "5436:5432"
     volumes:
-      - fine_erp_pgdata:/var/lib/postgresql/data
+      - compress_pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -33,14 +33,14 @@ services:
       PGHOST_WRITER: db
       PGPORT_WRITER: 5432
       PGUSER_WRITER: postgres
-      PGPASSWORD_WRITER: "Shams@19427"
+      PGPASSWORD_WRITER: Shams@19427
       PGDATABASE_WRITER: postgres
 
       # Reader DB config
       PGHOST_READER: db
       PGPORT_READER: 5432
       PGUSER_READER: postgres
-      PGPASSWORD_READER: "Shams@19427"
+      PGPASSWORD_READER: Shams@19427
       PGDATABASE_READER: postgres
 
     depends_on:
@@ -51,4 +51,4 @@ services:
       - ./config:/usr/src/app/config
 
 volumes:
-  fine_erp_pgdata:
+  compress_pgdata:
