@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "Shams@19427"
-      POSTGRES_DB: "fine_erp"
+      POSTGRES_DB: "postgres"
     ports:
       - "5436:5432"
     volumes:
@@ -34,14 +34,14 @@ services:
       PGPORT_WRITER: 5432
       PGUSER_WRITER: postgres
       PGPASSWORD_WRITER: Shams@19427
-      PGDATABASE_WRITER: fine_erp
+      PGDATABASE_WRITER: postgres
 
       # Reader DB config
       PGHOST_READER: db
       PGPORT_READER: 5432
       PGUSER_READER: postgres
       PGPASSWORD_READER: Shams@19427
-      PGDATABASE_READER: fine_erp
+      PGDATABASE_READER: postgres
 
     depends_on:
       db:
