@@ -6,8 +6,8 @@ services:
     restart: always
     environment:
       POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "Danish@321"
-      POSTGRES_DB: "postgres"
+      POSTGRES_PASSWORD: "019427"
+      POSTGRES_DB: "fine_erp"
     ports:
       - "5436:5432"
     volumes:
@@ -24,7 +24,7 @@ services:
       - "8001:8001"
     environment:
       NODE_ENV: production
-      GYMMATEAPIGATEWAY_PORT: 8001
+      FINE_ENGINEERING_PORT: 8001
 
       # --- Add your application secrets here ---
       JWT_SECRET: ""
@@ -33,15 +33,15 @@ services:
       PGHOST_WRITER: db
       PGPORT_WRITER: 5432
       PGUSER_WRITER: postgres
-      PGPASSWORD_WRITER: Danish@321
-      PGDATABASE_WRITER: postgres
+      PGPASSWORD_WRITER: 019427
+      PGDATABASE_WRITER: fine_erp
 
       # Reader DB config
       PGHOST_READER: db
       PGPORT_READER: 5432
       PGUSER_READER: postgres
-      PGPASSWORD_READER: Danish@321
-      PGDATABASE_READER: postgres
+      PGPASSWORD_READER: 019427
+      PGDATABASE_READER: fine_erp
 
     depends_on:
       db:
