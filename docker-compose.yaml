@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "019427"
-      POSTGRES_DB: "postgres"
+      POSTGRES_DB: "fine_erp"
     ports:
       - "5436:5432"
     volumes:
