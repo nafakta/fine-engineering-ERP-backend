@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import { SystemuserRouter } from "./routes";
+import { SystemuserRouter2 } from "./routes";
 import * as Sentry from "@sentry/node";
 import cors from "cors";
 import path from "path";
@@ -14,12 +15,10 @@ import "./database/sync";
 
 // ---- App Init ----
 const app: Express = express();
+const port = Number(process.env.FINE_ENGINEERING_PORT) || 3000;
+const localIp = "192.168.1.9";
 
-// ✅ FIXED PORT LOGIC
-const port =
-  Number(process.env.GYMMATEAPIGATEWAY_PORT) ||
-  Number(process.env.COMPRESS_CRM_PORT) ||
-  3000;
+
 
 // ---- Sentry ----
 Sentry.init({
@@ -95,6 +94,7 @@ app.get("/debug-file/:ticketId/:filename", (req: Request, res: Response) => {
 
 // ---- Routes ----
 app.use("/api/v1/compresscrmbackend", SystemuserRouter);
+app.use("/api/v1/fineengg_erp", SystemuserRouter2);
 
 // ---- Root ----
 app.get("/", (_req, res) => {

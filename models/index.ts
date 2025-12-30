@@ -52,6 +52,9 @@ import { initHvacErpServiceReportModel } from "./hvac_erp_service_report";
 import { initDepartmentModel } from "./Department";
 import { initUserDepartmentModel } from "./UserDepartment";
 import { initExpensePaymentModel } from './ExpensePayment';
+import initCategoryModel from "./Category";
+import { initJobModel } from "./Job";
+import { initPendingMaterialModel } from "./PendingMaterial";
 
 // AMC Contract models
 import { AmcContract } from "./AmcContract";
@@ -93,6 +96,10 @@ const dbModels: any = {
   TicketERP: initTicketerpModel(sequelize),
   TicketFollowup: initTicketFollowupModel(sequelize),
   TicketMedia: initTicketMediaModel(sequelize),
+
+  Category: initCategoryModel(sequelize),
+  Job: initJobModel(sequelize),
+  PendingMaterial: initPendingMaterialModel(sequelize),
 
   Loan: initLoanModel(sequelize),
   LoanTransaction: initLoanTransactionModel(sequelize),
@@ -178,6 +185,34 @@ dbModels.Role.belongsToMany(dbModels.SystemUser, {
   foreignKey: "role_id",
   otherKey: "system_user_id",
   as: "users",
+});
+
+// ==================== JOB & CATEGORY ASSOCIATIONS ====================
+// A Job (if it's a JOB_SERVICE) can belong to a Category via job_no
+// IMPORTANT: This assumes `job_no` is a UNIQUE key in the `category` table.
+dbModels.Job.belongsTo(dbModels.Category, {
+  foreignKey: "job_no",
+  targetKey: "job_no", // The column in Category to match against
+  as: "categoryDetails",
+});
+
+// A Category can have many Jobs associated with it via job_no
+dbModels.Category.hasMany(dbModels.Job, {
+  foreignKey: "job_no",
+  sourceKey: "job_no", // The column in Category to use for the join
+  as: "jobs",
+});
+
+dbModels.PendingMaterial.belongsTo(dbModels.Category, {
+  foreignKey: "job_no",
+  targetKey: "job_no",
+  as: "category",
+});
+
+dbModels.Category.hasMany(dbModels.PendingMaterial, {
+  foreignKey: "job_no",
+  sourceKey: "job_no",
+  as: "pendingMaterials",
 });
 
 dbModels.SystemUser.hasMany(dbModels.SystemUserSecret, {
@@ -1062,6 +1097,9 @@ export const {
   OrderBill,
   VendorBillPayment,
   VendorPaymentClearance,
+  Category,
+  Job,
+  PendingMaterial,
   // Add other models you need
 } = dbModels;
 export const { sequelize: sequelizeWriterBound } = dbModels;
