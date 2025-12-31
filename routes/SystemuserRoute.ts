@@ -138,17 +138,6 @@ import {
 import RoleController from "../controllers/RoleController";
 import PermissionAssignmentController from "../controllers/PermissionAssignmentController";
 import PermissionController from "../controllers/PermissionController";
-import {
-  makePayment,
-  getPayments,
-  getPaymentById,
-  getExpensePayments,
-  reversePayment,
-  checkExpensePaymentStatus,
-  getDepartmentPaymentSummary,
-  getPaymentsWithDepartmentFilter,
-  getExpenseDetailsWithMedia,
-} from "../controllers/payment.controller";
 import { vendorPaymentClearanceController } from '../controllers/vendorPaymentClearance.controller';
 
 const SystemUserRouter = express.Router();
@@ -936,22 +925,7 @@ SystemUserRouter.get("/role-permissions/:role_id/all", permissionAssignmentContr
 SystemUserRouter.get("/permissions", permissionController.getAllPermissions);
 SystemUserRouter.get('/role-permissions/:role_id/by-module', permissionAssignmentController.getPermissionsByModuleForRole);
 
-/* ==================== EXPENSE PAYMENTS ROUTES ==================== */
-SystemUserRouter.post("/payments/make", requireAuth, makePayment);
-SystemUserRouter.get("/payments", getPayments);
-SystemUserRouter.get("/payments/department-filter", getPaymentsWithDepartmentFilter);
-SystemUserRouter.get("/payments/department/summary", getDepartmentPaymentSummary);
-SystemUserRouter.get("/payments/department/filter", getPaymentsWithDepartmentFilter);
-SystemUserRouter.get("/expenses/:expense_id/payments", getExpensePayments);
-SystemUserRouter.post("/payments/:id/reverse", requireAuth, reversePayment);
-SystemUserRouter.get("/expenses/:expense_id/payment-status", checkExpensePaymentStatus);
-// Legacy route with dash (keep for backward compatibility)
-SystemUserRouter.get("/payments/department-summary", getDepartmentPaymentSummary);
-SystemUserRouter.get("/payments/:id", getPaymentById);
-SystemUserRouter.get(
-  "/expenses/:expense_id/details",
-  getExpenseDetailsWithMedia
-);
+
 // SystemUserRouter.get('/getallpaymentclearances', vendorPaymentClearanceController.getPaymentClearances);
 // SystemUserRouter.get('/getpaymentclearance/:id', vendorPaymentClearanceController.getPaymentClearanceById);
 // SystemUserRouter.post('/createpaymentclearance', vendorPaymentClearanceController.createPaymentClearance);
