@@ -41,13 +41,6 @@ import {
 } from "../controllers/transferController";
 
 import {
-  createExpense, getExpenses, viewExpenses, viewExpense,
-  searchExpensesByForm, updateExpense, getPaymentsForExpense, createExpensePaymentEntry, updatePaymentWithAmount,
-  getCurrentUser,
-  getUserById,
-} from "../controllers/expenseController";
-
-import {
   createVendor, getVendors, deleteVendor, updateVendor,
   searchVendors, getVendorById,
 } from "../controllers/vendorcontroller";
@@ -142,7 +135,6 @@ import {
   previewHvacServiceReportHtml,
   hvacServiceReportWorkflow
 } from "../controllers/hvacServiceReportController";
-import DepartmentController from "../controllers/DepartmentController";
 import RoleController from "../controllers/RoleController";
 import PermissionAssignmentController from "../controllers/PermissionAssignmentController";
 import PermissionController from "../controllers/PermissionController";
@@ -169,7 +161,6 @@ const loanTakenController = new LoanTakenController();
 const loanGivenController = new LoanGivenController();
 const loanTransactionController = new LoanTransactionController();
 const quotationController = new QuotationController();
-const departmentController = new DepartmentController(sequelize);
 const roleController = new RoleController(sequelize);
 const permissionAssignmentController = new PermissionAssignmentController(sequelize);
 const permissionController = new PermissionController(sequelize);
@@ -317,9 +308,6 @@ SystemUserRouter.get("/getallusername", systemUserController.getAllUserNamesAndU
 SystemUserRouter.post("/filteruseractivites", systemUserController.filterUserActivities);
 SystemUserRouter.get("/getalldeleteduser", systemUserController.getAllDeletedUsers);
 
-SystemUserRouter.get("/users/:id", requireAuth, getUserById);
-SystemUserRouter.get("/users/me", requireAuth, getCurrentUser);
-
 /* ----------------------------- BANK ------------------------------- */
 SystemUserRouter.get("/getallaccounts", getAllAccounts);
 SystemUserRouter.post("/createaccount", createAccount);
@@ -337,26 +325,6 @@ SystemUserRouter.get("/listtransfers", listTransfers);
 SystemUserRouter.get("/latesttransfer", latestTransfer);
 SystemUserRouter.post("/createtransferservice", createtransferservice);
 
-/* ----------------------------- EXPENSE ---------------------------- */
-SystemUserRouter.post("/createexpense", createExpense);
-SystemUserRouter.get("/getexpenses", getExpenses);
-SystemUserRouter.get("/expenses/view", viewExpenses);
-SystemUserRouter.get("/expenses/view/:id", viewExpense);
-SystemUserRouter.get("/expenses/search", searchExpensesByForm);
-SystemUserRouter.post(
-  ["/update/expense/:id", "/expenses/update/:id"],
-  upload.array("media[]", 50),
-  updateExpense
-);
-//SystemUserRouter.post('/expenses/payment', requireAuth, createExpensePaymentEntry);
-SystemUserRouter.post(
-  '/expenses/:expense_id/payments',
-  requireAuth,
-  createExpensePaymentEntry
-);
-SystemUserRouter.get('/expenses/:id/payments', getPaymentsForExpense);
-SystemUserRouter.get('/expenses/:expense_id/payments', getPaymentsForExpense);
-SystemUserRouter.patch('/payments/:id', updatePaymentWithAmount);
 
 /* ----------------------------- VENDORS ---------------------------- */
 SystemUserRouter.post("/createvendor", createVendor);
@@ -954,11 +922,6 @@ SystemUserRouter.get('/hvac-tickets/:ticketId/status-eligibility', checkHVACTick
 SystemUserRouter.post('/hvac-tickets/:ticketId/status', updateHVACTicketStatus);
 SystemUserRouter.get('/hvac-tickets/:ticketId/media-count', getHVACTicketMediaCount);
 
-SystemUserRouter.post("/departments", departmentController.createDepartment);
-SystemUserRouter.get("/departments", departmentController.getDepartments);
-SystemUserRouter.get("/departments/:id", departmentController.getDepartmentById);
-SystemUserRouter.put("/departments/:id", departmentController.updateDepartment);
-SystemUserRouter.delete("/departments/:id", departmentController.deleteDepartment);
 
 /* ------------------------------ ROLES ------------------------------ */
 SystemUserRouter.post("/roles", roleController.createRole);
