@@ -1,29 +1,36 @@
-import { Sequelize, DataTypes, Model } from 'sequelize';
+// src/models/Permission.ts
+import { Sequelize, DataTypes, Model } from "sequelize";
 
-export class Permission extends Model { }
+export class Permission extends Model {}
 
 export const initPermissionModel = (sequelize: Sequelize) => {
-  Permission.init({
-    id: {
-      type: DataTypes.UUID,
-      primaryKey: true,
-      autoIncrement: true,
+  Permission.init(
+    {
+      id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4, // ✅ correct for UUID PK
+      },
+      name: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        unique: true,
+      },
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
     },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-  }, {
-    sequelize,
-    modelName: 'Permission',
-    tableName: 'permissions',
-    timestamps: false,
-  });
+    {
+      sequelize,
+      modelName: "Permission",
+      tableName: "permissions",
+      schema: "public",
+      timestamps: true,     // ✅ needed because seed inserts created_at/updated_at
+      underscored: true,    // ✅ created_at / updated_at
+    }
+  );
 
   return Permission;
 };

@@ -7,16 +7,33 @@ async function syncDatabase() {
   try {
     console.log("🚀 Starting database sync process...");
 
-    // Initialize writer/reader + extensions
+    // 1) Init writer/reader connections (your DBService)
     await db.init();
     console.log("✅ Database service initialized");
 
-    // Validate models against existing tables
+    // 2) Sync tables
     const isProduction = process.env.NODE_ENV === "production";
-    await sequelize.sync({ force: false, alter: !isProduction });
+
+    /**
+     * ✅ IMPORTANT:
+     * - In DEV: alter=true (keeps schema in sync automatically)
+     * - In PROD: alter=false by default (safe)
+     * - If you WANT schema changes in prod, set DB_SYNC_ALTER=true
+     */
+    const allowAlter = process.env.DB_SYNC_ALTER === "true";
+    const alter = isProduction ? allowAlter : true;
+
+    console.log("🔧 Sequelize.sync config:", {
+      NODE_ENV: process.env.NODE_ENV,
+      isProduction,
+      force: false,
+      alter,
+    });
+
+    await sequelize.sync({ force: false, alter });
     console.log("✅ Model sync complete");
 
-    // Seed roles, permissions, role_permissions
+    // 3) Seed initial RBAC data
     await seedInitialData();
     console.log("✅ Seeding complete");
 
@@ -42,10 +59,14 @@ async function seedInitialData() {
     const VIEWER_ROLE_ID = "22222222-2222-2222-2222-222222222222";
 
     // Enable UUID extension if not exists (for PostgreSQL)
-    await sequelize.query(
-      `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`,
-      { transaction }
-    );
+    await sequelize.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`, {
+      transaction,
+    });
+
+    // (Optional) pgcrypto for gen_random_uuid if you ever use it
+    await sequelize.query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`, {
+      transaction,
+    });
 
     // Create or update Admin role
     await sequelize.query(
@@ -64,7 +85,7 @@ async function seedInitialData() {
           name: "Admin",
           level: 1,
         },
-        transaction
+        transaction,
       }
     );
 
@@ -532,10 +553,12 @@ async function seedInitialData() {
 
     console.log(`📊 Seeding ${PERMISSIONS.length} permissions...`);
 
-    // Batch insert permissions for better performance
-    const permissionValues = PERMISSIONS.map(p =>
-      `('${p.id}', '${p.name.replace(/'/g, "''")}', '${p.description.replace(/'/g, "''")}', NOW(), NOW())`
-    ).join(',');
+    // Batch insert permissions
+    const permissionValues = PERMISSIONS.map((p) => {
+      const name = p.name.replace(/'/g, "''");
+      const desc = (p.description || "").replace(/'/g, "''");
+      return `('${p.id}', '${name}', '${desc}', NOW(), NOW())`;
+    }).join(",");
 
     await sequelize.query(
       `
@@ -551,13 +574,12 @@ async function seedInitialData() {
 
     console.log("✅ All permissions inserted/updated");
 
-    // --- ROLE ➜ PERMISSIONS ASSIGNMENT -----------------------------
     // Clear existing role permissions for ADMIN role ONLY
     await sequelize.query(
       `DELETE FROM public.role_permissions WHERE role_id = :role_id;`,
       {
         replacements: { role_id: ADMIN_ROLE_ID },
-        transaction
+        transaction,
       }
     );
 
@@ -568,12 +590,11 @@ async function seedInitialData() {
     );
 
     const permissions = permissionRows as Array<{ id: string }>;
-    let assignedCount = 0;
 
     // Assign ALL permissions to ADMIN role
-    const adminRolePermissionValues = permissions.map(permission =>
-      `('${ADMIN_ROLE_ID}', '${permission.id}', NOW(), NOW())`
-    ).join(',');
+    const adminRolePermissionValues = permissions
+      .map((permission) => `('${ADMIN_ROLE_ID}', '${permission.id}', NOW(), NOW())`)
+      .join(",");
 
     if (adminRolePermissionValues) {
       await sequelize.query(
@@ -584,10 +605,9 @@ async function seedInitialData() {
         `,
         { transaction }
       );
-      assignedCount = permissions.length;
     }
 
-    console.log(`✅ Assigned ${assignedCount} permissions to ADMIN role`);
+    console.log(`✅ Assigned ${permissions.length} permissions to ADMIN role`);
 
     // --- CREATE VIEWER ROLE -----------------------------------------
     await sequelize.query(
@@ -605,7 +625,7 @@ async function seedInitialData() {
           name: "Viewer",
           level: 999,
         },
-        transaction
+        transaction,
       }
     );
 
@@ -618,7 +638,7 @@ async function seedInitialData() {
       "sales.dashboard.view",
       "sales.clients.view",
       "accounts.dashboard.view",
-      "accounts.ledger.view"
+      "accounts.ledger.view",
     ];
 
     // Clear existing viewer permissions
@@ -626,7 +646,7 @@ async function seedInitialData() {
       `DELETE FROM public.role_permissions WHERE role_id = :role_id;`,
       {
         replacements: { role_id: VIEWER_ROLE_ID },
-        transaction
+        transaction,
       }
     );
 
@@ -635,18 +655,18 @@ async function seedInitialData() {
       `SELECT id FROM public.permissions WHERE name IN (:permissionNames);`,
       {
         replacements: {
-          permissionNames: viewerPermissions
+          permissionNames: viewerPermissions,
         },
-        transaction
+        transaction,
       }
     );
 
     const viewerPerms = viewerPermRows as Array<{ id: string }>;
 
     if (viewerPerms.length > 0) {
-      const viewerRolePermissionValues = viewerPerms.map(perm =>
-        `('${VIEWER_ROLE_ID}', '${perm.id}', NOW(), NOW())`
-      ).join(',');
+      const viewerRolePermissionValues = viewerPerms
+        .map((perm) => `('${VIEWER_ROLE_ID}', '${perm.id}', NOW(), NOW())`)
+        .join(",");
 
       await sequelize.query(
         `
@@ -656,6 +676,7 @@ async function seedInitialData() {
         `,
         { transaction }
       );
+
       console.log(`✅ Assigned ${viewerPerms.length} permissions to VIEWER role`);
     }
 
@@ -664,35 +685,20 @@ async function seedInitialData() {
     console.log("\n🎉 Database seeding completed successfully!");
     console.log("\n📋 PERMISSION SUMMARY:");
     console.log("======================");
-    console.log("1. Dashboard Module ✓");
-    console.log("2. Profile Module ✓");
-    console.log("3. Market Module ✓");
-    console.log("4. Procurement/Vendor Module ✓");
-    console.log("5. Sales Module ✓");
-    console.log("6. AMC Module ✓");
-    console.log("7. Customer Support Module ✓");
-    console.log("8. Accounts Module ✓");
-    console.log("9. GST & TAX Section ✓");
-    console.log("10. Loan Section ✓");
-    console.log("11. HR Module ✓");
-    console.log("12. Expense Module ✓");
-    console.log("13. User Management Module ✓");
-    console.log("14. System Management ✓");
-    console.log("15. QR Code Module ✓");
-    console.log("16. Purchase Module ✓");
-    console.log(`\nTotal permissions: ${permissions.length}`);
-    console.log(`Admin role permissions: ${assignedCount}`);
-    console.log(`Viewer role permissions: ${viewerPerms.length}`);
-
+    console.log("Total permissions:", permissions.length);
+    console.log("Admin role permissions:", permissions.length);
+    console.log("Viewer role permissions:", viewerPerms.length);
   } catch (error) {
     await transaction.rollback();
     console.error("❌ Seeding failed:", error);
+
     if (error instanceof Error) {
       console.error("Error message:", error.message);
-      if ('sql' in error) {
+      if ("sql" in (error as any)) {
         console.error("SQL:", (error as any).sql);
       }
     }
+
     throw error;
   }
 }
