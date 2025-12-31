@@ -134,6 +134,7 @@ export default class PendingMaterialController {
       job_order_date: Yup.date().nullable(),
       mtl_rcd_date: Yup.date().nullable(),
       created_by: Yup.string().uuid().nullable(),
+      urgent: Yup.boolean(),
     });
 
     const transaction = await dbModels.sequelize.transaction();

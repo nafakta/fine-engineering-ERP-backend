@@ -45,20 +45,38 @@ export default class JobController {
       remark: Yup.string().nullable(),
       bin_location: Yup.string().nullable(),
       material_remark: Yup.string().nullable(),
+      urgent: Yup.boolean().default(false),
       created_by: Yup.string().uuid().nullable(),
     });
+
+    const transaction = await dbModels.sequelize.transaction();
 
     try {
       const body = await createSchema.validate(req.body, { abortEarly: false, stripUnknown: true });
 
       if (!this.Job) {
+        await transaction.rollback();
         return res.status(500).json({
           success: false,
           error: "Job model not initialized",
         });
       }
 
-      const job = await this.Job.create(body);
+      const job = await this.Job.create(body, { transaction });
+
+      // Check if the item with same item_no is present in pending table, if it is present then mark is_completed as true
+      if (body.item_no) {
+        const whereCondition: any = {
+          item_no: body.item_no,
+          is_completed: false,
+        };
+        if (body.job_no) {
+          whereCondition.job_no = body.job_no;
+        }
+        await dbModels.PendingMaterial.update({ is_completed: true }, { where: whereCondition, transaction });
+      }
+
+      await transaction.commit();
 
       return res.status(201).json({
         success: true,
@@ -66,6 +84,7 @@ export default class JobController {
         message: "Job created successfully",
       });
     } catch (err: any) {
+      await transaction.rollback();
       console.error("Create Job Error:", err);
       if (err instanceof Yup.ValidationError) {
         return res.status(400).json({
@@ -200,6 +219,7 @@ export default class JobController {
       remark: Yup.string(),
       bin_location: Yup.string(),
       material_remark: Yup.string(),
+      urgent: Yup.boolean(),
       updated_by: Yup.string().uuid().nullable(),
     });
 
@@ -288,6 +308,58 @@ export default class JobController {
       });
     } catch (err: any) {
       console.error("Delete Job Error:", err);
+      return res.status(500).json({
+        success: false,
+        error: "Internal server error",
+      });
+    }
+  };
+
+  // -------------------------
+  // MARK URGENT
+  // PATCH /api/v1/jobs/:id/urgent
+  // -------------------------
+  public markUrgent = async (req: Request, res: Response) => {
+    const schema = Yup.object({
+      urgent: Yup.boolean().default(true),
+      updated_by: Yup.string().uuid().nullable(),
+    });
+
+    try {
+      const { id } = req.params;
+      const body = await schema.validate(req.body, { stripUnknown: true });
+
+      if (!this.Job) {
+        return res.status(500).json({
+          success: false,
+          error: "Job model not initialized",
+        });
+      }
+
+      const job = await this.Job.findByPk(id);
+      if (!job) {
+        return res.status(404).json({
+          success: false,
+          error: "Job not found",
+        });
+      }
+
+      await job.update({ urgent: body.urgent, updated_by: body.updated_by });
+
+      return res.json({
+        success: true,
+        message: "Job urgent status updated successfully",
+        data: job,
+      });
+    } catch (err: any) {
+      console.error("Mark Urgent Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({
+          success: false,
+          error: "Validation error",
+          details: err.errors,
+        });
+      }
       return res.status(500).json({
         success: false,
         error: "Internal server error",

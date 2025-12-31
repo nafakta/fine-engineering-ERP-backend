@@ -14,6 +14,7 @@ router.get("/jobs", jobController.list);
 router.get("/jobs/:id", jobController.get);
 router.put("/jobs/:id", jobController.update);
 router.delete("/jobs/:id", jobController.delete);
+router.post("/jobs/:id/urgent", jobController.markUrgent);
 
 router.post("/categories", categoryController.create);
 router.get("/categories", categoryController.list);
