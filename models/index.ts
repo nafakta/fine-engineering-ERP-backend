@@ -2,8 +2,6 @@
 import { Sequelize } from "sequelize";
 import { db } from "../database/DBService";
 
-// ── Model initializers ─────────────────────────────────────────────────────────
-
 // ── Model initializers (1 file = 1 init function) ──────────────────────────────
 import { initAccountModel } from "./Banks";
 import { initSystemUserModel } from "./SystemUser";
@@ -12,9 +10,6 @@ import { initRoleModel } from "./Role";
 import { initPermissionModel } from "./Permission";
 import { initRolePermissionModel } from "./RolePermission";
 import { initSystemUserSecretModel } from "./SystemUserSecret";
-
-import { initExpenseModel } from "./expenses";
-import { initExpenseMediaModel } from "./ExpenseMedia";
 
 import { initMarketModel } from "./market";
 import { initTicketerpModel } from "./ticketerp";
@@ -27,10 +22,12 @@ import { initClientModel } from "./Client";
 import { initTicketFollowupModel } from "./ticket_followup";
 import { initEstimateModel } from "./Estimate";
 import { initEstimateItemModel } from "./EstimateItem";
+
 import { initHVACTicketModel } from "./hvacticket";
 import { initHVACTicketMediaModel } from "./hvac_ticket_media";
 import { initHVACTicketFollowupModel } from "./hvac_ticket_followup";
 import { initTicketMediaModel } from "./ticket_media";
+
 import { initPiModel } from "./Pi";
 import { initPiItemModel } from "./PiItem";
 import { initInvoiceModel } from "./Invoice";
@@ -38,20 +35,22 @@ import { initInvoiceItemModel } from "./InvoiceItem";
 import { initGstRecordModel } from "./gst_record";
 import { initInvoicePaymentModel } from "./invoicePayment";
 import TdsRecord from "./tds_records";
+
 import { initOrderBillModel } from "./OrderBill";
 import { initVendorBillPaymentModel } from "./VendorBillPayment";
+
 import { AmcEstimate } from "./AmcEstimate";
 import { AmcAcDetail } from "./AmcAcDetail";
 import { initVendorDocumentModel } from "./VendorDocument";
+
 import { initBoqModel } from "./boq";
 import { initBoqItemModel } from "./boqitem";
 import { initQuotationModel } from "./Quotation";
+
 import { initErpServiceReportModel } from "./erp_service_report";
 import { initLoanTransactionModel } from "./LoanTransaction";
 import { initHvacErpServiceReportModel } from "./hvac_erp_service_report";
-import { initDepartmentModel } from "./Department";
-import { initUserDepartmentModel } from "./UserDepartment";
-import { initExpensePaymentModel } from './ExpensePayment';
+
 import initCategoryModel from "./Category";
 import { initJobModel } from "./Job";
 import { initPendingMaterialModel } from "./PendingMaterial";
@@ -65,6 +64,7 @@ import { BillingRequest } from "./BillingRequest";
 import { AmcPaymentHistory } from "./AmcPaymentHistory";
 import { BillingRequestPaymentHistory } from "./BillingRequestPaymentHistory";
 import { initAMCOfferModel } from "./AMCOffer";
+
 import { initVendorPaymentClearanceModel } from "./VendorPaymentClearance";
 import { initBoqItemFileModel } from "./boq-item-file";
 
@@ -86,11 +86,6 @@ const dbModels: any = {
   // Banking / Accounts
   Account: initAccountModel(sequelize),
   AccountTransfer: initAccountTransfer(sequelize),
-
-  // Domain models
-  Expense: initExpenseModel(sequelize),
-  ExpenseMedia: initExpenseMediaModel(sequelize),
-  ExpensePayment: initExpensePaymentModel(sequelize),
 
   Market: initMarketModel(sequelize),
   TicketERP: initTicketerpModel(sequelize),
@@ -147,13 +142,12 @@ const dbModels: any = {
   AmcPaymentHistory: AmcPaymentHistory.initModel(sequelize),
   BillingRequest: BillingRequest.initModel(sequelize),
   BillingRequestPaymentHistory: BillingRequestPaymentHistory.initModel(sequelize),
+
   AMCOffer: initAMCOfferModel(sequelize),
+
   ErpServiceReport: initErpServiceReportModel(sequelize),
   HvacErpServiceReport: initHvacErpServiceReportModel(sequelize),
 
-  // Department models
-  Department: initDepartmentModel(sequelize),
-  UserDepartment: initUserDepartmentModel(sequelize),
   VendorPaymentClearance: initVendorPaymentClearanceModel(sequelize),
   BoqItemFile: initBoqItemFileModel(sequelize),
 };
@@ -192,14 +186,14 @@ dbModels.Role.belongsToMany(dbModels.SystemUser, {
 // IMPORTANT: This assumes `job_no` is a UNIQUE key in the `category` table.
 dbModels.Job.belongsTo(dbModels.Category, {
   foreignKey: "job_no",
-  targetKey: "job_no", // The column in Category to match against
+  targetKey: "job_no",
   as: "categoryDetails",
 });
 
 // A Category can have many Jobs associated with it via job_no
 dbModels.Category.hasMany(dbModels.Job, {
   foreignKey: "job_no",
-  sourceKey: "job_no", // The column in Category to use for the join
+  sourceKey: "job_no",
   as: "jobs",
 });
 
@@ -324,17 +318,13 @@ dbModels.SystemUser.hasMany(dbModels.AmcContract, {
   foreignKey: "created_by",
   as: "amcContracts",
 });
-dbModels.SystemUser.hasMany(dbModels.ExpensePayment, {
-  foreignKey: 'created_by',
-  as: 'createdExpensePayments',
+dbModels.SystemUser.hasMany(dbModels.VendorPaymentClearance, {
+  foreignKey: "created_by",
+  as: "createdVendorPaymentClearances",
 });
 dbModels.SystemUser.hasMany(dbModels.VendorPaymentClearance, {
-  foreignKey: 'created_by',
-  as: 'createdVendorPaymentClearances',
-});
-dbModels.SystemUser.hasMany(dbModels.VendorPaymentClearance, {
-  foreignKey: 'updated_by',
-  as: 'updatedVendorPaymentClearances',
+  foreignKey: "updated_by",
+  as: "updatedVendorPaymentClearances",
 });
 dbModels.SystemUser.hasMany(dbModels.ErpServiceReport, {
   foreignKey: "created_by",
@@ -461,7 +451,7 @@ dbModels.Pi.belongsTo(dbModels.Estimate, {
 });
 dbModels.Pi.belongsTo(dbModels.Client, {
   foreignKey: "client_id",
-  as: "client", // ✅ MUST BE "client" (not "clientRef")
+  as: "client", // ✅ MUST BE "client"
   onDelete: "SET NULL",
 });
 dbModels.Pi.belongsTo(dbModels.SystemUser, {
@@ -498,7 +488,7 @@ dbModels.PiItem.belongsTo(dbModels.Pi, {
 // ==================== INVOICE ASSOCIATIONS ====================
 dbModels.Invoice.belongsTo(dbModels.Client, {
   foreignKey: "client_id",
-  as: "client", // ✅ Use "client" for consistency
+  as: "client",
   onDelete: "SET NULL",
 });
 dbModels.Invoice.belongsTo(dbModels.Estimate, {
@@ -581,8 +571,8 @@ dbModels.HVACTicket.hasMany(dbModels.HVACTicketFollowup, {
   onDelete: "CASCADE",
 });
 dbModels.HVACTicket.hasOne(dbModels.HvacErpServiceReport, {
-  foreignKey: 'hvac_erp_id',
-  as: 'serviceReport',
+  foreignKey: "hvac_erp_id",
+  as: "serviceReport",
   onDelete: "CASCADE",
 });
 
@@ -596,56 +586,6 @@ dbModels.HVACTicketFollowup.belongsTo(dbModels.HVACTicket, {
   foreignKey: "hvac_ticket_id",
   as: "ticket",
   onDelete: "CASCADE",
-});
-
-// ==================== EXPENSE ASSOCIATIONS ====================
-dbModels.Expense.hasMany(dbModels.ExpenseMedia, {
-  foreignKey: "expense_id",
-  as: "media",
-  onDelete: "CASCADE",
-});
-dbModels.Expense.hasMany(dbModels.ExpensePayment, {
-  foreignKey: 'expense_id',
-  as: 'payments',
-  onDelete: "CASCADE",
-});
-dbModels.Expense.belongsTo(dbModels.Department, {
-  foreignKey: 'department_id',
-  as: 'department',
-  onDelete: "SET NULL",
-});
-
-dbModels.ExpenseMedia.belongsTo(dbModels.Expense, {
-  foreignKey: "expense_id",
-  as: "expense",
-  onDelete: "CASCADE",
-});
-
-// ==================== EXPENSE PAYMENT ASSOCIATIONS ====================
-dbModels.ExpensePayment.belongsTo(dbModels.Expense, {
-  foreignKey: 'expense_id',
-  as: 'expense',
-  onDelete: "CASCADE",
-});
-dbModels.ExpensePayment.belongsTo(dbModels.Account, {
-  foreignKey: 'account_id',
-  as: 'account',
-  onDelete: "SET NULL",
-});
-dbModels.ExpensePayment.belongsTo(dbModels.Department, {
-  foreignKey: 'department_id',
-  as: 'department',
-  onDelete: "SET NULL",
-});
-dbModels.ExpensePayment.belongsTo(dbModels.SystemUser, {
-  foreignKey: 'created_by',
-  as: 'creator',
-  onDelete: "SET NULL",
-});
-
-dbModels.Account.hasMany(dbModels.ExpensePayment, {
-  foreignKey: 'account_id',
-  as: 'expensePayments',
 });
 
 // ==================== ORDER BILL ASSOCIATIONS ====================
@@ -670,8 +610,8 @@ dbModels.OrderBill.hasMany(dbModels.VendorBillPayment, {
   onDelete: "CASCADE",
 });
 dbModels.OrderBill.hasMany(dbModels.VendorPaymentClearance, {
-  foreignKey: 'bill_id',
-  as: 'orderBillClearances',
+  foreignKey: "bill_id",
+  as: "orderBillClearances",
   onDelete: "CASCADE",
 });
 
@@ -703,8 +643,8 @@ dbModels.VendorBillPayment.belongsTo(dbModels.SystemUser, {
   onDelete: "SET NULL",
 });
 dbModels.VendorBillPayment.hasMany(dbModels.VendorPaymentClearance, {
-  foreignKey: 'vendor_bill_payment_id',
-  as: 'vendorBillPaymentClearances',
+  foreignKey: "vendor_bill_payment_id",
+  as: "vendorBillPaymentClearances",
   onDelete: "CASCADE",
 });
 
@@ -930,124 +870,79 @@ dbModels.BillingRequestPaymentHistory.belongsTo(dbModels.BillingRequest, {
 dbModels.ErpServiceReport.belongsTo(dbModels.TicketERP, {
   foreignKey: "erp_id",
   as: "ticket",
-  onDelete: "CASCADE"
+  onDelete: "CASCADE",
 });
 dbModels.ErpServiceReport.belongsTo(dbModels.Client, {
   foreignKey: "client_id",
   as: "client",
-  onDelete: "CASCADE"
+  onDelete: "CASCADE",
 });
 dbModels.ErpServiceReport.belongsTo(dbModels.SystemUser, {
   foreignKey: "created_by",
   as: "createdBy",
-  onDelete: "SET NULL"
+  onDelete: "SET NULL",
 });
 
 dbModels.HvacErpServiceReport.belongsTo(dbModels.HVACTicket, {
-  foreignKey: 'hvac_erp_id',
-  as: 'ticket',
-  onDelete: 'CASCADE'
+  foreignKey: "hvac_erp_id",
+  as: "ticket",
+  onDelete: "CASCADE",
 });
 dbModels.HvacErpServiceReport.belongsTo(dbModels.SystemUser, {
   foreignKey: "created_by",
   as: "createdBy",
-  onDelete: "SET NULL"
-});
-
-// ==================== DEPARTMENT ASSOCIATIONS ====================
-dbModels.SystemUser.belongsToMany(dbModels.Department, {
-  through: dbModels.UserDepartment,
-  foreignKey: "user_id",
-  otherKey: "department_id",
-  as: "departments",
-});
-dbModels.Department.belongsToMany(dbModels.SystemUser, {
-  through: dbModels.UserDepartment,
-  foreignKey: "department_id",
-  otherKey: "user_id",
-  as: "users",
-});
-
-dbModels.SystemUser.hasMany(dbModels.UserDepartment, {
-  foreignKey: "user_id",
-  as: "userDepartments",
-});
-dbModels.UserDepartment.belongsTo(dbModels.SystemUser, {
-  foreignKey: "user_id",
-  as: "user",
-  onDelete: "CASCADE",
-});
-
-dbModels.Department.hasMany(dbModels.UserDepartment, {
-  foreignKey: "department_id",
-  as: "departmentUsers",
-});
-dbModels.UserDepartment.belongsTo(dbModels.Department, {
-  foreignKey: "department_id",
-  as: "department",
-  onDelete: "CASCADE",
-});
-
-dbModels.Department.hasMany(dbModels.Expense, {
-  foreignKey: 'department_id',
-  as: 'expenses',
-  onDelete: "SET NULL",
-});
-dbModels.Department.hasMany(dbModels.ExpensePayment, {
-  foreignKey: 'department_id',
-  as: 'expensePayments',
   onDelete: "SET NULL",
 });
 
 // ==================== VENDOR PAYMENT CLEARANCE ASSOCIATIONS ====================
 dbModels.VendorPaymentClearance.belongsTo(dbModels.Vendor, {
-  foreignKey: 'vendor_id',
-  as: 'vendor',
+  foreignKey: "vendor_id",
+  as: "vendor",
   onDelete: "CASCADE",
 });
 dbModels.VendorPaymentClearance.belongsTo(dbModels.Account, {
-  foreignKey: 'account_id',
-  as: 'account',
+  foreignKey: "account_id",
+  as: "account",
   onDelete: "SET NULL",
 });
 dbModels.VendorPaymentClearance.belongsTo(dbModels.VendorBillPayment, {
-  foreignKey: 'vendor_bill_payment_id',
-  as: 'vendorBillPayment',
+  foreignKey: "vendor_bill_payment_id",
+  as: "vendorBillPayment",
   onDelete: "CASCADE",
 });
 dbModels.VendorPaymentClearance.belongsTo(dbModels.OrderBill, {
-  foreignKey: 'bill_id',
-  as: 'orderBill',
+  foreignKey: "bill_id",
+  as: "orderBill",
   onDelete: "CASCADE",
 });
 dbModels.VendorPaymentClearance.belongsTo(dbModels.SystemUser, {
-  foreignKey: 'created_by',
-  as: 'creator',
+  foreignKey: "created_by",
+  as: "creator",
   onDelete: "SET NULL",
 });
 dbModels.VendorPaymentClearance.belongsTo(dbModels.SystemUser, {
-  foreignKey: 'updated_by',
-  as: 'updater',
+  foreignKey: "updated_by",
+  as: "updater",
   onDelete: "SET NULL",
 });
 
 dbModels.Vendor.hasMany(dbModels.VendorPaymentClearance, {
-  foreignKey: 'vendor_id',
-  as: 'vendorClearances',
+  foreignKey: "vendor_id",
+  as: "vendorClearances",
   onDelete: "CASCADE",
 });
 dbModels.Account.hasMany(dbModels.VendorPaymentClearance, {
-  foreignKey: 'account_id',
-  as: 'accountClearances',
+  foreignKey: "account_id",
+  as: "accountClearances",
 });
 dbModels.VendorBillPayment.hasMany(dbModels.VendorPaymentClearance, {
-  foreignKey: 'vendor_bill_payment_id',
-  as: 'billPaymentClearances',
+  foreignKey: "vendor_bill_payment_id",
+  as: "billPaymentClearances",
   onDelete: "CASCADE",
 });
 dbModels.OrderBill.hasMany(dbModels.VendorPaymentClearance, {
-  foreignKey: 'bill_id',
-  as: 'orderBillClearancesList',
+  foreignKey: "bill_id",
+  as: "orderBillClearancesList",
   onDelete: "CASCADE",
 });
 
@@ -1077,13 +972,9 @@ dbModels.TdsRecord.belongsTo(dbModels.VendorBillPayment, {
 
 // ── 3) Export registry & bound sequelize ───────────────────────────────────────
 export default dbModels;
+
 export const {
-  Expense,
-  ExpensePayment,
   Account,
-  UserDepartment,
-  Department,
-  ExpenseMedia,
   SystemUser,
   Pi,
   PiItem,
@@ -1102,5 +993,6 @@ export const {
   PendingMaterial,
   // Add other models you need
 } = dbModels;
+
 export const { sequelize: sequelizeWriterBound } = dbModels;
 export { sequelize };

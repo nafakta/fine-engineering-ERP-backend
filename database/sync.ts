@@ -73,7 +73,7 @@ async function seedInitialData() {
       `
         INSERT INTO public.roles (id, name, level, created_at, updated_at)
         VALUES (:id, :name, :level, NOW(), NOW())
-        ON CONFLICT (id) DO UPDATE 
+        ON CONFLICT (id) DO UPDATE
         SET name = EXCLUDED.name,
             level = EXCLUDED.level,
             updated_at = NOW()
@@ -564,7 +564,7 @@ async function seedInitialData() {
       `
         INSERT INTO public.permissions (id, name, description, created_at, updated_at)
         VALUES ${permissionValues}
-        ON CONFLICT (id) DO UPDATE 
+        ON CONFLICT (id) DO UPDATE
         SET name = EXCLUDED.name,
             description = EXCLUDED.description,
             updated_at = NOW();
@@ -584,10 +584,9 @@ async function seedInitialData() {
     );
 
     // Get all permission IDs
-    const [permissionRows] = await sequelize.query(
-      `SELECT id FROM public.permissions;`,
-      { transaction }
-    );
+    const [permissionRows] = await sequelize.query(`SELECT id FROM public.permissions;`, {
+      transaction,
+    });
 
     const permissions = permissionRows as Array<{ id: string }>;
 
@@ -614,7 +613,7 @@ async function seedInitialData() {
       `
         INSERT INTO public.roles (id, name, level, created_at, updated_at)
         VALUES (:id, :name, :level, NOW(), NOW())
-        ON CONFLICT (id) DO UPDATE 
+        ON CONFLICT (id) DO UPDATE
         SET name = EXCLUDED.name,
             level = EXCLUDED.level,
             updated_at = NOW();
