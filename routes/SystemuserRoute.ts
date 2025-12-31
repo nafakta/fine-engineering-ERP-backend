@@ -14,7 +14,6 @@ import { SystemUser } from "../models/SystemUser";
 // Import controllers
 import SystemUserController from "../controllers/CompressCrmController";
 import ClientController from "../controllers/clientController";
-import LoanAccountController from "../controllers/loanAccountController";
 import VendorPrintController from "../controllers/VendorPrintController";
 import ClientPrint from "../controllers/PrintClientController";
 import GSTController from "../controllers/gstController";
@@ -22,9 +21,6 @@ import TDSController from "../controllers/TDSController";
 import Estimate from "../controllers/estimateController";
 import DashboardController from "../controllers/dashboardController";
 
-// Import Loan Controllers
-import { LoanTakenController } from "../controllers/loanTakenController";
-import { LoanGivenController } from "../controllers/loanGivenController";
 
 // Import other controllers
 import {
@@ -82,10 +78,6 @@ import {
 } from "../controllers/piController";
 
 import {
-  getClientLedger, printLedgerHtml, printLedgerPdf, debugLedger,
-} from "../controllers/ledgercontroller";
-
-import {
   listBills, createVendorPayment, printBillPdf,
 } from "../controllers/OrderBillController";
 
@@ -113,8 +105,6 @@ import {
   updateAmcDealPackage, softDeleteAmcDealPackage, restoreAmcDealPackage,
   hardDeleteAmcDealPackage, listAmcDealPackagesDropdown,
 } from "../controllers/amcDealPackageController";
-import LoanTransactionController from "../controllers/LoanTransactionController";
-import loanLedgerController from "../controllers/loanLedgerController";
 import { QuotationController } from "../controllers/quotationController";
 import { AmcContractController } from "../controllers/AmcContractController";
 import BillingRequestController from "../controllers/BillingRequestController";
@@ -145,10 +135,6 @@ const SystemUserRouter = express.Router();
 // Initialize controllers
 const systemUserController = new SystemUserController();
 const clientController = new ClientController();
-const loanAccountController = new LoanAccountController();
-const loanTakenController = new LoanTakenController();
-const loanGivenController = new LoanGivenController();
-const loanTransactionController = new LoanTransactionController();
 const quotationController = new QuotationController();
 const roleController = new RoleController(sequelize);
 const permissionAssignmentController = new PermissionAssignmentController(sequelize);
@@ -369,22 +355,6 @@ SystemUserRouter.get("/servicereports/:ticketId/:file", streamServiceReportPdf);
 
 /* ------------------------------ LOANS ----------------------------- */
 
-/* --------------------- LOAN TAKEN ROUTES --------------------- */
-SystemUserRouter.post("/loans/taken", requireAuth, loanTakenController.createLoanTaken);
-SystemUserRouter.get("/loans/taken", loanTakenController.getAllLoansTaken);
-SystemUserRouter.get("/loans/taken/dropdown", loanTakenController.getDropdownData);
-SystemUserRouter.get("/loans/taken/:id", loanTakenController.getLoanTakenById);
-SystemUserRouter.put("/loans/taken/:id", requireAuth, loanTakenController.updateLoanTaken);
-SystemUserRouter.delete("/loans/taken/:id", requireAuth, loanTakenController.deleteLoanTaken);
-
-/* --------------------- LOAN GIVEN ROUTES --------------------- */
-SystemUserRouter.post("/loans/given", requireAuth, loanGivenController.createLoanGiven);
-SystemUserRouter.get("/loans/given", loanGivenController.getAllLoansGiven);
-SystemUserRouter.get("/loans/given/dropdown", loanGivenController.getDropdownData);
-SystemUserRouter.get("/loans/given/:id", loanGivenController.getLoanGivenById);
-SystemUserRouter.put("/loans/given/:id", requireAuth, loanGivenController.updateLoanGiven);
-SystemUserRouter.delete("/loans/given/:id", requireAuth, loanGivenController.deleteLoanGiven);
-
 /* ------------------------ PURCHASE ORDERS ------------------------- */
 SystemUserRouter.post("/createorder", requireAuth, createorder);
 SystemUserRouter.get("/getallorder", getAllOrders);
@@ -462,11 +432,6 @@ SystemUserRouter.get("/tds", TDSController.listTDS);
 SystemUserRouter.post("/paytds", requireAuth, TDSController.payTDS);
 SystemUserRouter.get("/tds/search", TDSController.searchTDS);
 
-/* ---------------------------- LEDGER ------------------------------ */
-SystemUserRouter.get("/ledger", getClientLedger);
-SystemUserRouter.get("/export/ledger/html", printLedgerHtml);
-SystemUserRouter.get("/export/ledger/pdf", printLedgerPdf);
-SystemUserRouter.get("/debug/ledger", debugLedger);
 
 /* -------------------------- CLIENT PRINTS ------------------------- */
 SystemUserRouter.get("/estimate/:id/pdf", ClientPrint.renderEstimatePDF);
@@ -528,36 +493,6 @@ SystemUserRouter.get("/boqpdf", printBoqPdfByQuery);
 SystemUserRouter.post("/boqpdf", printBoqPdfFromBody);
 
 /* ------------------------ LOAN ACCOUNTS ------------------------ */
-SystemUserRouter.post(
-  "/createloanaccount",
-  requireAuth,
-  loanUpload.fields([
-    { name: 'AADHAAR', maxCount: 1 },
-    { name: 'PAN', maxCount: 1 },
-    { name: 'PASSBOOK', maxCount: 1 },
-    { name: 'PHOTO', maxCount: 1 },          // <-- added
-    { name: 'PROFILE_IMAGE', maxCount: 1 }   // <-- optional alias (frontend might send PROFILE_IMAGE)
-  ]),
-  loanAccountController.createLoanAccount
-);
-SystemUserRouter.put(
-  "/updateloanaccount",
-  requireAuth,
-  loanUpload.fields([
-    { name: 'AADHAAR', maxCount: 1 },
-    { name: 'PAN', maxCount: 1 },
-    { name: 'PASSBOOK', maxCount: 1 },
-    { name: 'PHOTO', maxCount: 1 },          // <-- added
-    { name: 'PROFILE_IMAGE', maxCount: 1 }   // <-- optional alias
-  ]),
-  loanAccountController.updateLoanAccount
-);
-
-SystemUserRouter.get("/getloanaccounts", loanAccountController.getLoanAccounts);
-SystemUserRouter.post("/getloanaccount", loanAccountController.getLoanAccountById);
-SystemUserRouter.post("/getloanaccountbynumber", loanAccountController.getLoanAccountByNumber);
-SystemUserRouter.delete("/deleteloanaccount", requireAuth, loanAccountController.deleteLoanAccount);
-SystemUserRouter.get("/documents/:document_id/download", loanAccountController.downloadDocument);
 
 /* --------------------------- AMC ESTIMATES ------------------------ */
 SystemUserRouter.post("/amc-estimates", AmcEstimateController.create);
@@ -636,48 +571,6 @@ SystemUserRouter.get("/dashboard-total-amc-contracts", DashboardController.getTo
 SystemUserRouter.get("/dashboard-total-estimates", DashboardController.getTotalEstimates);
 SystemUserRouter.get("/dashboard-total-billing-requests", DashboardController.getTotalBillingRequests);
 /* ------------------- LOAN TRANSACTIONS ROUTES ------------------- */
-SystemUserRouter.post(
-  "/loans/transactions",
-  requireAuth,
-  loanTransactionController.createLoanTransaction
-);
-SystemUserRouter.get(
-  "/loans/transactions",
-  loanTransactionController.listLoanTransactions
-);
-SystemUserRouter.get(
-  "/loans/transactions/loan/:loan_id",
-  loanTransactionController.getLoanTransactionsByLoan
-);
-SystemUserRouter.get(
-  "/loans/transactions/:id",
-  loanTransactionController.getLoanTransactionById
-);
-SystemUserRouter.patch(
-  "/loans/transactions/:id",
-  requireAuth,
-  loanTransactionController.updateLoanTransaction
-);
-SystemUserRouter.delete(
-  "/loans/transactions/:id",
-  requireAuth,
-  loanTransactionController.deleteLoanTransaction
-);
-SystemUserRouter.get(
-  "/loans/:id/ledger/pdf",
-  loanLedgerController.printLoanLedgerPdf
-);
-
-SystemUserRouter.get(
-  "/loan-transactions/:transaction_id/payment-slip",
-  loanLedgerController.printLoanPaymentSlipPdf
-);
-
-SystemUserRouter.get(
-  "/loans/:id/ledger/html",
-  loanLedgerController.printLoanLedgerHtml
-);
-
 /* ==================== QUOTATION ROUTES ==================== */
 
 /* ------------------------- QUOTATIONS ------------------------- */

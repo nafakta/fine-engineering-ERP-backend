@@ -31,7 +31,7 @@ export default (sequelize: Sequelize) => {
       job_no: {
         type: DataTypes.DECIMAL(14, 2),
         allowNull: false,
-        defaultValue: 0,
+        unique: true, // ✅ REQUIRED
       },
       description: {
         type: DataTypes.TEXT,

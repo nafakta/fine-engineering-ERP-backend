@@ -13,7 +13,6 @@ import { initSystemUserSecretModel } from "./SystemUserSecret";
 
 import { initMarketModel } from "./market";
 import { initTicketerpModel } from "./ticketerp";
-import { initLoanModel } from "./loan";
 import { initVendorModel } from "./vendor";
 import { initPurchaseOrderModel } from "./purchaseorder";
 import { initOrderItemModel } from "./orderitem";
@@ -48,7 +47,6 @@ import { initBoqItemModel } from "./boqitem";
 import { initQuotationModel } from "./Quotation";
 
 import { initErpServiceReportModel } from "./erp_service_report";
-import { initLoanTransactionModel } from "./LoanTransaction";
 import { initHvacErpServiceReportModel } from "./hvac_erp_service_report";
 
 import initCategoryModel from "./Category";
@@ -95,9 +93,6 @@ const dbModels: any = {
   Category: initCategoryModel(sequelize),
   Job: initJobModel(sequelize),
   PendingMaterial: initPendingMaterialModel(sequelize),
-
-  Loan: initLoanModel(sequelize),
-  LoanTransaction: initLoanTransactionModel(sequelize),
 
   Vendor: initVendorModel(sequelize),
   PurchaseOrder: initPurchaseOrderModel(sequelize),
