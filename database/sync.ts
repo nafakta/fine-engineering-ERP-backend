@@ -12,7 +12,8 @@ async function syncDatabase() {
     console.log("✅ Database service initialized");
 
     // Validate models against existing tables
-    await sequelize.sync({ force: false, alter: true });
+    const isProduction = process.env.NODE_ENV === "production";
+    await sequelize.sync({ force: false, alter: !isProduction });
     console.log("✅ Model sync complete");
 
     // Seed roles, permissions, role_permissions
