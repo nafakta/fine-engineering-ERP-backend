@@ -9,9 +9,9 @@ services:
       POSTGRES_PASSWORD: "Shams@19427"
       POSTGRES_DB: "postgres"
     ports:
-      - "5436:5432"
+      - "5556:5432"
     volumes:
-      - compress_pgdata:/var/lib/postgresql/data
+      - fine_pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -21,10 +21,10 @@ services:
   backend:
     build: .
     ports:
-      - "8001:8001"
+      - "8027:8027"
     environment:
       NODE_ENV: production
-      FINE_ENGINEERING_PORT: 8001
+      FINE_ENGINEERING_PORT: 8027
 
       # --- Add your application secrets here ---
       JWT_SECRET: ""
@@ -51,4 +51,4 @@ services:
       - ./config:/usr/src/app/config
 
 volumes:
-  compress_pgdata:
+  fine_pgdata:
