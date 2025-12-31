@@ -30,6 +30,35 @@ async function syncDatabase() {
       alter,
     });
 
+    // ✅ Ensure extensions BEFORE sync (not only in seed)
+    await sequelize.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`);
+    await sequelize.query(`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`);
+
+    // ✅ Debug: show what models are actually loaded in production
+    const loadedModels = Object.keys(sequelize.models || {});
+    console.log("📦 Loaded Sequelize models:", loadedModels);
+
+    // ✅ FIX: Create dependency tables first
+    // loans depends on loan_accounts + accounts + system_users
+    const LoanAccountModel = (sequelize.models as any)?.LoanAccount;
+    if (!LoanAccountModel) {
+      console.warn(
+        `⚠️ LoanAccount model is NOT loaded in sequelize.models.
+This means your production build is not importing/initializing LoanAccount model file.
+Sequelize cannot create "loan_accounts" table, so "loans" table FK will fail.`
+      );
+    } else {
+      console.log("🧱 Syncing LoanAccount first (dependency for loans)...");
+      await LoanAccountModel.sync({ force: false, alter });
+      console.log("✅ LoanAccount sync complete");
+    }
+
+    // If you have more dependency chains, add them here similarly.
+    // Example:
+    // const AccountModel = (sequelize.models as any)?.Account;
+    // if (AccountModel) await AccountModel.sync({ force: false, alter });
+
+    // ✅ Now sync remaining models
     await sequelize.sync({ force: false, alter });
     console.log("✅ Model sync complete");
 
@@ -99,7 +128,6 @@ async function seedInitialData() {
         name: "dashboard.view",
         description: "can access dashboard",
       },
-
       // ================== PROFILE ==================
       {
         id: "00000000-0002-1111-1111-111111111111",
