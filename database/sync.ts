@@ -696,9 +696,4 @@ async function seedInitialData() {
   }
 }
 
-// Run sync if this file is executed directly
-if (require.main === module) {
-  syncDatabase();
-}
-
-export { syncDatabase };
+export default syncDatabase;

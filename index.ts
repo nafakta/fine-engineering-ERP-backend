@@ -8,8 +8,11 @@ import cors from "cors";
 import path from "path";
 import fs from "fs";
 import "./scheduler";
+import syncDatabase from "./database/sync";
 
-dotenv.config();
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
 import "./config/production/env_config";
 import "./database/sync";
 
@@ -18,7 +21,15 @@ const app: Express = express();
 const port = Number(process.env.FINE_ENGINEERING_PORT) || 3000;
 const localIp = "192.168.1.9";
 
+(async () => {
+  // 1️⃣ Run DB sync FIRST
+  await syncDatabase();
 
+  // 2️⃣ Start server ONLY after DB is ready
+  app.listen(port, "0.0.0.0", () => {
+    console.log(`⚡️ Server running on port ${port}`);
+  });
+})();
 
 // ---- Sentry ----
 Sentry.init({
