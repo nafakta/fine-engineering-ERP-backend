@@ -482,13 +482,6 @@ SystemUserRouter.post("/boqpdf", printBoqPdfFromBody);
 
 
 
-
-/*----------------------- SALES DASHBOARS----------------------- */
-SystemUserRouter.get("/dashboard-total-clients", DashboardController.getTotalClients);
-SystemUserRouter.get("/dashboard-total-amc-estimates", DashboardController.getTotalAmcEstimates);
-SystemUserRouter.get("/dashboard-total-amc-contracts", DashboardController.getTotalAmcContracts);
-SystemUserRouter.get("/dashboard-total-estimates", DashboardController.getTotalEstimates);
-SystemUserRouter.get("/dashboard-total-billing-requests", DashboardController.getTotalBillingRequests);
 /* ------------------- LOAN TRANSACTIONS ROUTES ------------------- */
 /* ==================== QUOTATION ROUTES ==================== */
 
