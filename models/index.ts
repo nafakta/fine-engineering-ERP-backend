@@ -27,7 +27,7 @@ import { initHVACTicketMediaModel } from "./hvac_ticket_media";
 import { initHVACTicketFollowupModel } from "./hvac_ticket_followup";
 import { initTicketMediaModel } from "./ticket_media";
 
-import { initPiItemModel } from "./PiItem";
+
 import { initInvoiceModel } from "./Invoice";
 import { initInvoiceItemModel } from "./InvoiceItem";
 import { initGstRecordModel } from "./gst_record";
@@ -92,7 +92,6 @@ const dbModels: any = {
   Estimate: initEstimateModel(sequelize),
   EstimateItem: initEstimateItemModel(sequelize),
 
-  PiItem: initPiItemModel(sequelize),
 
   Invoice: initInvoiceModel(sequelize),
   InvoiceItem: initInvoiceItemModel(sequelize),
