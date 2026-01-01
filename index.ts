@@ -1,8 +1,7 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
-import { SystemuserRouter } from "./routes";
-import { SystemuserRouter2 } from "./routes";
+import { SystemuserRouter, SystemuserRouter2 } from "./routes";
 import * as Sentry from "@sentry/node";
 import cors from "cors";
 import path from "path";
@@ -12,23 +11,12 @@ import syncDatabase from "./database/sync";
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
+
 import "./config/production/env_config";
-import "./database/sync";
 
 // ---- App Init ----
 const app: Express = express();
 const port = Number(process.env.FINE_ENGINEERING_PORT) || 3000;
-const localIp = "192.168.1.9";
-
-(async () => {
-  // 1️⃣ Run DB sync FIRST
-  await syncDatabase();
-
-  // 2️⃣ Start server ONLY after DB is ready
-  app.listen(port, "0.0.0.0", () => {
-    console.log(`⚡️ Server running on port ${port}`);
-  });
-})();
 
 // ---- Sentry ----
 Sentry.init({
@@ -99,7 +87,7 @@ app.get("/debug-file/:ticketId/:filename", (req: Request, res: Response) => {
     });
   }
 
-  res.sendFile(filePath);
+  return res.sendFile(filePath);
 });
 
 // ---- Routes ----
@@ -122,8 +110,17 @@ app.use((req: Request, res: Response) => {
 // ---- Errors ----
 app.use(Sentry.Handlers.errorHandler());
 
-// ---- Start Server ----
-app.listen(port, "0.0.0.0", () => {
-  console.log(`⚡️ Server running on port ${port}`);
-  console.log(`📁 Uploads available at /uploads`);
-});
+// ✅ Start server ONCE (after DB sync)
+(async () => {
+  try {
+    await syncDatabase();
+
+    app.listen(port, "0.0.0.0", () => {
+      console.log(`⚡️ Server running on port ${port}`);
+      console.log(`📁 Uploads available at /uploads`);
+    });
+  } catch (err) {
+    console.error("❌ Failed to start server:", err);
+    process.exit(1);
+  }
+})();
