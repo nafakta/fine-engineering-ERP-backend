@@ -7,7 +7,6 @@ import * as Sentry from "@sentry/node";
 import cors from "cors";
 import path from "path";
 import fs from "fs";
-import "./scheduler";
 import syncDatabase from "./database/sync";
 
 if (process.env.NODE_ENV !== "production") {

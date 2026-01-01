@@ -27,7 +27,6 @@ import { initHVACTicketMediaModel } from "./hvac_ticket_media";
 import { initHVACTicketFollowupModel } from "./hvac_ticket_followup";
 import { initTicketMediaModel } from "./ticket_media";
 
-import { initPiModel } from "./Pi";
 import { initPiItemModel } from "./PiItem";
 import { initInvoiceModel } from "./Invoice";
 import { initInvoiceItemModel } from "./InvoiceItem";
@@ -93,7 +92,6 @@ const dbModels: any = {
   Estimate: initEstimateModel(sequelize),
   EstimateItem: initEstimateItemModel(sequelize),
 
-  Pi: initPiModel(sequelize),
   PiItem: initPiItemModel(sequelize),
 
   Invoice: initInvoiceModel(sequelize),
@@ -204,11 +202,6 @@ dbModels.Client.hasMany(dbModels.Estimate, {
   onDelete: "SET NULL",
 });
 // ✅ CRITICAL FIX: Add Pi association from Client side
-dbModels.Client.hasMany(dbModels.Pi, {
-  foreignKey: "client_id",
-  as: "pis",
-  onDelete: "SET NULL",
-});
 dbModels.Client.hasMany(dbModels.Invoice, {
   foreignKey: "client_id",
   as: "invoices",
@@ -233,10 +226,6 @@ dbModels.SystemUser.hasMany(dbModels.TicketERP, {
 dbModels.SystemUser.hasMany(dbModels.Estimate, {
   foreignKey: "created_by",
   as: "estimates",
-});
-dbModels.SystemUser.hasMany(dbModels.Pi, {
-  foreignKey: "created_by",
-  as: "pis",
 });
 dbModels.SystemUser.hasMany(dbModels.Invoice, {
   foreignKey: "created_by",
@@ -380,11 +369,6 @@ dbModels.Estimate.hasMany(dbModels.EstimateItem, {
   as: "items",
   onDelete: "CASCADE",
 });
-dbModels.Estimate.hasMany(dbModels.Pi, {
-  foreignKey: "estimate_id",
-  as: "pis",
-  onDelete: "SET NULL",
-});
 dbModels.Estimate.hasOne(dbModels.Invoice, {
   foreignKey: "estimate_id",
   as: "invoice",
@@ -420,13 +404,7 @@ dbModels.Pi.hasMany(dbModels.PiItem, {
   as: "items",
   onDelete: "CASCADE",
 });
-// ✅ CRITICAL FIX: Add Pi to Invoice association
-dbModels.Pi.hasOne(dbModels.Invoice, {
-  foreignKey: "pi_id",
-  as: "invoice",
-  onDelete: "SET NULL",
-  onUpdate: "CASCADE",
-});
+
 
 dbModels.PiItem.belongsTo(dbModels.Pi, {
   foreignKey: "pi_id",
@@ -806,7 +784,6 @@ export default dbModels;
 export const {
   Account,
   SystemUser,
-  Pi,
   PiItem,
   Estimate,
   EstimateItem,

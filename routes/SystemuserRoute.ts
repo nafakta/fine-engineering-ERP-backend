@@ -72,9 +72,6 @@ import {
   printPaymentSlipHtml, searchInvoicesByClientName, checkTdsStatus,
 } from "../controllers/invoiceController";
 
-import {
-  listPi, printPiHtml, printPiPdf, createInvoiceFromPi, searchPiByCompanyExact,
-} from "../controllers/piController";
 
 import {
   listBills, createVendorPayment, printBillPdf,
