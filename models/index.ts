@@ -741,28 +741,6 @@ dbModels.Vendor.hasMany(dbModels.Quotation, {
   onDelete: "SET NULL",
 });
 
-// ==================== LOAN ASSOCIATIONS ====================
-dbModels.Loan.hasMany(dbModels.LoanTransaction, {
-  foreignKey: "loan_id",
-  as: "transactions",
-  onDelete: "CASCADE",
-});
-
-dbModels.LoanTransaction.belongsTo(dbModels.Loan, {
-  foreignKey: "loan_id",
-  as: "loan",
-  onDelete: "CASCADE",
-});
-dbModels.LoanTransaction.belongsTo(dbModels.Account, {
-  foreignKey: "account_id",
-  as: "account",
-  onDelete: "SET NULL",
-});
-
-dbModels.Account.hasMany(dbModels.LoanTransaction, {
-  foreignKey: "account_id",
-  as: "loanTransactions",
-});
 
 // ==================== AMC ESTIMATE ASSOCIATIONS ====================
 dbModels.AmcEstimate.belongsTo(dbModels.Client, {
