@@ -1,13 +1,14 @@
-version: '3.8'
+version: "3.8"
 
 services:
   db:
     image: postgres:14
+    container_name: fine-engineering-erp-db
     restart: always
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "Shams@19427"
-      POSTGRES_DB: "postgres"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Shams@19427
+      POSTGRES_DB: postgres
     ports:
       - "5516:5432"
     volumes:
@@ -20,23 +21,22 @@ services:
 
   backend:
     build: .
+    container_name: fine-engineering-erp-backend
+    restart: always
     ports:
       - "8127:8127"
     environment:
       NODE_ENV: production
       FINE_ENGINEERING_PORT: 8127
 
-      # --- Add your application secrets here ---
       JWT_SECRET: ""
 
-      # Writer DB config
       PGHOST_WRITER: db
       PGPORT_WRITER: 5432
       PGUSER_WRITER: postgres
       PGPASSWORD_WRITER: Shams@19427
       PGDATABASE_WRITER: postgres
 
-      # Reader DB config
       PGHOST_READER: db
       PGPORT_READER: 5432
       PGUSER_READER: postgres
