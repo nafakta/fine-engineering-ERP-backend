@@ -479,35 +479,7 @@ SystemUserRouter.post("/boqpdf", printBoqPdfFromBody);
 
 /* ------------------------ LOAN ACCOUNTS ------------------------ */
 
-/* --------------------------- AMC ESTIMATES ------------------------ */
-SystemUserRouter.post("/amc-estimates", AmcEstimateController.create);
-SystemUserRouter.post("/amc-estimates/list", AmcEstimateController.list);
-// routes/amcEstimate.ts
-SystemUserRouter.post("/amc-estimates/search", AmcEstimateController.search);
-SystemUserRouter.post("/amc-estimates/get", AmcEstimateController.getById);
-SystemUserRouter.post("/amc-estimates/update", AmcEstimateController.update);
-SystemUserRouter.post("/amc-estimates/delete", AmcEstimateController.remove);
-SystemUserRouter.post("/amc-estimate-history", AmcEstimateController.history);
-SystemUserRouter.post(
-  "/amc-service/update-status",
-  AmcEstimateController.updateServiceSchedule
-);
-// PDF Routes - Add these to your existing routes
-SystemUserRouter.get('/amc-estimates/print-pdf/:id', AmcEstimateController.printAmcEstimatePdf);
-SystemUserRouter.get('/amc-estimates/print-html/:id', AmcEstimateController.printAmcEstimateHtml);
-SystemUserRouter.post("/amc-estimates/create-contract", AmcEstimateController.createContractFromEstimate);
-SystemUserRouter.post("/update-service-schedule-planned-date",AmcEstimateController.updateServiceSchedulePlannedDate);
 
-
-/* ------------------------ AMC PACKAGES DEAL ------------------------ */
-SystemUserRouter.post("/amc-deal-packages", createAmcDealPackage);
-SystemUserRouter.get("/amc-deal-packages", listAmcDealPackages);
-SystemUserRouter.get("/amc-deal-packages/dropdown", listAmcDealPackagesDropdown);
-SystemUserRouter.get("/amc-deal-packages/:id", getAmcDealPackageById);
-SystemUserRouter.put("/amc-deal-packages", updateAmcDealPackage);
-SystemUserRouter.delete("/amc-deal-packages/:id", softDeleteAmcDealPackage);
-SystemUserRouter.post("/amc-deal-packages/:id/restore", restoreAmcDealPackage);
-SystemUserRouter.delete("/amc-deal-packages/:id/hard", hardDeleteAmcDealPackage);
 
 
 
