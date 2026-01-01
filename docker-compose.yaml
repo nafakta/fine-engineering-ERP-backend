@@ -21,7 +21,7 @@ services:
   backend:
     build: .
     ports:
-      - "8027:8027"
+      - "8127:8127"
     environment:
       NODE_ENV: production
       FINE_ENGINEERING_PORT: 8127
