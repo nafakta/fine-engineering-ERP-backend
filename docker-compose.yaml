@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: "Shams@19427"
       POSTGRES_DB: "postgres"
     ports:
-      - "5556:5432"
+      - "5516:5432"
     volumes:
       - fine_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -24,7 +24,7 @@ services:
       - "8027:8027"
     environment:
       NODE_ENV: production
-      FINE_ENGINEERING_PORT: 8027
+      FINE_ENGINEERING_PORT: 8127
 
       # --- Add your application secrets here ---
       JWT_SECRET: ""
