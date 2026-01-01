@@ -399,12 +399,7 @@ SystemUserRouter.post("/paymentslip", printPaymentSlipPdfFromBody);
 SystemUserRouter.get("/invoices/search", searchInvoicesByClientName);
 SystemUserRouter.get('/payments/invoice/:invoice_id/tds-check', checkTdsStatus);
 
-/* ------------------------- PURCHASE REQUESTS ---------------------- */
-SystemUserRouter.get("/listpurchaserequests", listPi);
-SystemUserRouter.get("/purchaserequest/:id/print.html", printPiHtml);
-SystemUserRouter.get("/purchaserequest/:id/print.pdf", printPiPdf);
-SystemUserRouter.post("/createinvoicefrompi", createInvoiceFromPi);
-SystemUserRouter.get("/pi/search/by-client", searchPiByCompanyExact);
+
 
 /* --------------------------- GST / TDS ---------------------------- */
 SystemUserRouter.get("/gstrecords", GSTController.listGST);
