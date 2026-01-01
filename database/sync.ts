@@ -442,34 +442,6 @@ async function seedInitialData() {
         description: "can manage loans",
       },
 
-      // ================== HR MODULE ==================
-      {
-        id: "55555555-0001-1111-1111-111111111111",
-        name: "hr.view",
-        description: "can access HR module",
-      },
-      {
-        id: "55555555-0002-1111-1111-111111111111",
-        name: "hr.employee.view",
-        description: "can view employees",
-      },
-      {
-        id: "55555555-0003-1111-1111-111111111111",
-        name: "hr.employee.manage",
-        description: "can manage employees",
-      },
-
-      // ================== EXPENSE MODULE ==================
-      {
-        id: "66666666-0001-1111-1111-111111111111",
-        name: "expense.view",
-        description: "can access expense module",
-      },
-      {
-        id: "66666666-0002-1111-1111-111111111111",
-        name: "expense.manage",
-        description: "can manage expenses",
-      },
 
       // ================== USER MANAGEMENT MODULE ==================
       {
@@ -540,29 +512,6 @@ async function seedInitialData() {
         description: "can audit system users",
       },
 
-      // ================== QR CODE MODULE ==================
-      {
-        id: "99999999-0001-1111-1111-111111111111",
-        name: "qrcode.view",
-        description: "can access QR code module",
-      },
-      {
-        id: "99999999-0002-1111-1111-111111111111",
-        name: "qrcode.manage",
-        description: "can manage QR codes",
-      },
-
-      // ================== PURCHASE MODULE ==================
-      {
-        id: "aaaaaaaa-0001-1111-1111-111111111111",
-        name: "purchase.view",
-        description: "can access purchase module",
-      },
-      {
-        id: "aaaaaaaa-0002-1111-1111-111111111111",
-        name: "purchase.manage",
-        description: "can manage purchases",
-      },
     ];
 
     console.log(`📊 Seeding ${PERMISSIONS.length} permissions...`);

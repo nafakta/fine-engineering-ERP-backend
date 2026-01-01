@@ -38,8 +38,6 @@ import TdsRecord from "./tds_records";
 import { initOrderBillModel } from "./OrderBill";
 import { initVendorBillPaymentModel } from "./VendorBillPayment";
 
-import { AmcEstimate } from "./AmcEstimate";
-import { AmcAcDetail } from "./AmcAcDetail";
 import { initVendorDocumentModel } from "./VendorDocument";
 
 import { initBoqModel } from "./boq";
@@ -54,14 +52,6 @@ import { initJobModel } from "./Job";
 import { initPendingMaterialModel } from "./PendingMaterial";
 
 // AMC Contract models
-import { AmcContract } from "./AmcContract";
-import { AmcacContractDetails } from "./AmcacContractDetails";
-import { AmcContractServiceSchedule } from "./AmcContractServiceSchedule";
-import { AmcPackage } from "./AmcPackage";
-import { BillingRequest } from "./BillingRequest";
-import { AmcPaymentHistory } from "./AmcPaymentHistory";
-import { BillingRequestPaymentHistory } from "./BillingRequestPaymentHistory";
-import { initAMCOfferModel } from "./AMCOffer";
 
 import { initVendorPaymentClearanceModel } from "./VendorPaymentClearance";
 import { initBoqItemFileModel } from "./boq-item-file";
@@ -120,25 +110,14 @@ const dbModels: any = {
   OrderBill: initOrderBillModel(sequelize),
   VendorBillPayment: initVendorBillPaymentModel(sequelize),
 
-  AmcEstimate: AmcEstimate.initModel(sequelize),
-  AmcAcDetail: AmcAcDetail.initModel(sequelize),
   VendorDocument: initVendorDocumentModel(sequelize),
-  AmcPackage: AmcPackage.initModel(sequelize),
+
 
   // BOQ MODELS
   Boq: initBoqModel(sequelize),
   BoqItem: initBoqItemModel(sequelize),
   Quotation: initQuotationModel(sequelize),
 
-  // AMC Contract models
-  AmcContract: AmcContract.initModel(sequelize),
-  AmcacContractDetails: AmcacContractDetails.initModel(sequelize),
-  AmcContractServiceSchedule: AmcContractServiceSchedule.initModel(sequelize),
-  AmcPaymentHistory: AmcPaymentHistory.initModel(sequelize),
-  BillingRequest: BillingRequest.initModel(sequelize),
-  BillingRequestPaymentHistory: BillingRequestPaymentHistory.initModel(sequelize),
-
-  AMCOffer: initAMCOfferModel(sequelize),
 
   ErpServiceReport: initErpServiceReportModel(sequelize),
   HvacErpServiceReport: initHvacErpServiceReportModel(sequelize),
@@ -240,16 +219,6 @@ dbModels.Client.hasMany(dbModels.HVACTicket, {
   as: "hvacTickets",
   onDelete: "SET NULL",
 });
-dbModels.Client.hasMany(dbModels.AmcEstimate, {
-  foreignKey: "client_id",
-  as: "amcEstimates",
-  onDelete: "SET NULL",
-});
-dbModels.Client.hasMany(dbModels.AmcContract, {
-  foreignKey: "client_id",
-  as: "amcContracts",
-  onDelete: "SET NULL",
-});
 dbModels.Client.hasMany(dbModels.ErpServiceReport, {
   foreignKey: "client_id",
   as: "erpServiceReports",
@@ -304,14 +273,6 @@ dbModels.SystemUser.hasMany(dbModels.Quotation, {
 dbModels.SystemUser.hasMany(dbModels.Quotation, {
   foreignKey: "updated_by",
   as: "updatedQuotations",
-});
-dbModels.SystemUser.hasMany(dbModels.AmcEstimate, {
-  foreignKey: "created_by",
-  as: "amcEstimatesCreated",
-});
-dbModels.SystemUser.hasMany(dbModels.AmcContract, {
-  foreignKey: "created_by",
-  as: "amcContracts",
 });
 dbModels.SystemUser.hasMany(dbModels.VendorPaymentClearance, {
   foreignKey: "created_by",
@@ -463,13 +424,6 @@ dbModels.Pi.hasMany(dbModels.PiItem, {
 dbModels.Pi.hasOne(dbModels.Invoice, {
   foreignKey: "pi_id",
   as: "invoice",
-  onDelete: "SET NULL",
-  onUpdate: "CASCADE",
-});
-// ✅ CRITICAL FIX: Add AmcContract association to Pi
-dbModels.Pi.belongsTo(dbModels.AmcContract, {
-  foreignKey: "amc_contract_id",
-  as: "amcContract",
   onDelete: "SET NULL",
   onUpdate: "CASCADE",
 });
