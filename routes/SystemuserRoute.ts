@@ -82,7 +82,6 @@ import {
 } from "../controllers/OrderBillController";
 
 import { VendorLedgerController } from "../controllers/vendorLedgerController";
-import { AmcEstimateController } from "../controllers/amcEstimatecontroller";
 
 import {
   listVendorBillPayments, createVendorBillPayment, getBankAccounts,
@@ -95,20 +94,7 @@ import {
   printBoqPdfByQuery, printBoqPdfFromBody,
 } from "../controllers/boqController";
 
-import {
-  createAmcPackage,
-  listAmcPackages,
-} from "../controllers/amcPackageController";
-
-import {
-  createAmcDealPackage, listAmcDealPackages, getAmcDealPackageById,
-  updateAmcDealPackage, softDeleteAmcDealPackage, restoreAmcDealPackage,
-  hardDeleteAmcDealPackage, listAmcDealPackagesDropdown,
-} from "../controllers/amcDealPackageController";
 import { QuotationController } from "../controllers/quotationController";
-import { AmcContractController } from "../controllers/AmcContractController";
-import BillingRequestController from "../controllers/BillingRequestController";
-import AMCOfferController from "../controllers/AMCOfferController";
 
 import {
   checkServiceReportData,
@@ -139,7 +125,6 @@ const quotationController = new QuotationController();
 const roleController = new RoleController(sequelize);
 const permissionAssignmentController = new PermissionAssignmentController(sequelize);
 const permissionController = new PermissionController(sequelize);
-const amcOfferController = new AMCOfferController();
 // ==================== MULTER CONFIGURATIONS ====================
 
 // General file upload for expenses, etc.
@@ -513,28 +498,6 @@ SystemUserRouter.get('/amc-estimates/print-html/:id', AmcEstimateController.prin
 SystemUserRouter.post("/amc-estimates/create-contract", AmcEstimateController.createContractFromEstimate);
 SystemUserRouter.post("/update-service-schedule-planned-date",AmcEstimateController.updateServiceSchedulePlannedDate);
 
-// ----------------------------- AMC CONTRACT -----------------------------
-SystemUserRouter.post("/amc-contracts", AmcContractController.list);
-SystemUserRouter.post("/amc-contracts/search", AmcContractController.search);
-SystemUserRouter.post("/amc-contracts", AmcContractController.getById);
-SystemUserRouter.post("/amc-contracts-update", AmcContractController.update);
-SystemUserRouter.post("/amc-contracts-schedule-update", AmcContractController.updateServiceSchedule);
-SystemUserRouter.post("/amc-contracts-delete", AmcContractController.remove);
-SystemUserRouter.post("/amc-contracts-history", AmcContractController.history);
-SystemUserRouter.get("/amc-contracts-print/html/:id", AmcContractController.printAmcContractHtml);
-SystemUserRouter.get("/amc-contracts-print/pdf/:id", AmcContractController.printAmcContractPdf);
-SystemUserRouter.post("/amc-contracts-update-payment", AmcContractController.updatePayment);
-SystemUserRouter.get('/amc-data', AmcContractController.getAmcData);
-SystemUserRouter.get('/amc-amount-data', AmcContractController.getAmcAmountData);
-SystemUserRouter.get('/amc-tr-data', AmcContractController.getAmcTrData);
-// Add this line with other routes
-SystemUserRouter.post('/amc-contracts-renew-data', AmcContractController.getRenewData);
-SystemUserRouter.post('/amc-contracts-renew-form', AmcContractController.renewWithForm);
-
-/* --------------------------- AMC PACKAGES ------------------------ */
-
-SystemUserRouter.post("/amc-packages", createAmcPackage);
-SystemUserRouter.get("/amc-packages", listAmcPackages);
 
 /* ------------------------ AMC PACKAGES DEAL ------------------------ */
 SystemUserRouter.post("/amc-deal-packages", createAmcDealPackage);
@@ -547,21 +510,6 @@ SystemUserRouter.post("/amc-deal-packages/:id/restore", restoreAmcDealPackage);
 SystemUserRouter.delete("/amc-deal-packages/:id/hard", hardDeleteAmcDealPackage);
 
 
-/* --------------------------- AMC OFFERS ------------------------ */
-SystemUserRouter.post("/amc-offers-create", amcOfferController.create);
-SystemUserRouter.get("/amc-offers", amcOfferController.list);
-SystemUserRouter.put("/amc-offers/:id", amcOfferController.update);
-
-
-
-// -------------------------- AMC BILLING REQUEST --------------------------
-
-
-SystemUserRouter.get("/amc-billing-requests", BillingRequestController.getAll);
-SystemUserRouter.post("/amc-billing-requests", BillingRequestController.getById);
-SystemUserRouter.post("/amc-billing-requests-create", BillingRequestController.create);
-SystemUserRouter.post("/amc-billing-requests/mark-next-payment", BillingRequestController.markNextPaymentAsCompleted);
-SystemUserRouter.post("/create-pi", BillingRequestController.createPI);
 
 
 /*----------------------- SALES DASHBOARS----------------------- */
