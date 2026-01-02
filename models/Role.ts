@@ -1,7 +1,13 @@
 // src/models/Role.ts
 import { Sequelize, DataTypes, Model } from "sequelize";
 
-export class Role extends Model {}
+export class Role extends Model {
+  declare id: string;
+  declare name: string;
+  declare level: number;
+  declare created_at: Date;
+  declare updated_at: Date;
+}
 
 export const initRoleModel = (sequelize: Sequelize) => {
   Role.init(
@@ -21,6 +27,16 @@ export const initRoleModel = (sequelize: Sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 999,
+      },
+      created_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      updated_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
       },
     },
     {

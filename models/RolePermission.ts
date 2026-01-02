@@ -1,7 +1,12 @@
 // src/models/RolePermission.ts
 import { Sequelize, DataTypes, Model } from "sequelize";
 
-export class RolePermission extends Model {}
+export class RolePermission extends Model {
+  declare role_id: string;
+  declare permission_id: string;
+  declare created_at: Date;
+  declare updated_at: Date;
+}
 
 export const initRolePermissionModel = (sequelize: Sequelize) => {
   RolePermission.init(
@@ -15,6 +20,16 @@ export const initRolePermissionModel = (sequelize: Sequelize) => {
         type: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
+      },
+      created_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
+      updated_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
       },
     },
     {

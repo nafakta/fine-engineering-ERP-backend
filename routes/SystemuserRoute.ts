@@ -11,16 +11,6 @@ import { SystemUser } from "../models/SystemUser";
 // Import controllers
 import SystemUserController from "../controllers/CompressCrmController";
 
-
-
-
-
-
-
-
-
-
-
 const SystemUserRouter = express.Router();
 
 // Initialize controllers
