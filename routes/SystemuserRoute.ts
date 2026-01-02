@@ -2,7 +2,6 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { requireAuth } from "../middleware/auth";
 import { Sequelize, Op } from "sequelize";
 import { sequelize } from "../models";
 // Import models
@@ -149,7 +148,7 @@ const attachmentUpload = multer({
 
 /* -------------------------- SYSTEM USERS -------------------------- */
 SystemUserRouter.post("/login", systemUserController.authLogin);
-SystemUserRouter.post("/register", requireAuth, systemUserController.createUser);
+SystemUserRouter.post("/register", systemUserController.createUser);
 SystemUserRouter.post("/generateqrcode", systemUserController.generateQRCode);
 SystemUserRouter.get("/getuser", systemUserController.getUserDetails);
 SystemUserRouter.get("/getalluser", systemUserController.getAllUsers);

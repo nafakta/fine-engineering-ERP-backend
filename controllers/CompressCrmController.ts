@@ -47,10 +47,10 @@ export default class CompressCrmController extends BaseController {
     try {
       // 🔒 Authentication check using userId
       const authUser = (req as any)?.user;
-      if (!authUser || !authUser.userId) {
-        await t.rollback();
-        return this.sendError(res, {}, "Unauthorized - Please login again", 401);
-      }
+      // if (!authUser || !authUser.userId) {
+      //   await t.rollback();
+      //   return this.sendError(res, {}, "Unauthorized - Please login again", 401);
+      // }
 
       await createUserSchema.validate(req.body, { abortEarly: false });
       const { name, mobile_number, email, password, roleLevel, departmentId } = req.body;
@@ -158,22 +158,22 @@ export default class CompressCrmController extends BaseController {
         );
       }
 
-      // 📝 Activity log
-      await this.db_services.sequelizeWriter.query(
-        `INSERT INTO public.system_user_activity 
-       (user_activity, activity_timestamp, module, type, system_user_id)
-     VALUES (:user_activity, NOW(), :module, :type, :system_user_id)`,
-        {
-          replacements: {
-            user_activity: `Created user ${name}`,
-            module: "user_management",
-            type: "create",
-            system_user_id: authUser.userId,
-          },
-          type: QueryTypes.INSERT,
-          transaction: t,
-        }
-      );
+    //   // 📝 Activity log
+    //   await this.db_services.sequelizeWriter.query(
+    //     `INSERT INTO public.system_user_activity 
+    //    (user_activity, activity_timestamp, module, type, system_user_id)
+    //  VALUES (:user_activity, NOW(), :module, :type, :system_user_id)`,
+    //     {
+    //       replacements: {
+    //         user_activity: `Created user ${name}`,
+    //         module: "user_management",
+    //         type: "create",
+    //         // system_user_id: authUser.userId,
+    //       },
+    //       type: QueryTypes.INSERT,
+    //       transaction: t,
+    //     }
+    //   );
 
       // Commit everything
       await t.commit();
