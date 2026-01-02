@@ -121,11 +121,18 @@ export default class JobController {
       const offset = (page - 1) * limit;
       const q = String(req.query.q ?? "").trim();
       const jobType = req.query.job_type as JobType | undefined;
+      const urgent = req.query.urgent;
 
       const where: any = {};
 
       if (jobType && ['JOB_SERVICE', 'TSO_SERVICE', 'KANBAN'].includes(jobType)) {
         where.job_type = jobType;
+      }
+
+      if (urgent === 'true') {
+        where.urgent = true;
+      } else if (urgent === 'false') {
+        where.urgent = false;
       }
 
       if (q) {
