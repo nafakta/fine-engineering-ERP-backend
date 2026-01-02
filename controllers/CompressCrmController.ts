@@ -784,7 +784,7 @@ export default class CompressCrmController extends BaseController {
 
       // Generate a new secret
       const secret = speakeasy.generateSecret({
-        name: "Compress",
+        name: "Fine Enggineering",
         length: 20,
       });
 
