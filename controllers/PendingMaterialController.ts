@@ -39,7 +39,15 @@ export default class PendingMaterialController {
       const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit ?? "20"), 10)));
       const offset = (page - 1) * limit;
 
+      const where: any = {};
+      if (req.query.is_completed === "true") {
+        where.is_completed = true;
+      } else if (req.query.is_completed === "false") {
+        where.is_completed = false;
+      }
+
       const { rows, count } = await this.PendingMaterial.findAndCountAll({
+        where,
         limit,
         offset,
         order: [["created_at", "DESC"]],
