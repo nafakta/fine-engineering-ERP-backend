@@ -53,7 +53,10 @@ export const initJobModel = (sequelize: Sequelize) => {
         },
       },
       job_category: { type: DataTypes.TEXT, allowNull: true },
-      job_no: { type: DataTypes.DECIMAL(14, 2), allowNull: true }, // Nullable
+      job_no: {
+        type: DataTypes.DECIMAL(14, 2),
+        allowNull: true,
+      }, // Nullable
       serial_no: { type: DataTypes.DECIMAL(14, 2), allowNull: false, defaultValue: 0 },
       job_order_date: { type: DataTypes.DATEONLY, allowNull: true },
       mtl_rcd_date: { type: DataTypes.DATEONLY, allowNull: true },
@@ -91,6 +94,18 @@ export const initJobModel = (sequelize: Sequelize) => {
       timestamps: true,
       createdAt: "created_at",
       updatedAt: "updated_at",
+      hooks: {
+        beforeSave: async (job) => {
+          if (job.job_no) {
+            const category = await sequelize.models.Category.findOne({
+              where: { job_no: job.job_no },
+            });
+            if (category) {
+              job.job_category = category.getDataValue("job_category");
+            }
+          }
+        },
+      },
     }
   );
 
