@@ -45,6 +45,7 @@ export default class JobController {
       remark: Yup.string().nullable(),
       bin_location: Yup.string().nullable(),
       material_remark: Yup.string().nullable(),
+      client_name: Yup.string().nullable(),
       urgent: Yup.boolean().default(false),
       created_by: Yup.string().uuid().nullable(),
     });
@@ -141,6 +142,7 @@ export default class JobController {
           { item_description: { [Op.iLike]: `%${q}%` } },
           { moc: { [Op.iLike]: `%${q}%` } },
           { remark: { [Op.iLike]: `%${q}%` } },
+          { client_name: { [Op.iLike]: `%${q}%` } },
         ];
       }
 
@@ -226,6 +228,7 @@ export default class JobController {
       remark: Yup.string(),
       bin_location: Yup.string(),
       material_remark: Yup.string(),
+      client_name: Yup.string().nullable(),
       urgent: Yup.boolean(),
       updated_by: Yup.string().uuid().nullable(),
     });
