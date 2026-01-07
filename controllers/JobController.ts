@@ -329,6 +329,7 @@ export default class JobController {
   public markUrgent = async (req: Request, res: Response) => {
     const schema = Yup.object({
       urgent: Yup.boolean().default(true),
+      urgent_due_date: Yup.date().nullable(),
       updated_by: Yup.string().uuid().nullable(),
     });
 
@@ -351,7 +352,11 @@ export default class JobController {
         });
       }
 
-      await job.update({ urgent: body.urgent, updated_by: body.updated_by });
+      await job.update({
+        urgent: body.urgent,
+        urgent_due_date: body.urgent_due_date,
+        updated_by: body.updated_by,
+      });
 
       return res.json({
         success: true,

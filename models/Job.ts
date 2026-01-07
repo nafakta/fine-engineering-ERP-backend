@@ -31,6 +31,7 @@ export class Job extends Model<
   declare material_remark: string | null;
   // declare client: string | null;
   declare urgent: CreationOptional<boolean>;
+  declare urgent_due_date: Date | null;
   declare created_at: CreationOptional<Date>;
   declare updated_at: CreationOptional<Date>;
   declare created_by: string | null;
@@ -74,6 +75,7 @@ export const initJobModel = (sequelize: Sequelize) => {
         allowNull: false,
         defaultValue: false,
       },
+      urgent_due_date: { type: DataTypes.DATEONLY, allowNull: true },
       created_by: { type: DataTypes.UUID, allowNull: true },
       updated_by: { type: DataTypes.UUID, allowNull: true },
       created_at: {
