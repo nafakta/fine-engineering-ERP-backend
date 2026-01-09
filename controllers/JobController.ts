@@ -34,6 +34,7 @@ export default class JobController {
         then: (schema) => schema.required("job_no is required for JOB_SERVICE jobs").typeError("job_no must be a number"),
         otherwise: (schema) => schema.nullable(),
       }),
+      jo_number: Yup.number().nullable(),
       serial_no: Yup.number().default(0),
       job_order_date: Yup.date().nullable(),
       mtl_rcd_date: Yup.date().nullable(),
@@ -217,6 +218,7 @@ export default class JobController {
     const updateSchema = Yup.object({
       job_category: Yup.string().nullable(),
       job_no: Yup.number().nullable(),
+      jo_number: Yup.number().nullable(),
       serial_no: Yup.number(),
       job_order_date: Yup.date().nullable(),
       mtl_rcd_date: Yup.date().nullable(),
