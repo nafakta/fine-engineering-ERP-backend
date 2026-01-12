@@ -15,6 +15,7 @@ import { initSystemUserSecretModel } from "./SystemUserSecret";
 import initCategoryModel from "./Category";
 import { initJobModel } from "./Job";
 import { initPendingMaterialModel } from "./PendingMaterial";
+import { initPoServiceModel } from "./PoService";
 
 
 const sequelize = db.write;
@@ -35,6 +36,7 @@ const dbModels: any = {
   Category: initCategoryModel(sequelize),
   Job: initJobModel(sequelize),
   PendingMaterial: initPendingMaterialModel(sequelize),
+  PoService: initPoServiceModel(sequelize),
 
 };
 
@@ -95,6 +97,18 @@ dbModels.Category.hasMany(dbModels.PendingMaterial, {
   as: "pendingMaterials",
 });
 
+dbModels.PoService.belongsTo(dbModels.Category, {
+  foreignKey: "job_no",
+  targetKey: "job_no",
+  as: "category",
+});
+
+dbModels.Category.hasMany(dbModels.PoService, {
+  foreignKey: "job_no",
+  sourceKey: "job_no",
+  as: "poServices",
+});
+
 dbModels.SystemUser.hasMany(dbModels.SystemUserSecret, {
   foreignKey: "user_id",
   as: "secrets",
@@ -113,6 +127,7 @@ export const {
   Category,
   Job,
   PendingMaterial,
+  PoService,
   // Add other models you need
 } = dbModels;
 
