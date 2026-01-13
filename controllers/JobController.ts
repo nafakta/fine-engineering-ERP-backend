@@ -137,6 +137,13 @@ export default class JobController {
         where.urgent = false;
       }
 
+      if (req.query.job_no) {
+        const jobNo = parseFloat(String(req.query.job_no));
+        if (!isNaN(jobNo)) {
+          where.job_no = jobNo;
+        }
+      }
+
       if (q) {
         where[Op.or] = [
           { job_category: { [Op.iLike]: `%${q}%` } },
