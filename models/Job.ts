@@ -31,6 +31,8 @@ export class Job extends Model<
   declare bin_location: string | null;
   declare material_remark: string | null;
   declare client_name: string | null;
+  declare assign_to: string | null;
+  declare assign_date: Date | null;
   declare urgent: CreationOptional<boolean>;
   declare urgent_due_date: Date | null;
   declare created_at: CreationOptional<Date>;
@@ -75,6 +77,8 @@ export const initJobModel = (sequelize: Sequelize) => {
       bin_location: { type: DataTypes.TEXT, allowNull: true },
       material_remark: { type: DataTypes.TEXT, allowNull: true },
       client_name: { type: DataTypes.TEXT, allowNull: true },
+      assign_to: { type: DataTypes.TEXT, allowNull: true },
+      assign_date: { type: DataTypes.DATEONLY, allowNull: true },
       urgent: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

@@ -47,6 +47,8 @@ export default class JobController {
       bin_location: Yup.string().nullable(),
       material_remark: Yup.string().nullable(),
       client_name: Yup.string().nullable(),
+      assign_to: Yup.string().nullable(),
+      assign_date: Yup.date().nullable(),
       urgent: Yup.boolean().default(false),
       created_by: Yup.string().uuid().nullable(),
     });
@@ -238,6 +240,8 @@ export default class JobController {
       bin_location: Yup.string(),
       material_remark: Yup.string(),
       client_name: Yup.string().nullable(),
+      assign_to: Yup.string().nullable(),
+      assign_date: Yup.date().nullable(),
       urgent: Yup.boolean(),
       updated_by: Yup.string().uuid().nullable(),
     });
@@ -377,6 +381,63 @@ export default class JobController {
       });
     } catch (err: any) {
       console.error("Mark Urgent Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({
+          success: false,
+          error: "Validation error",
+          details: err.errors,
+        });
+      }
+      return res.status(500).json({
+        success: false,
+        error: "Internal server error",
+      });
+    }
+  };
+
+  // -------------------------
+  // ASSIGN JOB
+  // PATCH /api/v1/jobs/:id/assign
+  // -------------------------
+  public assignJob = async (req: Request, res: Response) => {
+    const schema = Yup.object({
+      assign_to: Yup.string().required("Assign to is required"),
+      assign_date: Yup.date().required("Assign date is required"),
+      updated_by: Yup.string().uuid().nullable(),
+    });
+
+    try {
+      const { id } = req.params;
+      const body = await schema.validate(req.body, { stripUnknown: true });
+
+      if (!this.Job) {
+        return res.status(500).json({
+          success: false,
+          error: "Job model not initialized",
+        });
+      }
+
+      const job = await this.Job.findByPk(id);
+      if (!job) {
+        return res.status(404).json({
+          success: false,
+          error: "Job not found",
+        });
+      }
+
+      await job.update({
+        assign_to: body.assign_to,
+        assign_date: body.assign_date,
+        updated_by: body.updated_by,
+      });
+
+      return res.json({
+        success: true,
+        message: "Job assigned successfully",
+        data: job,
+      });
+    } catch (err: any) {
+      console.error("Assign Job Error:", err);
       if (err instanceof Yup.ValidationError) {
         return res.status(400).json({
           success: false,
