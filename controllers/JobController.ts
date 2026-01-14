@@ -340,17 +340,17 @@ export default class JobController {
 
   // -------------------------
   // MARK URGENT
-  // PATCH /api/v1/jobs/:id/urgent
+  // POST /api/v1/jobs/mark-urgent
   // -------------------------
   public markUrgent = async (req: Request, res: Response) => {
     const schema = Yup.object({
+      job_no: Yup.number().required("job_no is required"),
       urgent: Yup.boolean().default(true),
       urgent_due_date: Yup.date().nullable(),
       updated_by: Yup.string().uuid().nullable(),
     });
 
     try {
-      const { id } = req.params;
       const body = await schema.validate(req.body, { stripUnknown: true });
 
       if (!this.Job) {
@@ -360,24 +360,26 @@ export default class JobController {
         });
       }
 
-      const job = await this.Job.findByPk(id);
-      if (!job) {
+      const { job_no, ...updatePayload } = body;
+
+      const [affectedCount] = await this.Job.update(updatePayload, {
+        where: { job_no },
+      });
+
+      if (affectedCount === 0) {
         return res.status(404).json({
           success: false,
-          error: "Job not found",
+          error: `No jobs found with job_no: ${job_no}`,
         });
       }
 
-      await job.update({
-        urgent: body.urgent,
-        urgent_due_date: body.urgent_due_date,
-        updated_by: body.updated_by,
-      });
-
       return res.json({
         success: true,
-        message: "Job urgent status updated successfully",
-        data: job,
+        message: `${affectedCount} job(s) with job_no ${job_no} were marked as urgent.`,
+        data: {
+          job_no,
+          updated_count: affectedCount,
+        },
       });
     } catch (err: any) {
       console.error("Mark Urgent Error:", err);
