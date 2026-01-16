@@ -24,6 +24,7 @@ router.get("/categories", categoryController.list);
 router.get("/categories/:id", categoryController.get);
 router.put("/categories/:id", categoryController.update);
 router.delete("/categories/:id", categoryController.delete);
+router.post("/categories/mark-urgent", categoryController.markUrgent);
 
 router.post("/pending-materials", pendingMaterialController.create);
 router.get("/pending-materials", pendingMaterialController.list);

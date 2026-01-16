@@ -23,6 +23,7 @@ export default class CategoryController {
       tempp: Yup.string().default("none"),
       qty: Yup.number().default(0),
       remark: Yup.string().required("Remark is required"),
+      is_urgent: Yup.boolean().default(false),
       created_by: Yup.string().uuid().nullable(),
     });
 
@@ -38,6 +39,7 @@ export default class CategoryController {
         tempp,
         qty,
         remark,
+        is_urgent,
         created_by,
       } = req.body;
 
@@ -58,6 +60,7 @@ export default class CategoryController {
         tempp: tempp || "none",
         qty: qty || 0,
         remark,
+        is_urgent: is_urgent ?? false,
         created_by,
       });
 
@@ -190,6 +193,7 @@ export default class CategoryController {
       tempp: Yup.string(),
       qty: Yup.number(),
       remark: Yup.string(),
+      is_urgent: Yup.boolean(),
       updated_by: Yup.string().uuid().nullable(),
     });
 
@@ -221,6 +225,7 @@ export default class CategoryController {
         tempp,
         qty,
         remark,
+        is_urgent,
         updated_by,
       } = req.body;
 
@@ -232,6 +237,7 @@ export default class CategoryController {
       if (tempp !== undefined) category.tempp = tempp;
       if (qty !== undefined) category.qty = qty;
       if (remark !== undefined) category.remark = remark;
+      if (is_urgent !== undefined) category.is_urgent = is_urgent;
       if (updated_by !== undefined) category.updated_by = updated_by;
 
       // manually update updated_at
@@ -291,6 +297,59 @@ export default class CategoryController {
       });
     } catch (err: any) {
       console.error("Delete Category Error:", err);
+      return res.status(500).json({
+        success: false,
+        error: "Internal server error",
+      });
+    }
+  };
+
+  // -------------------------
+  // MARK URGENT
+  // POST /api/v1/categories/mark-urgent
+  // -------------------------
+  public markUrgent = async (req: Request, res: Response) => {
+    const schema = Yup.object({
+      job_no: Yup.number().required("job_no is required"),
+    });
+
+    try {
+      await schema.validate(req.body);
+      const { job_no } = req.body;
+
+      if (!this.Category) {
+        return res.status(500).json({
+          success: false,
+          error: "Category model not initialized",
+        });
+      }
+
+      const category = await this.Category.findOne({ where: { job_no } });
+
+      if (!category) {
+        return res.status(404).json({
+          success: false,
+          error: "Category not found",
+        });
+      }
+
+      category.is_urgent = true;
+      await category.save();
+
+      return res.json({
+        success: true,
+        message: "Category marked as urgent successfully",
+        data: category,
+      });
+    } catch (err: any) {
+      console.error("Mark Urgent Category Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({
+          success: false,
+          error: "Validation error",
+          details: err.errors,
+        });
+      }
       return res.status(500).json({
         success: false,
         error: "Internal server error",
