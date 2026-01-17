@@ -16,7 +16,7 @@ export default class JobController {
   public create = async (req: Request, res: Response) => {
     // Define the static list of Kanban categories.
     // TODO: Update this list with your actual static Kanban categories.
-    const KANBAN_CATEGORIES = ['RAW_MATERIAL', 'IN_PROGRESS', 'FINISHED_GOODS'];
+    const KANBAN_CATEGORIES = ['VESSEL', 'HEAD', 'CLAMP', 'PILLER_DRIVE_ASSEMBLY', 'HEATER_PLATE', 'COMPRESSION_RING', 'HEATER_SHELL', 'OUTER_RING', 'COOLING_COIL', 'SPARGER', 'HOLLOW_SHAFT', 'STIRRER_SHAFT'];
 
     const createSchema = Yup.object({
       job_type: Yup.string()
@@ -68,16 +68,39 @@ export default class JobController {
 
       const job = await this.Job.create(body, { transaction });
 
-      // Check if the item with same item_no is present in pending table, if it is present then mark is_completed as true
-      if (body.item_no) {
+      // Check if the item with same item_no is present in pending table
+      if (body.job_no) {
         const whereCondition: any = {
-          item_no: body.item_no,
+          job_no: body.job_no,
           is_completed: false,
         };
         if (body.job_no) {
           whereCondition.job_no = body.job_no;
         }
-        await dbModels.PendingMaterial.update({ is_completed: true }, { where: whereCondition, transaction });
+
+        const pendingMaterial = await dbModels.PendingMaterial.findOne({
+          where: whereCondition,
+          transaction,
+        });
+
+        if (pendingMaterial) {
+          const pendingQty = Number(pendingMaterial.qty);
+          const jobQty = Number(body.qty || 0);
+
+          if (jobQty > pendingQty) {
+            await transaction.rollback();
+            return res.status(400).json({
+              success: false,
+              error: "Quantity more than required",
+            });
+          }
+
+          if (jobQty < pendingQty) {
+            await pendingMaterial.update({ qty: pendingQty - jobQty }, { transaction });
+          } else {
+            await pendingMaterial.update({ is_completed: true }, { transaction });
+          }
+        }
       }
 
       await transaction.commit();
