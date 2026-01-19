@@ -25,6 +25,7 @@ export default class CategoryController {
       remark: Yup.string().required("Remark is required"),
       client_name: Yup.string().nullable(),
       drawing_recieved_date: Yup.date().nullable(),
+      urgent_due_date: Yup.date().nullable(),
       is_urgent: Yup.boolean().default(false),
       created_by: Yup.string().uuid().nullable(),
     });
@@ -43,6 +44,7 @@ export default class CategoryController {
         remark,
         client_name,
         drawing_recieved_date,
+        urgent_due_date,
         is_urgent,
         created_by,
       } = req.body;
@@ -66,6 +68,7 @@ export default class CategoryController {
         remark,
         client_name,
         drawing_recieved_date,
+        urgent_due_date,
         is_urgent: is_urgent ?? false,
         created_by,
       });
@@ -201,6 +204,7 @@ export default class CategoryController {
       remark: Yup.string(),
       client_name: Yup.string().nullable(),
       drawing_recieved_date: Yup.date().nullable(),
+      urgent_due_date: Yup.date().nullable(),
       is_urgent: Yup.boolean(),
       updated_by: Yup.string().uuid().nullable(),
     });
@@ -235,6 +239,7 @@ export default class CategoryController {
         remark,
         client_name,
         drawing_recieved_date,
+        urgent_due_date,
         is_urgent,
         updated_by,
       } = req.body;
@@ -249,6 +254,7 @@ export default class CategoryController {
       if (remark !== undefined) category.remark = remark;
       if (client_name !== undefined) category.client_name = client_name;
       if (drawing_recieved_date !== undefined) category.drawing_recieved_date = drawing_recieved_date;
+      if (urgent_due_date !== undefined) category.urgent_due_date = urgent_due_date;
       if (is_urgent !== undefined) category.is_urgent = is_urgent;
       if (updated_by !== undefined) category.updated_by = updated_by;
 
@@ -323,11 +329,12 @@ export default class CategoryController {
   public markUrgent = async (req: Request, res: Response) => {
     const schema = Yup.object({
       job_no: Yup.number().required("job_no is required"),
+      urgent_due_date: Yup.date().nullable(),
     });
 
     try {
       await schema.validate(req.body);
-      const { job_no } = req.body;
+      const { job_no, urgent_due_date } = req.body;
 
       if (!this.Category) {
         return res.status(500).json({
@@ -346,6 +353,7 @@ export default class CategoryController {
       }
 
       category.is_urgent = true;
+      if (urgent_due_date !== undefined) category.urgent_due_date = urgent_due_date;
       await category.save();
 
       return res.json({

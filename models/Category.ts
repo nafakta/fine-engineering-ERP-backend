@@ -13,6 +13,7 @@ export default (sequelize: Sequelize) => {
     public remark!: string;
     public client_name!: string | null;
     public drawing_recieved_date!: Date | null;
+    public urgent_due_date!: Date | null;
     public is_urgent!: boolean;
     public created_by!: string | null;
     public updated_by!: string | null;
@@ -69,6 +70,10 @@ export default (sequelize: Sequelize) => {
         allowNull: true,
       },
       drawing_recieved_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
+      },
+      urgent_due_date: {
         type: DataTypes.DATEONLY,
         allowNull: true,
       },
