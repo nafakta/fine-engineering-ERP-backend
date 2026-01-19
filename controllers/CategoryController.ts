@@ -117,15 +117,22 @@ export default class CategoryController {
 
       const q = String(req.query.q ?? "").trim();
 
-      const where = q
-        ? {
-            [Op.or]: [
-              { job_category: { [Op.iLike]: `%${q}%` } },
-              { description: { [Op.iLike]: `%${q}%` } },
-              { remark: { [Op.iLike]: `%${q}%` } },
-            ],
-          }
-        : undefined;
+      const where: any = {};
+
+      if (q) {
+        where[Op.or] = [
+          { job_category: { [Op.iLike]: `%${q}%` } },
+          { description: { [Op.iLike]: `%${q}%` } },
+          { remark: { [Op.iLike]: `%${q}%` } },
+        ];
+      }
+
+      if (req.query.job_no) {
+        const jobNo = parseFloat(String(req.query.job_no));
+        if (!isNaN(jobNo)) {
+          where.job_no = jobNo;
+        }
+      }
 
       const { rows, count } = await this.Category.findAndCountAll({
         where,
