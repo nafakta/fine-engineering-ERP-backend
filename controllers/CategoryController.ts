@@ -23,6 +23,8 @@ export default class CategoryController {
       tempp: Yup.string().default("none"),
       qty: Yup.number().default(0),
       remark: Yup.string().required("Remark is required"),
+      client_name: Yup.string().nullable(),
+      drawing_recieved_date: Yup.date().nullable(),
       is_urgent: Yup.boolean().default(false),
       created_by: Yup.string().uuid().nullable(),
     });
@@ -39,6 +41,8 @@ export default class CategoryController {
         tempp,
         qty,
         remark,
+        client_name,
+        drawing_recieved_date,
         is_urgent,
         created_by,
       } = req.body;
@@ -60,6 +64,8 @@ export default class CategoryController {
         tempp: tempp || "none",
         qty: qty || 0,
         remark,
+        client_name,
+        drawing_recieved_date,
         is_urgent: is_urgent ?? false,
         created_by,
       });
@@ -193,6 +199,8 @@ export default class CategoryController {
       tempp: Yup.string(),
       qty: Yup.number(),
       remark: Yup.string(),
+      client_name: Yup.string().nullable(),
+      drawing_recieved_date: Yup.date().nullable(),
       is_urgent: Yup.boolean(),
       updated_by: Yup.string().uuid().nullable(),
     });
@@ -225,6 +233,8 @@ export default class CategoryController {
         tempp,
         qty,
         remark,
+        client_name,
+        drawing_recieved_date,
         is_urgent,
         updated_by,
       } = req.body;
@@ -237,6 +247,8 @@ export default class CategoryController {
       if (tempp !== undefined) category.tempp = tempp;
       if (qty !== undefined) category.qty = qty;
       if (remark !== undefined) category.remark = remark;
+      if (client_name !== undefined) category.client_name = client_name;
+      if (drawing_recieved_date !== undefined) category.drawing_recieved_date = drawing_recieved_date;
       if (is_urgent !== undefined) category.is_urgent = is_urgent;
       if (updated_by !== undefined) category.updated_by = updated_by;
 

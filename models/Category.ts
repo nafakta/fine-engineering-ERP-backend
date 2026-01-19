@@ -11,6 +11,8 @@ export default (sequelize: Sequelize) => {
     public tempp!: string;
     public qty!: number;
     public remark!: string;
+    public client_name!: string | null;
+    public drawing_recieved_date!: Date | null;
     public is_urgent!: boolean;
     public created_by!: string | null;
     public updated_by!: string | null;
@@ -61,6 +63,14 @@ export default (sequelize: Sequelize) => {
       remark: {
         type: DataTypes.TEXT,
         allowNull: false,
+      },
+      client_name: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      drawing_recieved_date: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
       },
       is_urgent: {
         type: DataTypes.BOOLEAN,
