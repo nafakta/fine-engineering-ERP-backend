@@ -98,7 +98,7 @@ export default class JobController {
           if (jobQty < pendingQty) {
             await pendingMaterial.update({ qty: pendingQty - jobQty }, { transaction });
           } else {
-            await pendingMaterial.update({ is_completed: true }, { transaction });
+            await pendingMaterial.update({ is_completed: true, qty: pendingQty - jobQty }, { transaction });
           }
         }
       }
