@@ -169,6 +169,10 @@ export default class JobController {
         }
       }
 
+      if (req.query.client_name) {
+        where.client_name = { [Op.iLike]: `%${String(req.query.client_name).trim()}%` };
+      }
+
       if (q) {
         where[Op.or] = [
           { job_category: { [Op.iLike]: `%${q}%` } },
