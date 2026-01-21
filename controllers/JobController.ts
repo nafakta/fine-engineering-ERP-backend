@@ -393,19 +393,34 @@ export default class JobController {
         where: { job_no },
       });
 
-      if (affectedCount === 0) {
+      // Also update Category if it exists
+      let categoryUpdated = false;
+      if (dbModels.Category) {
+        const category = await dbModels.Category.findOne({ where: { job_no } });
+        if (category) {
+          category.is_urgent = body.urgent;
+          if (body.urgent_due_date !== undefined) {
+            category.urgent_due_date = body.urgent_due_date;
+          }
+          await category.save();
+          categoryUpdated = true;
+        }
+      }
+
+      if (affectedCount === 0 && !categoryUpdated) {
         return res.status(404).json({
           success: false,
-          error: `No jobs found with job_no: ${job_no}`,
+          error: `No jobs or category found with job_no: ${job_no}`,
         });
       }
 
       return res.json({
         success: true,
-        message: `${affectedCount} job(s) with job_no ${job_no} were marked as urgent.`,
+        message: `${affectedCount} job(s) and category with job_no ${job_no} were marked as urgent.`,
         data: {
           job_no,
           updated_count: affectedCount,
+          category_updated: categoryUpdated,
         },
       });
     } catch (err: any) {
