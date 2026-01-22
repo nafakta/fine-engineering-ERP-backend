@@ -129,7 +129,7 @@ export default class JobController {
 
   // -------------------------
   // LIST
-  // GET /api/v1/jobs?page=1&limit=20&q=...&job_type=...
+  // GET /api/v1/jobs?page=1&limit=20&q=...&job_type=...&assign_to=...
   // -------------------------
   public list = async (req: Request, res: Response) => {
     try {
@@ -171,6 +171,10 @@ export default class JobController {
 
       if (req.query.client_name) {
         where.client_name = { [Op.iLike]: `%${String(req.query.client_name).trim()}%` };
+      }
+
+      if (req.query.assign_to) {
+        where.assign_to = { [Op.iLike]: `%${String(req.query.assign_to).trim()}%` };
       }
 
       if (q) {
