@@ -12,6 +12,7 @@ const poServiceController = new PoServiceController();
 
 // Define routes for the unified Job API
 router.post("/jobs", jobController.create);
+router.post("/jobs/bulk", jobController.bulkCreate);
 router.get("/jobs", jobController.list);
 router.get("/jobs/:id", jobController.get);
 router.put("/jobs/:id", jobController.update);

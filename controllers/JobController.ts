@@ -128,6 +128,255 @@ export default class JobController {
   };
 
   // -------------------------
+  // BULK CREATE
+  // POST /api/v1/jobs/bulk
+  // -------------------------
+  // public bulkCreate = async (req: Request, res: Response) => {
+  //   // Define the static list of Kanban categories.
+  //   const KANBAN_CATEGORIES = ['VESSEL', 'HEAD', 'CLAMP', 'PILLER_DRIVE_ASSEMBLY', 'HEATER_PLATE', 'COMPRESSION_RING', 'HEATER_SHELL', 'OUTER_RING', 'COOLING_COIL', 'SPARGER', 'HOLLOW_SHAFT', 'STIRRER_SHAFT'];
+
+  //   const itemSchema = Yup.object({
+  //     item_description: Yup.string().nullable(),
+  //     item_no: Yup.number().default(0),
+  //     qty: Yup.number().default(0),
+  //     moc: Yup.string().required("moc is required"),
+  //     bin_location: Yup.string().nullable(),
+  //     material_remark: Yup.string().nullable(),
+  //   });
+
+  //   const bulkCreateSchema = Yup.object({
+  //     common_data: Yup.object({
+  //       job_type: Yup.string()
+  //         .oneOf(['JOB_SERVICE', 'TSO_SERVICE', 'KANBAN'] as JobType[])
+  //         .required("job_type is required"),
+  //       job_category: Yup.string().when('job_type', {
+  //         is: 'KANBAN',
+  //         then: (schema) => schema
+  //           .oneOf(KANBAN_CATEGORIES, `For KANBAN, job_category must be one of: ${KANBAN_CATEGORIES.join(', ')}`)
+  //           .required("job_category is required for KANBAN jobs"),
+  //         otherwise: (schema) => schema.nullable(),
+  //       }),
+  //       job_no: Yup.number().when('job_type', {
+  //         is: 'JOB_SERVICE',
+  //         then: (schema) => schema.required("job_no is required for JOB_SERVICE jobs").typeError("job_no must be a number"),
+  //         otherwise: (schema) => schema.nullable(),
+  //       }),
+  //       jo_number: Yup.number().nullable(),
+  //       serial_no: Yup.number().default(0),
+  //       job_order_date: Yup.date().nullable(),
+  //       mtl_rcd_date: Yup.date().nullable(),
+  //       mtl_challan_no: Yup.number().default(0),
+  //       remark: Yup.string().nullable(),
+  //       client_name: Yup.string().nullable(),
+  //       assign_to: Yup.string().nullable(),
+  //       assign_date: Yup.date().nullable(),
+  //       urgent: Yup.boolean().default(false),
+  //       created_by: Yup.string().uuid().nullable(),
+  //     }).required("common_data is required"),
+  //     items: Yup.array().of(itemSchema).min(1, "At least one item is required").required("items is required"),
+  //   });
+
+  //   const transaction = await dbModels.sequelize.transaction();
+
+  //   try {
+  //     const { common_data, items } = await bulkCreateSchema.validate(req.body, { abortEarly: false, stripUnknown: true });
+
+  //     if (!this.Job) {
+  //       await transaction.rollback();
+  //       return res.status(500).json({
+  //         success: false,
+  //         error: "Job model not initialized",
+  //       });
+  //     }
+
+  //     const createdJobs = [];
+
+  //     for (const item of items) {
+  //       const jobData = { ...common_data, ...item };
+  //       const job = await this.Job.create(jobData, { transaction });
+  //       createdJobs.push(job);
+
+  //       // Check if the item with same item_no is present in pending table
+  //       if (jobData.job_no) {
+  //         const whereCondition: any = {
+  //           job_no: jobData.job_no,
+  //           is_completed: false,
+  //         };
+
+  //         const pendingMaterial = await dbModels.PendingMaterial.findOne({
+  //           where: whereCondition,
+  //           transaction,
+  //         });
+
+  //         if (pendingMaterial) {
+  //           const pendingQty = Number(pendingMaterial.qty);
+  //           const jobQty = Number(jobData.qty || 0);
+
+  //           if (jobQty > pendingQty) {
+  //             await transaction.rollback();
+  //             return res.status(400).json({
+  //               success: false,
+  //               error: `Quantity more than required for item ${item.item_no}`,
+  //             });
+  //           }
+
+  //           if (jobQty < pendingQty) {
+  //             await pendingMaterial.update({ qty: pendingQty - jobQty }, { transaction });
+  //           } else {
+  //             await pendingMaterial.update({ is_completed: true, qty: pendingQty - jobQty }, { transaction });
+  //           }
+  //         }
+  //       }
+  //     }
+
+  //     await transaction.commit();
+
+  //     return res.status(201).json({
+  //       success: true,
+  //       data: createdJobs,
+  //       message: "Jobs created successfully",
+  //     });
+  //   } catch (err: any) {
+  //     await transaction.rollback();
+  //     console.error("Bulk Create Job Error:", err);
+  //     if (err instanceof Yup.ValidationError) {
+  //       return res.status(400).json({
+  //         success: false,
+  //         error: "Validation error",
+  //         details: err.errors,
+  //       });
+  //     }
+  //     return res.status(500).json({
+  //       success: false,
+  //       error: "Internal server error",
+  //     });
+  //   }
+  // };
+
+  // -------------------------
+  // BULK CREATE
+  // POST /api/v1/jobs/bulk
+  // -------------------------
+  public bulkCreate = async (req: Request, res: Response) => {
+    const itemSchema = Yup.object({
+      item_description: Yup.string().nullable(),
+      item_no: Yup.number().default(0),
+      qty: Yup.number().default(0),
+      moc: Yup.string().required("moc is required"),
+      bin_location: Yup.string().nullable(),
+      material_remark: Yup.string().nullable(),
+    });
+
+    const bulkCreateSchema = Yup.object({
+      common_data: Yup.object({
+        job_type: Yup.string()
+          .oneOf(['JOB_SERVICE'], "Only JOB_SERVICE is allowed for bulk create")
+          .required("job_type is required"),
+        job_no: Yup.number().required("job_no is required"),
+        job_category: Yup.string().nullable(),
+        jo_number: Yup.number().nullable(),
+        serial_no: Yup.number().default(0),
+        job_order_date: Yup.date().nullable(),
+        mtl_rcd_date: Yup.date().nullable(),
+        mtl_challan_no: Yup.number().default(0),
+        remark: Yup.string().nullable(),
+        client_name: Yup.string().nullable(),
+        assign_to: Yup.string().nullable(),
+        assign_date: Yup.date().nullable(),
+        urgent: Yup.boolean().default(false),
+        created_by: Yup.string().uuid().nullable(),
+      }).required("common_data is required"),
+      items: Yup.array().of(itemSchema).min(1, "At least one item is required").required("items is required"),
+    });
+
+    const transaction = await dbModels.sequelize.transaction();
+
+    try {
+      const { common_data, items } = await bulkCreateSchema.validate(req.body, { abortEarly: false, stripUnknown: true });
+
+      if (!this.Job) {
+        await transaction.rollback();
+        return res.status(500).json({
+          success: false,
+          error: "Job model not initialized",
+        });
+      }
+
+      const createdJobs = [];
+
+      for (const item of items) {
+        const jobData = { ...common_data, ...item };
+        const job = await this.Job.create(jobData, { transaction });
+        createdJobs.push(job);
+
+        // Check if the item with same item_no is present in pending table
+        if (jobData.job_no) {
+          let pendingMaterial = await dbModels.PendingMaterial.findOne({
+            where: {
+              job_no: jobData.job_no,
+              item_no: item.item_no,
+              is_completed: false,
+            },
+            transaction,
+          });
+
+          // Fallback: if item_no is 0 (default), try finding by job_no only
+          if (!pendingMaterial && item.item_no === 0) {
+             pendingMaterial = await dbModels.PendingMaterial.findOne({
+                where: {
+                  job_no: jobData.job_no,
+                  is_completed: false,
+                },
+                transaction,
+              });
+          }
+
+          if (pendingMaterial) {
+            const pendingQty = Number(pendingMaterial.qty);
+            const jobQty = Number(jobData.qty || 0);
+
+            if (jobQty > pendingQty) {
+              await transaction.rollback();
+              return res.status(400).json({
+                success: false,
+                error: `Quantity more than required for item ${item.item_no}`,
+              });
+            }
+
+            if (jobQty < pendingQty) {
+              await pendingMaterial.update({ qty: pendingQty - jobQty }, { transaction });
+            } else {
+              await pendingMaterial.update({ is_completed: true, qty: pendingQty - jobQty }, { transaction });
+            }
+          }
+        }
+      }
+
+      await transaction.commit();
+
+      return res.status(201).json({
+        success: true,
+        data: createdJobs,
+        message: "Jobs created successfully",
+      });
+    } catch (err: any) {
+      await transaction.rollback();
+      console.error("Bulk Create Job Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({
+          success: false,
+          error: "Validation error",
+          details: err.errors,
+        });
+      }
+      return res.status(500).json({
+        success: false,
+        error: "Internal server error",
+      });
+    }
+  };
+
+  // -------------------------
   // LIST
   // GET /api/v1/jobs?page=1&limit=20&q=...&job_type=...&assign_to=...
   // -------------------------
