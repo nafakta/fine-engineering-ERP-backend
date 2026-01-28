@@ -3,6 +3,7 @@ import JobController from "../controllers/JobController";
 import CategoryController from "../controllers/CategoryController";
 import PendingMaterialController from "../controllers/PendingMaterialController";
 import PoServiceController from "../controllers/PoServiceController";
+import { upload } from "../multerconfig";
 
 const router = Router();
 const jobController = new JobController();
@@ -33,6 +34,7 @@ router.get("/pending-materials/:id", pendingMaterialController.get);
 router.put("/pending-materials/:id", pendingMaterialController.update);
 router.delete("/pending-materials/:id", pendingMaterialController.delete);
 router.post("/pending-materials/:id/complete", pendingMaterialController.completeAndCreateJob);
+router.post("/pending-material/send-mail", upload.array("followup_images", 10), pendingMaterialController.sendMail);
 
 router.post("/po-services", poServiceController.create);
 router.get("/po-services", poServiceController.list);
