@@ -11,6 +11,7 @@ import { Upload } from "@aws-sdk/lib-storage";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+// Interface for image attachments to S3
 interface TemplateAttachment {
   path: string; // S3 key
   name: string;
@@ -58,40 +59,49 @@ export default class PendingMaterialController {
   // ------------------------
   // Helpers
   // ------------------------
-  private escapeHtml(v: any) {
-    if (v === null || v === undefined) return "";
-    return String(v).replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
+// Helper function to escape HTML characters (for safety in the email body)
+private escapeHtml(v: any) {
+  if (v === null || v === undefined) return "";
+  return String(v).replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 
-  // ✅ Upload followup images to S3 folder: upload-product/
-  private async saveFilesToS3(files?: Express.Multer.File[]): Promise<TemplateAttachment[]> {
-    if (!files || !Array.isArray(files) || files.length === 0) return [];
+// Function to save images to S3
+private async saveFilesToS3(files?: Express.Multer.File[]): Promise<TemplateAttachment[]> {
+  if (!files || !Array.isArray(files) || files.length === 0) return [];
 
-    const attachments: TemplateAttachment[] = [];
+  const attachments: TemplateAttachment[] = [];
 
-    for (const file of files) {
-      const safeOriginal = file.originalname.replace(/[^\w.\- ]+/g, "_");
-      const fileName = `${Date.now()}-${safeOriginal}`;
+  for (const file of files) {
+    const safeOriginal = file.originalname.replace(/[^\w.\- ]+/g, "_");
+    const fileName = `${Date.now()}-${safeOriginal}`;
 
-      // local folder: uploads/upload-product
-      const localDir = path.join(process.cwd(), "uploads", "upload-product");
-      const localPath = path.join(localDir, fileName);
+    // local folder: uploads/upload-product
+    const localDir = path.join(process.cwd(), "uploads", "upload-product");
+    const localPath = path.join(localDir, fileName);
 
-      fs.mkdirSync(localDir, { recursive: true });
+    fs.mkdirSync(localDir, { recursive: true });
 
-      // compress images only
-      if (file.mimetype?.startsWith("image/")) {
+    // Check if the file is an image before processing it with sharp
+    if (file.mimetype && file.mimetype.startsWith("image/")) {
+      try {
+        // Process image with sharp only if it's a valid image buffer
         await sharp(file.buffer)
           .resize({ width: 800, withoutEnlargement: true })
           .jpeg({ quality: 80 })
           .toFile(localPath);
-      } else {
-        fs.writeFileSync(localPath, file.buffer);
+      } catch (error) {
+        console.error("Error processing image with sharp:", error);
+        throw new Error("Invalid image format or corrupted image file.");
       }
+    } else {
+      // If it's not an image, directly save the buffer to the file system
+      fs.writeFileSync(localPath, file.buffer);
+    }
 
-      // upload to S3
-      const key = `upload-product/${fileName}`;
+    // Upload to S3
+    const key = `upload-product/${fileName}`;
 
+    try {
       await new Upload({
         client: s3Client,
         params: {
@@ -102,31 +112,35 @@ export default class PendingMaterialController {
           ACL: "private",
         },
       }).done();
-
-      attachments.push({
-        path: key,
-        name: file.originalname,
-        type: file.mimetype,
-      });
-
-      // delete local file
-      try {
-        fs.unlinkSync(localPath);
-      } catch {}
+    } catch (uploadError) {
+      console.error("Error uploading file to S3:", uploadError);
+      throw new Error("File upload to S3 failed.");
     }
 
-    return attachments;
-  }
-
-  // ✅ Signed URL for PRIVATE s3 images
-  private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60) {
-    const cmd = new GetObjectCommand({
-      Bucket: AWS_BUCKET,
-      Key: key,
+    attachments.push({
+      path: key,
+      name: file.originalname,
+      type: file.mimetype,
     });
 
-    return getSignedUrl(s3Client, cmd, { expiresIn: expiresSeconds });
+    // Delete local file after uploading to S3
+    try {
+      fs.unlinkSync(localPath);
+    } catch {}
   }
+
+  return attachments;
+}
+
+// Generate a signed URL for private S3 images
+private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60) {
+  const cmd = new GetObjectCommand({
+    Bucket: AWS_BUCKET,
+    Key: key,
+  });
+
+  return getSignedUrl(s3Client, cmd, { expiresIn: expiresSeconds });
+}
 
   // ------------------------
   // CREATE
@@ -388,177 +402,92 @@ export default class PendingMaterialController {
   // ------------------------
   public sendMail = async (req: Request, res: Response) => {
     try {
+      // Validate the request body
       const schema = Yup.object({
-        job_no: Yup.number().optional(),
-        ids: Yup.array().of(Yup.string().uuid()).optional(),
-
-        job_category: Yup.string().nullable(),
-        item_description: Yup.string().nullable(),
-
-        subject: Yup.string().optional(),
-        onlyPending: Yup.boolean().default(true),
+        job_no: Yup.number().required("job_no is required"),
+        followup_images: Yup.array().of(Yup.mixed().required("Image is required")).required(),
+        followup_dates: Yup.array().of(Yup.string().required("Date is required")).optional(),
         cc: Yup.array().of(Yup.string().email()).optional(),
-        followup_dates: Yup.array().of(Yup.string()).optional(),
-      }).test("job_no-or-ids", "Provide either job_no or ids", (val) => {
-        if (!val) return false;
-        if (val.job_no) return true;
-        if (Array.isArray(val.ids) && val.ids.length > 0) return true;
-        return false;
+        subject: Yup.string().optional(),
       });
 
-      // Normalize multipart body
-      const rawBody: any = { ...req.body };
-
-      if (rawBody.ids && !Array.isArray(rawBody.ids)) rawBody.ids = [rawBody.ids];
-      if (rawBody.cc && !Array.isArray(rawBody.cc)) rawBody.cc = [rawBody.cc];
-      if (rawBody.followup_dates && !Array.isArray(rawBody.followup_dates)) {
-        rawBody.followup_dates = [rawBody.followup_dates];
-      }
-
-      if (typeof rawBody.onlyPending === "string") rawBody.onlyPending = rawBody.onlyPending === "true";
-      if (typeof rawBody.job_no === "string") {
-        const n = Number(rawBody.job_no);
-        rawBody.job_no = Number.isFinite(n) ? n : undefined;
-      }
-
-      const body = await schema.validate(rawBody, { abortEarly: false, stripUnknown: true });
+      const body = await schema.validate(req.body, { abortEarly: false, stripUnknown: true });
 
       if (!this.PendingMaterial) {
         return res.status(500).json({ success: false, error: "PendingMaterial model not initialized" });
       }
 
-      // Fetch data
-      const where: any = {};
-      if (body.onlyPending !== false) where.is_completed = false;
-      if (body.job_no) where.job_no = body.job_no;
-      if (body.ids?.length) where.id = body.ids;
-
-      const rows = await this.PendingMaterial.findAll({
-        where,
-        order: [["created_at", "DESC"]],
-      });
+      // Fetch data based on the job number
+      const where: any = { job_no: body.job_no, is_completed: false };
+      const rows = await this.PendingMaterial.findAll({ where, order: [["created_at", "DESC"]] });
 
       if (!rows.length) {
-        return res.status(404).json({ success: false, error: "No pending material found for given filter" });
+        return res.status(404).json({ success: false, error: "No pending material found for the given job number" });
       }
 
-      // Upload images
-      const uploaded = await this.saveFilesToS3(req.files as Express.Multer.File[] | undefined);
+      // Upload images to S3
+      const uploadedFiles = await this.saveFilesToS3(req.files as Express.Multer.File[] | undefined);
 
-      // Signed URLs
-      const signed = await Promise.all(
-        uploaded.map(async (u) => {
-          const url = await this.getSignedUrlForKey(u.path);
-          return { ...u, signedUrl: url };
+      // Generate signed URLs for the uploaded images
+      const signedUrls = await Promise.all(
+        uploadedFiles.map(async (file) => {
+          const url = await this.getSignedUrlForKey(file.path);
+          return { ...file, signedUrl: url };
         })
       );
 
-      // Map images + dates
-      const dates = body.followup_dates || [];
-      const followupBlocksHtml =
-        signed.length > 0
-          ? signed
-              .map((f: any, idx: number) => {
-                const dateText = this.escapeHtml(dates[idx] || "");
-                return `
-                  <div style="margin:10px 0;">
-                    <b>Image ${idx + 1}</b>${dateText ? ` (${dateText})` : ""}
-                    <div style="margin-top:8px;">
-                      <img src="${this.escapeHtml(f.signedUrl)}"
-                           alt="followup-${idx + 1}"
-                           style="max-width:220px;border:1px solid #ddd;padding:4px;border-radius:6px;" />
-                    </div>
-                  </div>
-                `;
-              })
-              .join("")
-          : `<div style="color:#444;">No follow-up images attached.</div>`;
+      // If followup_dates are not provided, extract them from the image filenames
+      const followupDates = body.followup_dates || signedUrls.map((file) => this.extractDateFromImage(file.name));
 
-      // Fixed recipients
+      // Generate the HTML content for the email
+      const followupBlocksHtml = signedUrls.length
+        ? signedUrls
+            .map((file, idx) => {
+              const dateText = followupDates[idx] || "Unknown Date";
+              return `
+                <div style="margin:10px 0;">
+                  <b>Image ${idx + 1}</b> (${dateText})
+                  <div style="margin-top:8px;">
+                    <img src="${file.signedUrl}" alt="followup-${idx + 1}" style="max-width:220px; border:1px solid #ddd; padding:4px; border-radius:6px;" />
+                  </div>
+                </div>
+              `;
+            })
+            .join("")
+        : `<div style="color:#444;">No follow-up images attached.</div>`;
+
+      // Prepare the email details
+      const subject = body.subject || "Material Pending from Amar";
       const toList = DEFAULT_TO.join(", ");
       const ccList = (body.cc?.length ? body.cc : []).join(", ");
 
-      // Subject fixed format
-      const subject = body.subject || "Subject :- Material pending from Amar";
-
-      // ✅ THIS LINE FIXED IN CODE (AS YOU SAID)
-      const fixedLine = "This is an urgent and final follow-up regarding the pending job work material";
-
+      // Job details HTML
       const jobDetailsHtml = `
-        <div><b>Job No:</b> ${this.escapeHtml(body.job_no ?? "-")}</div>
-        <div><b>Job Category:</b> ${this.escapeHtml(body.job_category ?? "-")}</div>
-        <div><b>Item Description:</b> ${this.escapeHtml(body.item_description ?? "-")}</div>
+        <div><b>Job No:</b> ${body.job_no}</div>
         <div><b>Status:</b> Material Pending</div>
       `;
 
-      const pendingMaterialTableHtml = `
-        <table style="border-collapse: collapse; width:100%; font-size: 13px;">
-          <thead>
-            <tr>
-              <th style="border:1px solid #ddd;padding:8px;background:#f5f5f5;">Sr</th>
-              <th style="border:1px solid #ddd;padding:8px;background:#f5f5f5;">Job</th>
-              <th style="border:1px solid #ddd;padding:8px;background:#f5f5f5;">Item No</th>
-              <th style="border:1px solid #ddd;padding:8px;background:#f5f5f5;">Item Description</th>
-              <th style="border:1px solid #ddd;padding:8px;background:#f5f5f5;">Size</th>
-              <th style="border:1px solid #ddd;padding:8px;background:#f5f5f5;">MOC</th>
-              <th style="border:1px solid #ddd;padding:8px;background:#f5f5f5;">Qty</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows
-              .map(
-                (r: any, idx: number) => `
-                <tr>
-                  <td style="border:1px solid #ddd;padding:8px;">${idx + 1}</td>
-                  <td style="border:1px solid #ddd;padding:8px;">${this.escapeHtml(r.job_no)}</td>
-                  <td style="border:1px solid #ddd;padding:8px;">${this.escapeHtml(r.item_no)}</td>
-                  <td style="border:1px solid #ddd;padding:8px;">${this.escapeHtml(r.description)}</td>
-                  <td style="border:1px solid #ddd;padding:8px;">${this.escapeHtml(r.size)}</td>
-                  <td style="border:1px solid #ddd;padding:8px;">${this.escapeHtml(r.moc)}</td>
-                  <td style="border:1px solid #ddd;padding:8px;text-align:right;">${this.escapeHtml(r.qty)}</td>
-                </tr>
-              `
-              )
-              .join("")}
-          </tbody>
-        </table>
-      `;
-
+      // Construct the email body
       const html = `
         <div style="font-family: Arial, sans-serif; font-size: 14px; color: #111; line-height: 1.6;">
-          <div style="font-weight:700;margin-bottom:14px;">Subject :- Material pending from Amar</div>
-
-          <div style="margin-bottom:12px;">Dear Team Amar,</div>
-
-          <div style="margin-bottom:12px;">${fixedLine}</div>
-
-          <div style="margin-bottom:16px;">
-            Despite repeated reminders the material is still pending due to which production is stopped and dispatch commitments are failing causing unnecessary delays
-          </div>
-
+          <div style="font-weight:700;margin-bottom:14px;">Subject: ${subject}</div>
+          <div style="margin-bottom:12px;">Dear Team,</div>
+          <div style="margin-bottom:16px;">This is an urgent follow-up regarding pending materials.</div>
           <div style="font-weight:700;margin:18px 0 8px;">Job Details:</div>
           <div style="margin-bottom:12px;">${jobDetailsHtml}</div>
-
-          <div style="font-weight:700;margin:18px 0 8px;">Pending Material:</div>
-          <div style="margin-bottom:14px;">${pendingMaterialTableHtml}</div>
-
-          <div style="margin-top:16px;margin-bottom:10px;">📌 <b>multiple follow-ups already shared</b></div>
-          <div style="margin: 10px 0 16px;">${followupBlocksHtml}</div>
-
+          <div style="font-weight:700;margin:18px 0 8px;">Pending Materials:</div>
+          <div style="margin-bottom:14px;">${followupBlocksHtml}</div>
+          <div style="margin-top:16px;margin-bottom:10px;">📌 <b>Multiple follow-ups already shared</b></div>
           <div style="margin-top:18px;">
-            ⚠️ <b>Important:</b><br/>
-            If pending material is not dispatched immediately, we will not be able to complete the job within the planned timeline and the delay will be recorded as material pending from your side.
+            ⚠️ <b>Important:</b><br/>If pending material is not dispatched immediately, we will not be able to complete the job on time.
           </div>
-
           <div style="margin-top:24px;">
-            Regards,<br/>
-            <b>[ Pravin Durgavale ]</b><br/>
-            Fine Engineering<br/>
-            91+8879634270
+            Regards,<br/>Fine Engineering Team
           </div>
         </div>
       `;
 
+      // Send the email
       const info = await transporter.sendMail({
         from: SMTP_FROM,
         to: toList,
@@ -573,16 +502,19 @@ export default class PendingMaterialController {
         data: {
           messageId: info.messageId,
           sentTo: DEFAULT_TO,
-          uploadedImages: uploaded.map((u) => ({ key: u.path, name: u.name })),
+          uploadedImages: uploadedFiles.map((file) => ({ key: file.path, name: file.name })),
           count: rows.length,
         },
       });
     } catch (err: any) {
       console.error("sendMail PendingMaterial Error:", err);
-      if (err instanceof Yup.ValidationError) {
-        return res.status(400).json({ success: false, error: "Validation error", details: err.errors });
-      }
-      return res.status(500).json({ success: false, error: err?.message || "Internal server error" });
+      return res.status(500).json({ success: false, error: "Internal server error" });
     }
   };
+
+  // Helper function to extract dates from the image filenames (e.g., "image_2026-01-01.jpg")
+  private extractDateFromImage(filename: string): string | null {
+    const match = filename.match(/(\d{4}-\d{2}-\d{2})/); // Matches date format YYYY-MM-DD
+    return match ? match[0] : null;
+  }
 }
