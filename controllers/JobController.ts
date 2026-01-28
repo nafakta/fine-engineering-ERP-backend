@@ -35,7 +35,7 @@ export default class JobController {
         otherwise: (schema) => schema.nullable(),
       }),
       jo_number: Yup.number().nullable(),
-      serial_no: Yup.number().default(0),
+      serial_no: Yup.string().nullable(),
       job_order_date: Yup.date().nullable(),
       mtl_rcd_date: Yup.date().nullable(),
       mtl_challan_no: Yup.number().default(0),
@@ -66,7 +66,7 @@ export default class JobController {
         });
       }
 
-      const job = await this.Job.create(body, { transaction });
+      const job = await this.Job.create(body, { transaction, isBulk: false });
 
       // Check if the item with same item_no is present in pending table
       if (body.job_no) {
@@ -275,7 +275,7 @@ export default class JobController {
         job_no: Yup.number().required("job_no is required"),
         job_category: Yup.string().nullable(),
         jo_number: Yup.number().nullable(),
-        serial_no: Yup.number().default(0),
+        serial_no: Yup.string().nullable(),
         job_order_date: Yup.date().nullable(),
         mtl_rcd_date: Yup.date().nullable(),
         mtl_challan_no: Yup.number().default(0),
@@ -306,7 +306,7 @@ export default class JobController {
 
       for (const item of items) {
         const jobData = { ...common_data, ...item };
-        const job = await this.Job.create(jobData, { transaction });
+        const job = await this.Job.create(jobData, { transaction, isBulk: true });
         createdJobs.push(job);
 
         // Check if the item with same item_no is present in pending table
@@ -508,7 +508,7 @@ export default class JobController {
       job_category: Yup.string().nullable(),
       job_no: Yup.number().nullable(),
       jo_number: Yup.number().nullable(),
-      serial_no: Yup.number(),
+      serial_no: Yup.string().nullable(),
       job_order_date: Yup.date().nullable(),
       mtl_rcd_date: Yup.date().nullable(),
       mtl_challan_no: Yup.number(),

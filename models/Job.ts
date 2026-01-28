@@ -5,6 +5,7 @@ import {
   CreationOptional,
   InferAttributes,
   InferCreationAttributes,
+  Op,
 } from "sequelize";
 
 // Define the allowed job types for better type safety
@@ -19,7 +20,7 @@ export class Job extends Model<
   declare job_category: string | null;
   declare job_no: number | null; // Nullable
   declare jo_number: number | null;
-  declare serial_no: number;
+  declare serial_no: string | null;
   declare job_order_date: Date | null;
   declare mtl_rcd_date: Date | null;
   declare mtl_challan_no: number;
@@ -65,7 +66,11 @@ export const initJobModel = (sequelize: Sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      serial_no: { type: DataTypes.DECIMAL(14, 2), allowNull: false, defaultValue: 0 },
+      serial_no: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        unique: true,
+      },
       job_order_date: { type: DataTypes.DATEONLY, allowNull: true },
       mtl_rcd_date: { type: DataTypes.DATEONLY, allowNull: true },
       mtl_challan_no: { type: DataTypes.DECIMAL(14, 2), allowNull: false, defaultValue: 0 },
@@ -106,6 +111,47 @@ export const initJobModel = (sequelize: Sequelize) => {
       createdAt: "created_at",
       updatedAt: "updated_at",
       hooks: {
+        beforeCreate: async (job, options) => {
+          const { job_type } = job;
+          let prefix = "";
+
+          switch (job_type) {
+            case "JOB_SERVICE":
+              // The `isBulk` option is passed from the controller
+              prefix = (options as any).isBulk ? "JMA" : "JSA";
+              break;
+            case "TSO_SERVICE":
+              prefix = "FSA";
+              break;
+            case "KANBAN":
+              prefix = "FKA";
+              break;
+            default:
+              return; // Let validation handle invalid job_type
+          }
+
+          const lastJob = await Job.findOne({
+            where: {
+              serial_no: {
+                [Op.startsWith]: prefix,
+              },
+            },
+            order: [["serial_no", "DESC"]],
+            transaction: options.transaction,
+          });
+
+          let nextNumber = 1;
+          if (lastJob?.serial_no) {
+            const numericPart = lastJob.serial_no.substring(prefix.length);
+            const lastNumber = parseInt(numericPart, 10);
+            if (!isNaN(lastNumber)) {
+              nextNumber = lastNumber + 1;
+            }
+          }
+
+          const paddedNumber = String(nextNumber).padStart(6, "0");
+          job.serial_no = `${prefix}${paddedNumber}`;
+        },
         beforeSave: async (job) => {
           if (job.job_no) {
             const category = await sequelize.models.Category.findOne({
