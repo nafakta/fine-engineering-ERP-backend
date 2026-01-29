@@ -426,6 +426,13 @@ export default class JobController {
         where.assign_to = { [Op.iLike]: `%${String(req.query.assign_to).trim()}%` };
       }
 
+      if (req.query.jo_number) {
+        const joNumber = parseInt(String(req.query.jo_number).trim(), 10);
+        if (!isNaN(joNumber)) {
+          where.jo_number = joNumber;
+        }
+      }
+
       if (q) {
         where[Op.or] = [
           { job_category: { [Op.iLike]: `%${q}%` } },
