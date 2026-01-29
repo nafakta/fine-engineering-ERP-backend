@@ -110,10 +110,6 @@ export const initJobModel = (sequelize: Sequelize) => {
       timestamps: true,
       createdAt: "created_at",
       updatedAt: "updated_at",
-      indexes: [
-        // This index will speed up the `findOne` query in the `beforeCreate` hook.
-        { fields: ["serial_no"] },
-      ],
       hooks: {
         beforeCreate: async (job, options) => {
           const { job_type } = job;
