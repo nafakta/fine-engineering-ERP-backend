@@ -722,15 +722,29 @@ export default class JobController {
         });
       }
 
-      await job.update({
-        assign_to: body.assign_to,
-        assign_date: body.assign_date,
-        updated_by: body.updated_by,
-      });
+      if (job.jo_number) {
+        await this.Job.update(
+          {
+            assign_to: body.assign_to,
+            assign_date: body.assign_date,
+            updated_by: body.updated_by,
+          },
+          {
+            where: { jo_number: job.jo_number },
+          }
+        );
+        await job.reload();
+      } else {
+        await job.update({
+          assign_to: body.assign_to,
+          assign_date: body.assign_date,
+          updated_by: body.updated_by,
+        });
+      }
 
       return res.json({
         success: true,
-        message: "Job assigned successfully",
+        message: "Job(s) assigned successfully",
         data: job,
       });
     } catch (err: any) {
