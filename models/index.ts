@@ -120,6 +120,16 @@ dbModels.SystemUserSecret.belongsTo(dbModels.SystemUser, {
   as: "user",
 });
 
+dbModels.AssignToWorker.belongsTo(dbModels.Job, {
+  foreignKey: "job_id",
+  as: "job",
+});
+
+dbModels.Job.hasMany(dbModels.AssignToWorker, {
+  foreignKey: "job_id",
+  as: "assignments",
+});
+
 
 // ── 3) Export registry & bound sequelize ───────────────────────────────────────
 export default dbModels;

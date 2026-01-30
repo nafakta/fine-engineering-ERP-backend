@@ -10,6 +10,8 @@ export interface AssignToWorkerAttributes {
   worker_name?: string;
   quantity_no?: number;
   assigning_date?: Date;
+  serial_no?: string;
+  job_id?: string;
   created_at?: Date;
   updated_at?: Date;
   created_by?: string;
@@ -32,6 +34,8 @@ export class AssignToWorker
   public worker_name!: string;
   public quantity_no!: number;
   public assigning_date!: Date;
+  public serial_no!: string;
+  public job_id!: string;
   public created_at!: Date;
   public updated_at!: Date;
   public created_by!: string;
@@ -75,6 +79,14 @@ export class AssignToWorker
         },
         assigning_date: {
           type: DataTypes.DATEONLY,
+          allowNull: true,
+        },
+        serial_no: {
+          type: DataTypes.TEXT,
+          allowNull: true,
+        },
+        job_id: {
+          type: DataTypes.UUID,
           allowNull: true,
         },
         created_by: {

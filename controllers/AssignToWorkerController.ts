@@ -72,6 +72,7 @@ export default class AssignToWorkerController {
           { worker_name: { [Op.iLike]: `%${q}%` } },
           { machine_category: { [Op.iLike]: `%${q}%` } },
           { machine_code: { [Op.iLike]: `%${q}%` } },
+          { serial_no: { [Op.iLike]: `%${q}%` } },
         ];
 
         if (!isNaN(Number(q))) {
@@ -85,11 +86,21 @@ export default class AssignToWorkerController {
         where.jo_no = Number(req.query.jo_no);
       }
 
+      if (req.query.job_id) {
+        where.job_id = req.query.job_id;
+      }
+
       const { rows, count } = await this.AssignToWorker.findAndCountAll({
         where,
         limit,
         offset,
         order: [["created_at", "DESC"]],
+        include: [
+          {
+            model: dbModels.Job,
+            as: "job",
+          },
+        ],
       });
 
       return res.json({
@@ -121,7 +132,14 @@ export default class AssignToWorkerController {
           .json({ success: false, error: "AssignToWorker model not initialized" });
       }
 
-      const record = await this.AssignToWorker.findByPk(id);
+      const record = await this.AssignToWorker.findByPk(id, {
+        include: [
+          {
+            model: dbModels.Job,
+            as: "job",
+          },
+        ],
+      });
 
       if (!record) {
         return res

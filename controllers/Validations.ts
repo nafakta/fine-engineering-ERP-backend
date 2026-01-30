@@ -788,6 +788,8 @@ export const createAssignToWorkerSchema = Yup.object({
   worker_name: Yup.string().nullable(),
   quantity_no: Yup.number().nullable(),
   assigning_date: Yup.date().nullable(),
+  serial_no: Yup.string().nullable(),
+  job_id: Yup.string().uuid().nullable(),
   created_by: Yup.string().uuid().nullable(),
 });
 
@@ -800,5 +802,7 @@ export const updateAssignToWorkerSchema = Yup.object({
   worker_name: Yup.string().nullable(),
   quantity_no: Yup.number().nullable(),
   assigning_date: Yup.date().nullable(),
+  serial_no: Yup.string().nullable(),
+  job_id: Yup.string().uuid().nullable(),
   updated_by: Yup.string().uuid().nullable(),
 });
