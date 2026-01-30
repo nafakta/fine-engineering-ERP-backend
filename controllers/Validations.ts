@@ -778,3 +778,27 @@ const paymentCreateSchema = Yup.object({
   notes: Yup.string().nullable().optional(),
   created_by: Yup.string().uuid().nullable().optional(),
 });
+
+export const createAssignToWorkerSchema = Yup.object({
+  jo_no: Yup.number().nullable(),
+  item_no: Yup.number().nullable(),
+  machine_category: Yup.string().nullable(),
+  machine_size: Yup.string().nullable(),
+  machine_code: Yup.string().nullable(),
+  worker_name: Yup.string().nullable(),
+  quantity_no: Yup.number().nullable(),
+  assigning_date: Yup.date().nullable(),
+  created_by: Yup.string().uuid().nullable(),
+});
+
+export const updateAssignToWorkerSchema = Yup.object({
+  jo_no: Yup.number().nullable(),
+  item_no: Yup.number().nullable(),
+  machine_category: Yup.string().nullable(),
+  machine_size: Yup.string().nullable(),
+  machine_code: Yup.string().nullable(),
+  worker_name: Yup.string().nullable(),
+  quantity_no: Yup.number().nullable(),
+  assigning_date: Yup.date().nullable(),
+  updated_by: Yup.string().uuid().nullable(),
+});

@@ -16,6 +16,7 @@ import initCategoryModel from "./Category";
 import { initJobModel } from "./Job";
 import { initPendingMaterialModel } from "./PendingMaterial";
 import { initPoServiceModel } from "./PoService";
+import { AssignToWorker as AssignToWorkerModel } from "./AssignToWorker";
 
 
 const sequelize = db.write;
@@ -37,6 +38,7 @@ const dbModels: any = {
   Job: initJobModel(sequelize),
   PendingMaterial: initPendingMaterialModel(sequelize),
   PoService: initPoServiceModel(sequelize),
+  AssignToWorker: AssignToWorkerModel.initModel(sequelize),
 
 };
 
@@ -128,6 +130,7 @@ export const {
   Job,
   PendingMaterial,
   PoService,
+  AssignToWorker,
   // Add other models you need
 } = dbModels;
 
