@@ -14,6 +14,7 @@ export default class AssignToWorkerController {
 
   // CREATE
   public create = async (req: Request, res: Response) => {
+    const transaction = await dbModels.sequelize.transaction();
     try {
       const body = await createAssignToWorkerSchema.validate(req.body, {
         abortEarly: false,
@@ -21,12 +22,48 @@ export default class AssignToWorkerController {
       });
 
       if (!this.AssignToWorker) {
+        await transaction.rollback();
         return res
           .status(500)
           .json({ success: false, error: "AssignToWorker model not initialized" });
       }
 
-      const record = await this.AssignToWorker.create(body);
+      // Subtract quantity from Job
+      if (body.quantity_no && body.quantity_no > 0) {
+        let job: any = null;
+
+        if (body.job_id) {
+          job = await dbModels.Job.findByPk(body.job_id, { transaction });
+        } else if (body.jo_no) {
+          job = await dbModels.Job.findOne({
+            where: { job_no: body.jo_no },
+            transaction,
+          });
+        }
+
+        if (job) {
+          const currentQty = Number(job.qty);
+          const assignQty = Number(body.quantity_no);
+
+          if (currentQty < assignQty) {
+            await transaction.rollback();
+            return res.status(400).json({
+              success: false,
+              error: `Insufficient job quantity. Available: ${currentQty}, Requested: ${assignQty}`,
+            });
+          }
+
+          await job.update({ qty: currentQty - assignQty }, { transaction });
+
+          if (!body.job_id) {
+            body.job_id = job.id;
+          }
+        }
+      }
+
+      const record = await this.AssignToWorker.create(body, { transaction });
+
+      await transaction.commit();
 
       return res.status(201).json({
         success: true,
@@ -34,6 +71,7 @@ export default class AssignToWorkerController {
         message: "Worker assignment created successfully",
       });
     } catch (err: any) {
+      await transaction.rollback();
       console.error("Create AssignToWorker Error:", err);
       if (err instanceof Yup.ValidationError) {
         return res.status(400).json({
