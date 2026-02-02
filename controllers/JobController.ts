@@ -266,8 +266,6 @@ export default class JobController {
     const itemSchema = Yup.object({
       item_description: Yup.string().nullable(),
       item_no: Yup.number().default(0),
-      product_desc: Yup.string().nullable(),
-      product_qty: Yup.number().nullable(),
       qty: Yup.number().default(0),
       moc: Yup.string().required("moc is required"),
       bin_location: Yup.string().nullable(),
@@ -296,6 +294,8 @@ export default class JobController {
         job_order_date: Yup.date().nullable(),
         mtl_rcd_date: Yup.date().nullable(),
         mtl_challan_no: Yup.number().default(0),
+        product_desc: Yup.string().nullable(),
+        product_qty: Yup.number().nullable(),
         remark: Yup.string().nullable(),
         client_name: Yup.string().nullable(),
         assign_to: Yup.string().nullable(),
