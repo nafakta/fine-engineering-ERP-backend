@@ -260,6 +260,9 @@ export default class JobController {
   // POST /api/v1/jobs/bulk
   // -------------------------
   public bulkCreate = async (req: Request, res: Response) => {
+    // Define the static list of Kanban categories.
+    const KANBAN_CATEGORIES = ['VESSEL', 'HEAD', 'CLAMP', 'PILLER_DRIVE_ASSEMBLY', 'HEATER_PLATE', 'COMPRESSION_RING', 'HEATER_SHELL', 'OUTER_RING', 'COOLING_COIL', 'SPARGER', 'HOLLOW_SHAFT', 'STIRRER_SHAFT'];
+
     const itemSchema = Yup.object({
       item_description: Yup.string().nullable(),
       item_no: Yup.number().default(0),
@@ -274,10 +277,20 @@ export default class JobController {
     const bulkCreateSchema = Yup.object({
       common_data: Yup.object({
         job_type: Yup.string()
-          .oneOf(['JOB_SERVICE'], "Only JOB_SERVICE is allowed for bulk create")
+          .oneOf(['JOB_SERVICE', 'TSO_SERVICE', 'KANBAN'] as JobType[])
           .required("job_type is required"),
-        job_no: Yup.number().required("job_no is required"),
-        job_category: Yup.string().nullable(),
+        job_category: Yup.string().when('job_type', {
+          is: 'KANBAN',
+          then: (schema) => schema
+            .oneOf(KANBAN_CATEGORIES, `For KANBAN, job_category must be one of: ${KANBAN_CATEGORIES.join(', ')}`)
+            .required("job_category is required for KANBAN jobs"),
+          otherwise: (schema) => schema.nullable(),
+        }),
+        job_no: Yup.number().when('job_type', {
+          is: 'JOB_SERVICE',
+          then: (schema) => schema.required("job_no is required for JOB_SERVICE jobs").typeError("job_no must be a number"),
+          otherwise: (schema) => schema.nullable(),
+        }),
         jo_number: Yup.number().nullable(),
         serial_no: Yup.string().nullable(),
         job_order_date: Yup.date().nullable(),
