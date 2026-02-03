@@ -20,6 +20,7 @@ export class Job extends Model<
   declare job_category: string | null;
   declare job_no: number | null; // Nullable
   declare jo_number: number | null;
+  declare tso_no: string | null;
   declare serial_no: string | null;
   declare job_order_date: Date | null;
   declare mtl_rcd_date: Date | null;
@@ -67,6 +68,11 @@ export const initJobModel = (sequelize: Sequelize) => {
       jo_number: {
         type: DataTypes.INTEGER,
         allowNull: true,
+      },
+      tso_no: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        unique: true,
       },
       serial_no: {
         type: DataTypes.TEXT,
@@ -116,6 +122,29 @@ export const initJobModel = (sequelize: Sequelize) => {
       updatedAt: "updated_at",
       hooks: {
         beforeCreate: async (job, options) => {
+          // Generate tso_no for TSO_SERVICE
+          if (job.job_type === 'TSO_SERVICE') {
+            const tsoPrefix = 'TSO';
+            const lastTsoJob = await Job.findOne({
+              where: { tso_no: { [Op.startsWith]: tsoPrefix } },
+              order: [['tso_no', 'DESC']],
+              transaction: options.transaction,
+              paranoid: false, // Include soft-deleted records to avoid number reuse
+            });
+
+            let nextTsoNumber = 1;
+            if (lastTsoJob?.tso_no) {
+              const numericPart = lastTsoJob.tso_no.substring(tsoPrefix.length);
+              const lastNumber = parseInt(numericPart, 10);
+              if (!isNaN(lastNumber)) {
+                nextTsoNumber = lastNumber + 1;
+              }
+            }
+            const paddedTsoNumber = String(nextTsoNumber).padStart(6, '0');
+            job.tso_no = `${tsoPrefix}${paddedTsoNumber}`;
+          }
+
+          // Generate serial_no for all types
           const { job_type } = job;
           let prefix = "";
 

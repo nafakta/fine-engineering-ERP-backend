@@ -35,6 +35,7 @@ export default class JobController {
         otherwise: (schema) => schema.nullable(),
       }),
       jo_number: Yup.number().nullable(),
+      tso_no: Yup.string().nullable(),
       serial_no: Yup.string().nullable(),
       job_order_date: Yup.date().nullable(),
       mtl_rcd_date: Yup.date().nullable(),
@@ -290,6 +291,7 @@ export default class JobController {
           otherwise: (schema) => schema.nullable(),
         }),
         jo_number: Yup.number().nullable(),
+        tso_no: Yup.string().nullable(),
         serial_no: Yup.string().nullable(),
         job_order_date: Yup.date().nullable(),
         mtl_rcd_date: Yup.date().nullable(),
@@ -450,6 +452,13 @@ export default class JobController {
         }
       }
 
+      if (req.query.tso_no) {
+        const tsoNo = String(req.query.tso_no).trim();
+        if (tsoNo) {
+          where.tso_no = { [Op.iLike]: `%${tsoNo}%` };
+        }
+      }
+
       if (q) {
         where[Op.or] = [
           { job_category: { [Op.iLike]: `%${q}%` } },
@@ -458,6 +467,7 @@ export default class JobController {
           { moc: { [Op.iLike]: `%${q}%` } },
           { remark: { [Op.iLike]: `%${q}%` } },
           { client_name: { [Op.iLike]: `%${q}%` } },
+          { tso_no: { [Op.iLike]: `%${q}%` } },
         ];
       }
 
@@ -533,6 +543,7 @@ export default class JobController {
       job_category: Yup.string().nullable(),
       job_no: Yup.number().nullable(),
       jo_number: Yup.number().nullable(),
+      tso_no: Yup.string().nullable(),
       serial_no: Yup.string().nullable(),
       job_order_date: Yup.date().nullable(),
       mtl_rcd_date: Yup.date().nullable(),
