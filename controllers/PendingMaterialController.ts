@@ -19,7 +19,7 @@ interface TemplateAttachment {
 }
 
 const DEFAULT_TO = [
-    "yasirfineengineering@gmail.com",
+    "ddkhank13@gmail.com",
   // "miten@amerequip.com",
   // "nirav.panchal@amerequip.com",
   // "shinoj.pillai@amerequip.com",
@@ -228,7 +228,6 @@ private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60)
       return res.status(500).json({ success: false, error: "Internal server error" });
     }
   };
-
   // ------------------------
   // GET ONE
   // ------------------------
@@ -251,7 +250,6 @@ private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60)
       return res.status(500).json({ success: false, error: "Internal server error" });
     }
   };
-
   // ------------------------
   // UPDATE
   // ------------------------
@@ -298,7 +296,6 @@ private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60)
       return res.status(500).json({ success: false, error: "Internal server error" });
     }
   };
-
   // ------------------------
   // DELETE
   // ------------------------
@@ -326,7 +323,6 @@ private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60)
       return res.status(500).json({ success: false, error: "Internal server error" });
     }
   };
-
   // ------------------------
   // COMPLETE AND CREATE JOB
   // ------------------------
@@ -399,8 +395,6 @@ private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60)
       return res.status(500).json({ success: false, error: "Internal server error" });
     }
   };
-
-  // ------------------------
   // ✅ SEND MAIL API (Your required format)
   // ------------------------
   public sendMail = async (req: Request, res: Response) => {
@@ -516,8 +510,6 @@ private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60)
       return res.status(500).json({ success: false, error: "Internal server error" });
     }
   };
-  
-
   // Helper function to extract dates from the image filenames (e.g., "image_2026-01-01.jpg")
   private extractDateFromImage(filename: string): string | null {
     const match = filename.match(/(\d{4}-\d{2}-\d{2})/); // Matches date format YYYY-MM-DD
