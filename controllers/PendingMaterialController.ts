@@ -19,7 +19,7 @@ interface TemplateAttachment {
 }
 
 const DEFAULT_TO = [
-    "ddkhank13@gmail.com.com",
+    "ddkhank13@gmail.com",
   // "miten@amerequip.com",
   // "nirav.panchal@amerequip.com",
   // "shinoj.pillai@amerequip.com",
@@ -65,41 +65,42 @@ private escapeHtml(v: any) {
   return String(v).replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// Function to save images to S3
 private async saveFilesToS3(files?: Express.Multer.File[]): Promise<TemplateAttachment[]> {
-  if (!files || !Array.isArray(files) || files.length === 0) return [];
+  if (!files?.length) return [];
 
   const attachments: TemplateAttachment[] = [];
 
   for (const file of files) {
-    const safeOriginal = file.originalname.replace(/[^\w.\- ]+/g, "_");
-    const fileName = `${Date.now()}-${safeOriginal}`;
+    const localPath = file.path; // ✅ diskStorage provides this
 
-    // local folder: uploads/upload-product
-    const localDir = path.join(process.cwd(), "uploads", "upload-product");
-    const localPath = path.join(localDir, fileName);
-
-    fs.mkdirSync(localDir, { recursive: true });
-
-    // Check if the file is an image before processing it with sharp
-    if (file.mimetype && file.mimetype.startsWith("image/")) {
-      try {
-        // Process image with sharp only if it's a valid image buffer
-        await sharp(file.buffer)
-          .resize({ width: 800, withoutEnlargement: true })
-          .jpeg({ quality: 80 })
-          .toFile(localPath);
-      } catch (error) {
-        console.error("Error processing image with sharp:", error);
-        throw new Error("Invalid image format or corrupted image file.");
-      }
-    } else {
-      // If it's not an image, directly save the buffer to the file system
-      fs.writeFileSync(localPath, file.buffer);
+    if (!localPath || !fs.existsSync(localPath)) {
+      throw new Error("Uploaded file not found on server disk.");
     }
 
-    // Upload to S3
-    const key = `upload-product/${fileName}`;
+    const isImage = !!file.mimetype && file.mimetype.startsWith("image/");
+    const safeOriginal = file.originalname.replace(/[^\w.\- ]+/g, "_");
+    const baseName = `${Date.now()}-${safeOriginal}`;
+
+    // ✅ if image => convert to jpg & optimize to a temp file
+    // ✅ else => upload the original file as it is
+    const uploadPath = isImage
+      ? path.join(path.dirname(localPath), `processed_${baseName}.jpg`)
+      : localPath;
+
+    try {
+      if (isImage) {
+        await sharp(localPath)
+          .rotate()
+          .resize({ width: 800, withoutEnlargement: true })
+          .jpeg({ quality: 80 })
+          .toFile(uploadPath);
+      }
+    } catch (error) {
+      console.error("Error processing image with sharp:", error);
+      throw new Error("Invalid image format or corrupted image file.");
+    }
+
+    const key = `pending-material/${path.basename(uploadPath)}`;
 
     try {
       await new Upload({
@@ -107,30 +108,32 @@ private async saveFilesToS3(files?: Express.Multer.File[]): Promise<TemplateAtta
         params: {
           Bucket: AWS_BUCKET,
           Key: key,
-          Body: fs.createReadStream(localPath),
-          ContentType: file.mimetype,
+          Body: fs.createReadStream(uploadPath),
+          ContentType: isImage ? "image/jpeg" : file.mimetype,
           ACL: "private",
         },
       }).done();
     } catch (uploadError) {
       console.error("Error uploading file to S3:", uploadError);
       throw new Error("File upload to S3 failed.");
+    } finally {
+      // ✅ cleanup: delete original + processed
+      try { fs.unlinkSync(localPath); } catch {}
+      if (isImage && uploadPath !== localPath) {
+        try { fs.unlinkSync(uploadPath); } catch {}
+      }
     }
 
     attachments.push({
       path: key,
       name: file.originalname,
-      type: file.mimetype,
+      type: isImage ? "image/jpeg" : (file.mimetype || "application/octet-stream"),
     });
-
-    // Delete local file after uploading to S3
-    try {
-      fs.unlinkSync(localPath);
-    } catch {}
   }
 
   return attachments;
 }
+
 
 // Generate a signed URL for private S3 images
 private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60) {
