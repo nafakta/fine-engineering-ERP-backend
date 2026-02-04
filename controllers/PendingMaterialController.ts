@@ -19,7 +19,7 @@ interface TemplateAttachment {
 }
 
 const DEFAULT_TO = [
-    "ddkhank13@gmail.com",
+    "yasirfineengineering@gmail.com",
   // "miten@amerequip.com",
   // "nirav.panchal@amerequip.com",
   // "shinoj.pillai@amerequip.com",
