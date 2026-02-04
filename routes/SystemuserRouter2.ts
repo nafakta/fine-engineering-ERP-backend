@@ -21,6 +21,7 @@ router.get("/jobs/:id", jobController.get);
 router.put("/jobs/:id", jobController.update);
 router.delete("/jobs/:id", jobController.delete);
 router.post("/jobs/mark-urgent", jobController.markUrgent);
+router.post("/jobs/mark-urgent-by-tso", jobController.markUrgentByTso);
 router.post("/jobs/:id/assign", jobController.assignJob);
 
 router.post("/categories", categoryController.create);
