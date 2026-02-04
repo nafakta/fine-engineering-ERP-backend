@@ -16,6 +16,7 @@ import initCategoryModel from "./Category";
 import { initJobModel } from "./Job";
 import { initPendingMaterialModel } from "./PendingMaterial";
 import { initPoServiceModel } from "./PoService";
+import { AssignToWorker as AssignToWorkerModel } from "./AssignToWorker";
 
 
 const sequelize = db.write;
@@ -37,6 +38,7 @@ const dbModels: any = {
   Job: initJobModel(sequelize),
   PendingMaterial: initPendingMaterialModel(sequelize),
   PoService: initPoServiceModel(sequelize),
+  AssignToWorker: AssignToWorkerModel.initModel(sequelize),
 
 };
 
@@ -118,6 +120,16 @@ dbModels.SystemUserSecret.belongsTo(dbModels.SystemUser, {
   as: "user",
 });
 
+dbModels.AssignToWorker.belongsTo(dbModels.Job, {
+  foreignKey: "job_id",
+  as: "job",
+});
+
+dbModels.Job.hasMany(dbModels.AssignToWorker, {
+  foreignKey: "job_id",
+  as: "assignments",
+});
+
 
 // ── 3) Export registry & bound sequelize ───────────────────────────────────────
 export default dbModels;
@@ -128,6 +140,7 @@ export const {
   Job,
   PendingMaterial,
   PoService,
+  AssignToWorker,
   // Add other models you need
 } = dbModels;
 
