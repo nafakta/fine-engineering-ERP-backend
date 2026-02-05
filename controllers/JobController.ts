@@ -17,6 +17,7 @@ export default class JobController {
     // Define the static list of Kanban categories.
     // TODO: Update this list with your actual static Kanban categories.
     const KANBAN_CATEGORIES = ['VESSEL', 'HEAD', 'CLAMP', 'PILLER_DRIVE_ASSEMBLY', 'HEATER_PLATE', 'COMPRESSION_RING', 'HEATER_SHELL', 'OUTER_RING', 'COOLING_COIL', 'SPARGER', 'HOLLOW_SHAFT', 'STIRRER_SHAFT'];
+    const KANBAN_JOB_CATEGORIES = ['MinMax', 'Kanban'];
 
     const createSchema = Yup.object({
       job_type: Yup.string()
@@ -26,7 +27,7 @@ export default class JobController {
       kanban_job_cat: Yup.string().when('job_type', {
         is: 'KANBAN',
         then: (schema) => schema
-          .oneOf(KANBAN_CATEGORIES, `For KANBAN, kanban_job_cat must be one of: ${KANBAN_CATEGORIES.join(', ')}`)
+          .oneOf(KANBAN_JOB_CATEGORIES, `For KANBAN, kanban_job_cat must be one of: ${KANBAN_JOB_CATEGORIES.join(', ')}`)
           .required("kanban_job_cat is required for KANBAN jobs"),
         otherwise: (schema) => schema.nullable(),
       }),
