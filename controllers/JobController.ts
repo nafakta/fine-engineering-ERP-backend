@@ -22,11 +22,12 @@ export default class JobController {
       job_type: Yup.string()
         .oneOf(['JOB_SERVICE', 'TSO_SERVICE', 'KANBAN'] as JobType[])
         .required("job_type is required"),
-      job_category: Yup.string().when('job_type', {
+      job_category: Yup.string().nullable(),
+      kanban_job_cat: Yup.string().when('job_type', {
         is: 'KANBAN',
         then: (schema) => schema
-          .oneOf(KANBAN_CATEGORIES, `For KANBAN, job_category must be one of: ${KANBAN_CATEGORIES.join(', ')}`)
-          .required("job_category is required for KANBAN jobs"),
+          .oneOf(KANBAN_CATEGORIES, `For KANBAN, kanban_job_cat must be one of: ${KANBAN_CATEGORIES.join(', ')}`)
+          .required("kanban_job_cat is required for KANBAN jobs"),
         otherwise: (schema) => schema.nullable(),
       }),
       job_no: Yup.number().when('job_type', {
@@ -173,11 +174,12 @@ export default class JobController {
         job_type: Yup.string()
           .oneOf(['JOB_SERVICE', 'TSO_SERVICE', 'KANBAN'] as JobType[])
           .required("job_type is required"),
-        job_category: Yup.string().when('job_type', {
+        job_category: Yup.string().nullable(),
+        kanban_job_cat: Yup.string().when('job_type', {
           is: 'KANBAN',
           then: (schema) => schema
-            .oneOf(KANBAN_CATEGORIES, `For KANBAN, job_category must be one of: ${KANBAN_CATEGORIES.join(', ')}`)
-            .required("job_category is required for KANBAN jobs"),
+            .oneOf(KANBAN_CATEGORIES, `For KANBAN, kanban_job_cat must be one of: ${KANBAN_CATEGORIES.join(', ')}`)
+            .required("kanban_job_cat is required for KANBAN jobs"),
           otherwise: (schema) => schema.nullable(),
         }),
         job_no: Yup.number().when('job_type', {
@@ -378,6 +380,7 @@ export default class JobController {
         where[Op.or] = [
           { job_category: { [Op.iLike]: `%${q}%` } },
           { item_description: { [Op.iLike]: `%${q}%` } },
+          { kanban_job_cat: { [Op.iLike]: `%${q}%` } },
           { product_desc: { [Op.iLike]: `%${q}%` } },
           { moc: { [Op.iLike]: `%${q}%` } },
           { remark: { [Op.iLike]: `%${q}%` } },
@@ -466,6 +469,7 @@ export default class JobController {
       item_description: Yup.string().nullable(),
       item_no: Yup.number(),
       product_desc: Yup.string().nullable(),
+      kanban_job_cat: Yup.string().nullable(),
       product_qty: Yup.number().nullable(),
       qty: Yup.number(),
       moc: Yup.string(),
@@ -518,11 +522,11 @@ export default class JobController {
       if (job.job_type === 'JOB_SERVICE' && 'job_no' in body && body.job_no === null) {
         return res.status(400).json({ success: false, error: "job_no cannot be null for JOB_SERVICE" });
       }
-      if (job.job_type === 'KANBAN' && 'job_category' in body) {
-        if (!body.job_category) {
-          return res.status(400).json({ success: false, error: "job_category is required for KANBAN jobs and cannot be set to null." });
+      if (job.job_type === 'KANBAN' && 'kanban_job_cat' in body) {
+        if (!body.kanban_job_cat) {
+          return res.status(400).json({ success: false, error: "kanban_job_cat is required for KANBAN jobs and cannot be set to null." });
         }
-        if (!KANBAN_CATEGORIES.includes(body.job_category)) {
+        if (!KANBAN_CATEGORIES.includes(body.kanban_job_cat)) {
           return res.status(400).json({ success: false, error: `Invalid Kanban category. Must be one of: ${KANBAN_CATEGORIES.join(', ')}` });
         }
       }

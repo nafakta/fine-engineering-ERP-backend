@@ -28,6 +28,7 @@ export class Job extends Model<
   declare item_description: string | null;
   declare item_no: number;
   declare product_desc: string | null;
+  declare kanban_job_cat: string | null;
   declare product_qty: number | null;
   declare qty: number;
   declare moc: string;
@@ -85,6 +86,7 @@ export const initJobModel = (sequelize: Sequelize) => {
       item_description: { type: DataTypes.TEXT, allowNull: true },
       item_no: { type: DataTypes.DECIMAL(14, 2), allowNull: false, defaultValue: 0 },
       product_desc: { type: DataTypes.TEXT, allowNull: true },
+      kanban_job_cat: { type: DataTypes.TEXT, allowNull: true },
       product_qty: { type: DataTypes.INTEGER, allowNull: true },
       qty: { type: DataTypes.DECIMAL(14, 2), allowNull: false, defaultValue: 0 },
       moc: { type: DataTypes.TEXT, allowNull: false },
