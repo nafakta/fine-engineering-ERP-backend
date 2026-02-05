@@ -719,6 +719,58 @@ export default class JobController {
   };
 
   // -------------------------
+  // MARK URGENT BY JO NUMBER
+  // POST /api/v1/jobs/mark-urgent-by-jo-number
+  // -------------------------
+  public markUrgentByJoNumber = async (req: Request, res: Response) => {
+    const schema = Yup.object({
+      jo_number: Yup.number().required("jo_number is required"),
+      urgent: Yup.boolean().default(true),
+      urgent_due_date: Yup.date().nullable(),
+      updated_by: Yup.string().uuid().nullable(),
+    });
+
+    try {
+      const body = await schema.validate(req.body, { stripUnknown: true });
+
+      if (!this.Job) {
+        return res.status(500).json({
+          success: false,
+          error: "Job model not initialized",
+        });
+      }
+
+      const { jo_number, ...updatePayload } = body;
+
+      const [affectedCount] = await this.Job.update(updatePayload, {
+        where: { jo_number },
+      });
+
+      if (affectedCount === 0) {
+        return res.status(404).json({
+          success: false,
+          error: `No jobs found with jo_number: ${jo_number}`,
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: `${affectedCount} job(s) with jo_number ${jo_number} were marked as urgent.`,
+        data: {
+          jo_number,
+          updated_count: affectedCount,
+        },
+      });
+    } catch (err: any) {
+      console.error("Mark Urgent by JO Number Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({ success: false, error: "Validation error", details: err.errors });
+      }
+      return res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  };
+
+  // -------------------------
   // ASSIGN JOB
   // PATCH /api/v1/jobs/:id/assign
   // -------------------------
