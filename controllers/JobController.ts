@@ -378,7 +378,7 @@ export default class JobController {
       }
 
       if (q) {
-        where[Op.or] = [
+        const orConditions: any[] = [
           { job_category: { [Op.iLike]: `%${q}%` } },
           { item_description: { [Op.iLike]: `%${q}%` } },
           { kanban_job_cat: { [Op.iLike]: `%${q}%` } },
@@ -388,6 +388,13 @@ export default class JobController {
           { client_name: { [Op.iLike]: `%${q}%` } },
           { tso_no: { [Op.iLike]: `%${q}%` } },
         ];
+
+        if (!isNaN(Number(q))) {
+          orConditions.push({ job_no: Number(q) });
+          orConditions.push({ jo_number: Number(q) });
+        }
+
+        where[Op.or] = orConditions;
       }
 
       const { rows, count } = await this.Job.findAndCountAll({
