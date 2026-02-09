@@ -879,8 +879,9 @@ export default class JobController {
     });
 
     try {
+      const payload = req.body || {};
       const body = await schema.validate(
-        { ...req.body, id: req.params.id || req.body.id },
+        { ...payload, id: req.params.id || payload.id },
         { stripUnknown: true }
       );
 
@@ -937,8 +938,9 @@ export default class JobController {
     });
 
     try {
+      const payload = req.body || {};
       const body = await schema.validate(
-        { ...req.body, id: req.params.id || req.body.id },
+        { ...payload, id: req.params.id || payload.id },
         { stripUnknown: true }
       );
 
