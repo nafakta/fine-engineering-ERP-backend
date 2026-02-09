@@ -25,6 +25,7 @@ router.post("/jobs/mark-urgent-by-tso", jobController.markUrgentByTso);
 router.post("/jobs/mark-urgent-by-jo-number", jobController.markUrgentByJoNumber);
 router.post("/jobs/:id/assign", jobController.assignJob);
 router.post("/jobs/:id/approve", jobController.approveJob);
+router.post("/jobs/:id/reject", jobController.rejectJob);
 
 router.post("/categories", categoryController.create);
 router.get("/categories", categoryController.list);

@@ -41,6 +41,7 @@ export class Job extends Model<
   declare urgent: CreationOptional<boolean>;
   declare urgent_due_date: Date | null;
   declare is_approved: CreationOptional<boolean>;
+  declare rejected: CreationOptional<boolean>;
   declare created_at: CreationOptional<Date>;
   declare updated_at: CreationOptional<Date>;
   declare created_by: string | null;
@@ -104,6 +105,11 @@ export const initJobModel = (sequelize: Sequelize) => {
       },
       urgent_due_date: { type: DataTypes.DATEONLY, allowNull: true },
       is_approved: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      rejected: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
