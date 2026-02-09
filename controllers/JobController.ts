@@ -869,7 +869,10 @@ export default class JobController {
     });
 
     try {
-      const body = await schema.validate(req.body, { stripUnknown: true });
+      const body = await schema.validate(
+        { ...req.body, id: req.params.id || req.body.id },
+        { stripUnknown: true }
+      );
 
       if (!this.Job) {
         return res.status(500).json({
