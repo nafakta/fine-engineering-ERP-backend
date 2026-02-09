@@ -59,6 +59,7 @@ export default class JobController {
       assign_to: Yup.string().nullable(),
       assign_date: Yup.date().nullable(),
       urgent: Yup.boolean().default(false),
+      is_approved: Yup.boolean().default(false),
       created_by: Yup.string().uuid().nullable(),
     });
 
@@ -205,6 +206,7 @@ export default class JobController {
         assign_to: Yup.string().nullable(),
         assign_date: Yup.date().nullable(),
         urgent: Yup.boolean().default(false),
+        is_approved: Yup.boolean().default(false),
         created_by: Yup.string().uuid().nullable(),
       }).required("common_data is required"),
       items: Yup.array().of(itemSchema).min(1, "At least one item is required").required("items is required"),
@@ -335,6 +337,7 @@ export default class JobController {
       const q = String(req.query.q ?? "").trim();
       const jobType = req.query.job_type as JobType | undefined;
       const urgent = req.query.urgent;
+      const is_approved = req.query.is_approved;
 
       const where: any = {};
 
@@ -346,6 +349,12 @@ export default class JobController {
         where.urgent = true;
       } else if (urgent === 'false') {
         where.urgent = false;
+      }
+
+      if (is_approved === 'true') {
+        where.is_approved = true;
+      } else if (is_approved === 'false') {
+        where.is_approved = false;
       }
 
       if (req.query.job_no) {
@@ -488,6 +497,7 @@ export default class JobController {
       assign_to: Yup.string().nullable(),
       assign_date: Yup.date().nullable(),
       urgent: Yup.boolean(),
+      is_approved: Yup.boolean(),
       updated_by: Yup.string().uuid().nullable(),
     });
 
@@ -834,6 +844,61 @@ export default class JobController {
       });
     } catch (err: any) {
       console.error("Assign Job Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({
+          success: false,
+          error: "Validation error",
+          details: err.errors,
+        });
+      }
+      return res.status(500).json({
+        success: false,
+        error: "Internal server error",
+      });
+    }
+  };
+
+  // -------------------------
+  // APPROVE JOB
+  // POST /api/v1/jobs/approve
+  // -------------------------
+  public approveJob = async (req: Request, res: Response) => {
+    const schema = Yup.object({
+      id: Yup.string().uuid().required("Job ID is required"),
+      updated_by: Yup.string().uuid().nullable(),
+    });
+
+    try {
+      const body = await schema.validate(req.body, { stripUnknown: true });
+
+      if (!this.Job) {
+        return res.status(500).json({
+          success: false,
+          error: "Job model not initialized",
+        });
+      }
+
+      const job = await this.Job.findByPk(body.id);
+
+      if (!job) {
+        return res.status(404).json({
+          success: false,
+          error: "Job not found",
+        });
+      }
+
+      await job.update({
+        is_approved: true,
+        updated_by: body.updated_by,
+      });
+
+      return res.json({
+        success: true,
+        message: "Job approved successfully",
+        data: job,
+      });
+    } catch (err: any) {
+      console.error("Approve Job Error:", err);
       if (err instanceof Yup.ValidationError) {
         return res.status(400).json({
           success: false,
