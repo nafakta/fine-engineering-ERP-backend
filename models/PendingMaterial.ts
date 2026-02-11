@@ -34,7 +34,7 @@ export const initPendingMaterialModel = (sequelize: Sequelize) => {
         primaryKey: true,
       },
       job_no: {
-        type: DataTypes.DECIMAL(14, 2),
+        type: DataTypes.BIGINT,
         allowNull: false,
       },
       item_no: {

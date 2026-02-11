@@ -33,7 +33,7 @@ export default (sequelize: Sequelize) => {
         allowNull: true,
       },
       job_no: {
-        type: DataTypes.DECIMAL(14, 2),
+        type: DataTypes.BIGINT,
         allowNull: false,
         unique: true, // ✅ REQUIRED
       },
@@ -57,7 +57,7 @@ export default (sequelize: Sequelize) => {
         defaultValue: "none",
       },
       qty: {
-        type: DataTypes.DECIMAL(14, 2),
+        type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
       },

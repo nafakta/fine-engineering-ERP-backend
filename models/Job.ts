@@ -65,7 +65,7 @@ export const initJobModel = (sequelize: Sequelize) => {
       },
       job_category: { type: DataTypes.TEXT, allowNull: true },
       job_no: {
-        type: DataTypes.DECIMAL(14, 2),
+        type: DataTypes.BIGINT,
         allowNull: true,
       }, // Nullable
       jo_number: {
@@ -84,13 +84,13 @@ export const initJobModel = (sequelize: Sequelize) => {
       },
       job_order_date: { type: DataTypes.DATEONLY, allowNull: true },
       mtl_rcd_date: { type: DataTypes.DATEONLY, allowNull: true },
-      mtl_challan_no: { type: DataTypes.DECIMAL(14, 2), allowNull: false, defaultValue: 0 },
+      mtl_challan_no: { type: DataTypes.BIGINT, allowNull: false, defaultValue: 0 },
       item_description: { type: DataTypes.TEXT, allowNull: true },
       item_no: { type: DataTypes.DECIMAL(14, 2), allowNull: false, defaultValue: 0 },
       product_desc: { type: DataTypes.TEXT, allowNull: true },
       kanban_job_cat: { type: DataTypes.TEXT, allowNull: true },
       product_qty: { type: DataTypes.INTEGER, allowNull: true },
-      qty: { type: DataTypes.DECIMAL(14, 2), allowNull: false, defaultValue: 0 },
+      qty: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
       moc: { type: DataTypes.TEXT, allowNull: false },
       remark: { type: DataTypes.TEXT, allowNull: true },
       bin_location: { type: DataTypes.TEXT, allowNull: true },
