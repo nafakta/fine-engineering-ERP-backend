@@ -20,7 +20,7 @@ export default class PoServiceController {
       pn_no: Yup.number().nullable(),
       description: Yup.string().nullable(),
       po_qnty: Yup.number().nullable(),
-      job_no: Yup.number().nullable(),
+      job_no: Yup.string().nullable(),
       created_by: Yup.string().uuid().nullable(),
     });
 
@@ -84,6 +84,7 @@ export default class PoServiceController {
         const orConditions: any[] = [
           { description: { [Op.iLike]: `%${q}%` } },
           { jo_category: { [Op.iLike]: `%${q}%` } },
+          { job_no: { [Op.iLike]: `%${q}%` } },
         ];
 
         // If q is a number, search numeric fields
@@ -91,7 +92,6 @@ export default class PoServiceController {
           const numQ = Number(q);
           orConditions.push({ po_no: numQ });
           orConditions.push({ pn_no: numQ });
-          orConditions.push({ job_no: numQ });
         }
 
         where[Op.or] = orConditions;
@@ -183,7 +183,7 @@ export default class PoServiceController {
       pn_no: Yup.number().nullable(),
       description: Yup.string().nullable(),
       po_qnty: Yup.number().nullable(),
-      job_no: Yup.number().nullable(),
+      job_no: Yup.string().nullable(),
       updated_by: Yup.string().uuid().nullable(),
     });
 

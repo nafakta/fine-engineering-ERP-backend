@@ -31,12 +31,12 @@ export default class JobController {
           .required("kanban_job_cat is required for KANBAN jobs"),
         otherwise: (schema) => schema.nullable(),
       }),
-      job_no: Yup.number().when('job_type', {
+      job_no: Yup.string().when('job_type', {
         is: 'JOB_SERVICE',
-        then: (schema) => schema.required("job_no is required for JOB_SERVICE jobs").typeError("job_no must be a number"),
+        then: (schema) => schema.required("job_no is required for JOB_SERVICE jobs"),
         otherwise: (schema) => schema.nullable(),
       }),
-      jo_number: Yup.number().nullable(),
+      jo_number: Yup.string().nullable(),
       tso_no: Yup.string().when('job_type', {
         is: 'TSO_SERVICE',
         then: (schema) => schema.required("tso_no is required for TSO_SERVICE jobs"),
@@ -185,12 +185,12 @@ export default class JobController {
             .required("kanban_job_cat is required for KANBAN jobs"),
           otherwise: (schema) => schema.nullable(),
         }),
-        job_no: Yup.number().when('job_type', {
+        job_no: Yup.string().when('job_type', {
           is: 'JOB_SERVICE',
-          then: (schema) => schema.required("job_no is required for JOB_SERVICE jobs").typeError("job_no must be a number"),
+          then: (schema) => schema.required("job_no is required for JOB_SERVICE jobs"),
           otherwise: (schema) => schema.nullable(),
         }),
-        jo_number: Yup.number().nullable(),
+        jo_number: Yup.string().nullable(),
         tso_no: Yup.string().when('job_type', {
           is: 'TSO_SERVICE',
           then: (schema) => schema.required("tso_no is required for TSO_SERVICE jobs"),
@@ -367,10 +367,7 @@ export default class JobController {
       }
 
       if (req.query.job_no) {
-        const jobNo = parseFloat(String(req.query.job_no));
-        if (!isNaN(jobNo)) {
-          where.job_no = jobNo;
-        }
+        where.job_no = String(req.query.job_no).trim();
       }
 
       if (req.query.client_name) {
@@ -382,10 +379,7 @@ export default class JobController {
       }
 
       if (req.query.jo_number) {
-        const joNumber = parseInt(String(req.query.jo_number).trim(), 10);
-        if (!isNaN(joNumber)) {
-          where.jo_number = joNumber;
-        }
+        where.jo_number = String(req.query.jo_number).trim();
       }
 
       if (req.query.tso_no) {
@@ -405,12 +399,9 @@ export default class JobController {
           { remark: { [Op.iLike]: `%${q}%` } },
           { client_name: { [Op.iLike]: `%${q}%` } },
           { tso_no: { [Op.iLike]: `%${q}%` } },
+          { job_no: { [Op.iLike]: `%${q}%` } },
+          { jo_number: { [Op.iLike]: `%${q}%` } },
         ];
-
-        if (!isNaN(Number(q))) {
-          orConditions.push({ job_no: Number(q) });
-          orConditions.push({ jo_number: Number(q) });
-        }
 
         where[Op.or] = orConditions;
       }
@@ -485,8 +476,8 @@ export default class JobController {
     // In update, all fields are optional
     const updateSchema = Yup.object({
       job_category: Yup.string().nullable(),
-      job_no: Yup.number().nullable(),
-      jo_number: Yup.number().nullable(),
+      job_no: Yup.string().nullable(),
+      jo_number: Yup.string().nullable(),
       tso_no: Yup.string().nullable(),
       serial_no: Yup.string().nullable(),
       job_order_date: Yup.date().nullable(),
@@ -625,7 +616,7 @@ export default class JobController {
   // -------------------------
   public markUrgent = async (req: Request, res: Response) => {
     const schema = Yup.object({
-      job_no: Yup.number().required("job_no is required"),
+      job_no: Yup.string().required("job_no is required"),
       urgent: Yup.boolean().default(true),
       urgent_due_date: Yup.date().nullable(),
       updated_by: Yup.string().uuid().nullable(),
@@ -751,7 +742,7 @@ export default class JobController {
   // -------------------------
   public markUrgentByJoNumber = async (req: Request, res: Response) => {
     const schema = Yup.object({
-      jo_number: Yup.number().required("jo_number is required"),
+      jo_number: Yup.string().required("jo_number is required"),
       urgent: Yup.boolean().default(true),
       urgent_due_date: Yup.date().nullable(),
       updated_by: Yup.string().uuid().nullable(),

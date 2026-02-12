@@ -16,7 +16,7 @@ export default class CategoryController {
   public create = async (req: Request, res: Response) => {
     const createSchema = Yup.object({
       job_category: Yup.string().nullable(),
-      job_no: Yup.number().default(0),
+      job_no: Yup.string().required("job_no is required"),
       description: Yup.string().nullable(),
       material_type: Yup.string().default("No Tax"),
       bar: Yup.string().default("No Tax"),
@@ -59,7 +59,7 @@ export default class CategoryController {
 
       const category = await this.Category.create({
         job_category,
-        job_no: job_no || 0,
+        job_no,
         description,
         material_type: material_type || "No Tax",
         bar: bar || "No Tax",
@@ -128,10 +128,7 @@ export default class CategoryController {
       }
 
       if (req.query.job_no) {
-        const jobNo = parseFloat(String(req.query.job_no));
-        if (!isNaN(jobNo)) {
-          where.job_no = jobNo;
-        }
+        where.job_no = String(req.query.job_no).trim();
       }
 
       const { rows, count } = await this.Category.findAndCountAll({
@@ -202,7 +199,7 @@ export default class CategoryController {
   public update = async (req: Request, res: Response) => {
     const updateSchema = Yup.object({
       job_category: Yup.string().nullable(),
-      job_no: Yup.number(),
+      job_no: Yup.string(),
       description: Yup.string().nullable(),
       material_type: Yup.string(),
       bar: Yup.string(),
@@ -335,7 +332,7 @@ export default class CategoryController {
   // -------------------------
   public markUrgent = async (req: Request, res: Response) => {
     const schema = Yup.object({
-      job_no: Yup.number().required("job_no is required"),
+      job_no: Yup.string().required("job_no is required"),
       urgent_due_date: Yup.date().nullable(),
     });
 

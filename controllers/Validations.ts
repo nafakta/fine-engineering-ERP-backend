@@ -780,7 +780,7 @@ const paymentCreateSchema = Yup.object({
 });
 
 export const createAssignToWorkerSchema = Yup.object({
-  jo_no: Yup.number().nullable(),
+  jo_no: Yup.string().nullable(),
   item_no: Yup.number().nullable(),
   machine_category: Yup.string().nullable(),
   machine_size: Yup.string().nullable(),
@@ -794,7 +794,7 @@ export const createAssignToWorkerSchema = Yup.object({
 });
 
 export const updateAssignToWorkerSchema = Yup.object({
-  jo_no: Yup.number().nullable(),
+  jo_no: Yup.string().nullable(),
   item_no: Yup.number().nullable(),
   machine_category: Yup.string().nullable(),
   machine_size: Yup.string().nullable(),

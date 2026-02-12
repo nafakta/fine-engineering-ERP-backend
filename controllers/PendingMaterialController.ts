@@ -150,7 +150,7 @@ private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60)
   // ------------------------
   public create = async (req: Request, res: Response) => {
     const createSchema = Yup.object({
-      job_no: Yup.number().required("job_no is required"),
+      job_no: Yup.string().required("job_no is required"),
       item_no: Yup.number().default(0),
       description: Yup.string().nullable(),
       size: Yup.string().required("size is required"),
@@ -207,8 +207,7 @@ private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60)
       else if (req.query.is_completed === "false") where.is_completed = false;
 
       if (req.query.job_no) {
-        const jobNo = parseFloat(String(req.query.job_no));
-        if (!isNaN(jobNo)) where.job_no = jobNo;
+        where.job_no = String(req.query.job_no).trim();
       }
 
       const { rows, count } = await this.PendingMaterial.findAndCountAll({
@@ -255,7 +254,7 @@ private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60)
   // ------------------------
   public update = async (req: Request, res: Response) => {
     const updateSchema = Yup.object({
-      job_no: Yup.number(),
+      job_no: Yup.string(),
       item_no: Yup.number(),
       description: Yup.string().nullable(),
       size: Yup.string(),
@@ -401,7 +400,7 @@ private async getSignedUrlForKey(key: string, expiresSeconds = 7 * 24 * 60 * 60)
     try {
       // ✅ Validate only non-file fields from body
       const schema = Yup.object({
-        job_no: Yup.number().required("job_no is required"),
+        job_no: Yup.string().required("job_no is required"),
         followup_dates: Yup.array().of(Yup.string().required("Date is required")).optional(),
         cc: Yup.array().of(Yup.string().email("Invalid cc email")).optional(),
         subject: Yup.string().optional(),

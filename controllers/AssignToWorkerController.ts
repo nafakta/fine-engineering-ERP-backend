@@ -111,17 +111,14 @@ export default class AssignToWorkerController {
           { machine_category: { [Op.iLike]: `%${q}%` } },
           { machine_code: { [Op.iLike]: `%${q}%` } },
           { serial_no: { [Op.iLike]: `%${q}%` } },
+          { jo_no: { [Op.iLike]: `%${q}%` } },
         ];
-
-        if (!isNaN(Number(q))) {
-          orConditions.push({ jo_no: Number(q) });
-        }
 
         where[Op.or] = orConditions;
       }
 
       if (req.query.jo_no) {
-        where.jo_no = Number(req.query.jo_no);
+        where.jo_no = String(req.query.jo_no).trim();
       }
 
       if (req.query.job_id) {
