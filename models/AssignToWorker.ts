@@ -3,6 +3,7 @@ import { Model, DataTypes, Sequelize, Optional } from "sequelize";
 export interface AssignToWorkerAttributes {
   id: string;
   jo_no?: number;
+  jo_no?: string;
   item_no?: number;
   machine_category?: string;
   machine_size?: string;
@@ -27,6 +28,7 @@ export class AssignToWorker
 
   public id!: string;
   public jo_no!: number;
+  public jo_no!: string;
   public item_no!: number;
   public machine_category!: string;
   public machine_size!: string;
@@ -51,6 +53,7 @@ export class AssignToWorker
         },
         jo_no: {
           type: DataTypes.INTEGER,
+          type: DataTypes.TEXT,
           allowNull: true,
         },
         item_no: {
