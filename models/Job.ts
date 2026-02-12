@@ -19,7 +19,7 @@ export class Job extends Model<
   declare job_type: JobType;
   declare job_category: string | null;
   declare job_no: string | null; // Nullable
-  declare jo_number: number | null;
+  declare jo_number: string | null;
   declare tso_no: string | null;
   declare serial_no: string | null;
   declare job_order_date: Date | null;
@@ -69,7 +69,7 @@ export const initJobModel = (sequelize: Sequelize) => {
         allowNull: true,
       }, // Nullable
       jo_number: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.TEXT,
         allowNull: true,
       },
       tso_no: {
