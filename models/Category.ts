@@ -4,7 +4,7 @@ export default (sequelize: Sequelize) => {
   class Category extends Model {
     public id!: string;
     public job_category!: string | null;
-    public job_no!: number;
+    public job_no!: string;
     public description!: string | null;
     public material_type!: string;
     public bar!: string;
@@ -33,7 +33,7 @@ export default (sequelize: Sequelize) => {
         allowNull: true,
       },
       job_no: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.TEXT,
         allowNull: false,
         unique: true, // ✅ REQUIRED
       },

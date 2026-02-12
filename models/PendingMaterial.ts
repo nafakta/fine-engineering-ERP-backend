@@ -12,7 +12,7 @@ export class PendingMaterial extends Model<
   InferCreationAttributes<PendingMaterial>
 > {
   declare id: CreationOptional<string>;
-  declare job_no: number;
+  declare job_no: string;
   declare item_no: number;
   declare description: string | null;
   declare size: string;
@@ -34,7 +34,7 @@ export const initPendingMaterialModel = (sequelize: Sequelize) => {
         primaryKey: true,
       },
       job_no: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.TEXT,
         allowNull: false,
       },
       item_no: {

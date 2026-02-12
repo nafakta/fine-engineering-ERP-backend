@@ -18,7 +18,7 @@ export class PoService extends Model<
   declare pn_no: number | null;
   declare description: string | null;
   declare po_qnty: number | null;
-  declare job_no: number | null;
+  declare job_no: string | null;
   declare created_at: CreationOptional<Date>;
   declare updated_at: CreationOptional<Date>;
   declare created_by: string | null;
@@ -58,7 +58,7 @@ export const initPoServiceModel = (sequelize: Sequelize) => {
         allowNull: true,
       },
       job_no: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.TEXT,
         allowNull: true,
       },
       created_by: {
