@@ -152,43 +152,61 @@ export const initJobModel = (sequelize: Sequelize) => {
           // Generate serial_no for all types
           const { job_type } = job;
           let prefix = "";
+          const isBulk = (options as any).isBulk;
 
           switch (job_type) {
             case "JOB_SERVICE":
               // The `isBulk` option is passed from the controller
-              prefix = (options as any).isBulk ? "JMA" : "JSA";
+              prefix = isBulk ? "JMA" : "JSA";
               break;
             case "TSO_SERVICE":
-              prefix = "FSA";
+              prefix = isBulk ? "SMA" : "SSA";
               break;
             case "KANBAN":
-              prefix = "FKA";
+              prefix = isBulk ? "KMA" : "KSA";
               break;
             default:
               return; // Let validation handle invalid job_type
           }
 
+          // Determine identifier based on job type
+          let identifier = "";
+          if (job_type === "TSO_SERVICE") {
+            identifier = job.tso_no || "";
+          } else if (job_type === "JOB_SERVICE") {
+            identifier = job.job_no || "";
+          }
+
+          const joNumber = job.jo_number || "";
+          const baseSerial = identifier
+            ? `${prefix}-${identifier}-${joNumber}`
+            : `${prefix}-${joNumber}`;
+
           const lastJob = await Job.findOne({
             where: {
               serial_no: {
-                [Op.startsWith]: prefix,
+                [Op.iLike]: `${baseSerial}-%`,
               },
             },
-            order: [["serial_no", "DESC"]],
+            order: [
+              [sequelize.fn("length", sequelize.col("serial_no")), "DESC"],
+              ["serial_no", "DESC"],
+            ],
             transaction: options.transaction,
           });
 
           let nextNumber = 1;
-          if (lastJob?.serial_no) {
-            const numericPart = lastJob.serial_no.substring(prefix.length);
-            const lastNumber = parseInt(numericPart, 10);
-            if (!isNaN(lastNumber)) {
-              nextNumber = lastNumber + 1;
+          if (lastJob && lastJob.serial_no) {
+            // Extract the suffix after the last dash
+            const suffixPart = lastJob.serial_no.substring(baseSerial.length + 1);
+            const lastNum = parseInt(suffixPart, 10);
+            if (!isNaN(lastNum)) {
+              nextNumber = lastNum + 1;
             }
           }
 
-          const paddedNumber = String(nextNumber).padStart(6, "0");
-          job.serial_no = `${prefix}${paddedNumber}`;
+          const suffix = String(nextNumber).padStart(2, "0");
+          job.serial_no = `${baseSerial}-${suffix}`;
         },
         beforeSave: async (job) => {
           if (job.job_no) {
