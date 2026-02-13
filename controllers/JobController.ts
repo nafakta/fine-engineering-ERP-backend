@@ -341,6 +341,7 @@ export default class JobController {
       const urgent = req.query.urgent;
       const is_approved = req.query.is_approved;
       const rejected = req.query.rejected;
+      const status = req.query.status;
 
       const where: any = {};
 
@@ -364,6 +365,12 @@ export default class JobController {
         where.rejected = true;
       } else if (rejected === 'false') {
         where.rejected = false;
+      }
+
+      if (status === 'true') {
+        where.status = true;
+      } else if (status === 'false') {
+        where.status = false;
       }
 
       if (req.query.job_no) {
@@ -497,6 +504,7 @@ export default class JobController {
       assign_to: Yup.string().nullable(),
       assign_date: Yup.date().nullable(),
       urgent: Yup.boolean(),
+      status: Yup.boolean(),
       is_approved: Yup.boolean(),
       rejected: Yup.boolean(),
       updated_by: Yup.string().uuid().nullable(),

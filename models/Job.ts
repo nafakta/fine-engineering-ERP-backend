@@ -31,6 +31,7 @@ export class Job extends Model<
   declare kanban_job_cat: string | null;
   declare product_qty: number | null;
   declare qty: number;
+  declare qty_history: number | null;
   declare moc: string;
   declare remark: string | null;
   declare bin_location: string | null;
@@ -38,6 +39,7 @@ export class Job extends Model<
   declare client_name: string | null;
   declare assign_to: string | null;
   declare assign_date: Date | null;
+  declare status: CreationOptional<boolean>;
   declare urgent: CreationOptional<boolean>;
   declare urgent_due_date: Date | null;
   declare is_approved: CreationOptional<boolean>;
@@ -91,6 +93,7 @@ export const initJobModel = (sequelize: Sequelize) => {
       kanban_job_cat: { type: DataTypes.TEXT, allowNull: true },
       product_qty: { type: DataTypes.INTEGER, allowNull: true },
       qty: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+      qty_history: { type: DataTypes.DECIMAL(14, 2), allowNull: true },
       moc: { type: DataTypes.TEXT, allowNull: false },
       remark: { type: DataTypes.TEXT, allowNull: true },
       bin_location: { type: DataTypes.TEXT, allowNull: true },
@@ -98,6 +101,11 @@ export const initJobModel = (sequelize: Sequelize) => {
       client_name: { type: DataTypes.TEXT, allowNull: true },
       assign_to: { type: DataTypes.TEXT, allowNull: true },
       assign_date: { type: DataTypes.DATEONLY, allowNull: true },
+      status: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
       urgent: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
@@ -136,6 +144,11 @@ export const initJobModel = (sequelize: Sequelize) => {
       updatedAt: "updated_at",
       hooks: {
         beforeCreate: async (job, options) => {
+          // Set qty_history to initial qty
+          if (job.qty !== undefined) {
+            job.qty_history = job.qty;
+          }
+
           // Generate serial_no for all types
           const { job_type } = job;
           let prefix = "";
