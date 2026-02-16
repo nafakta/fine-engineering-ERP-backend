@@ -61,6 +61,30 @@ export default class AssignToWorkerController {
         }
       }
 
+      // Auto-generate serial_no sequence (e.g., input "ABC" -> "ABC-0001")
+      if (body.serial_no) {
+        const baseSerial = body.serial_no.trim();
+        const lastRecord = await this.AssignToWorker.findOne({
+          where: {
+            serial_no: { [Op.iLike]: `${baseSerial}-%` },
+          },
+          order: [
+            [dbModels.sequelize.fn("length", dbModels.sequelize.col("serial_no")), "DESC"],
+            ["serial_no", "DESC"],
+          ],
+          transaction,
+        });
+
+        let nextSeq = 1;
+        if (lastRecord && lastRecord.serial_no) {
+          const parts = lastRecord.serial_no.split("-");
+          const lastSeqNum = parseInt(parts[parts.length - 1], 10);
+          if (!isNaN(lastSeqNum)) nextSeq = lastSeqNum + 1;
+        }
+
+        body.serial_no = `${baseSerial}-${String(nextSeq).padStart(4, "0")}`;
+      }
+
       const record = await this.AssignToWorker.create(body, { transaction });
 
       await transaction.commit();
