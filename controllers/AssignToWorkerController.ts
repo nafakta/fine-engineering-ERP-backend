@@ -112,6 +112,7 @@ export default class AssignToWorkerController {
           { machine_code: { [Op.iLike]: `%${q}%` } },
           { serial_no: { [Op.iLike]: `%${q}%` } },
           { jo_no: { [Op.iLike]: `%${q}%` } },
+          { status: { [Op.iLike]: `%${q}%` } },
         ];
 
         where[Op.or] = orConditions;
@@ -123,6 +124,10 @@ export default class AssignToWorkerController {
 
       if (req.query.job_id) {
         where.job_id = req.query.job_id;
+      }
+
+      if (req.query.status) {
+        where.status = { [Op.iLike]: `%${String(req.query.status).trim()}%` };
       }
 
       const { rows, count } = await this.AssignToWorker.findAndCountAll({
