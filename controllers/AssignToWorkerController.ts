@@ -150,6 +150,10 @@ export default class AssignToWorkerController {
         where.job_id = req.query.job_id;
       }
 
+      if (req.query.worker_name) {
+        where.worker_name = { [Op.iLike]: `%${String(req.query.worker_name).trim()}%` };
+      }
+
       if (req.query.status) {
         where.status = { [Op.iLike]: `%${String(req.query.status).trim()}%` };
       } else {
@@ -163,12 +167,12 @@ export default class AssignToWorkerController {
         limit,
         offset,
         order: [["created_at", "DESC"]],
-        // include: [
-        //   {
-        //     model: dbModels.Job,
-        //     as: "job",
-        //   },
-        // ],
+        include: [
+          {
+            model: dbModels.Job,
+            as: "job",
+          },
+        ],
       });
 
       return res.json({
@@ -507,45 +511,6 @@ export default class AssignToWorkerController {
       return res
         .status(500)
         .json({ success: false, error: "Internal server error" });
-    }
-  };
-
-  // LIST BY WORKER (IN-PROGRESS)
-  public listByWorker = async (req: Request, res: Response) => {
-    try {
-      const { worker_name } = req.query;
-
-      if (!worker_name) {
-        return res.status(400).json({
-          success: false,
-          error: "worker_name is required as a query parameter",
-        });
-      }
-
-      if (!this.AssignToWorker) {
-        return res
-          .status(500)
-          .json({ success: false, error: "AssignToWorker model not initialized" });
-      }
-
-      const rows = await this.AssignToWorker.findAll({
-        where: {
-          worker_name: String(worker_name),
-          status: "in-progress",
-        },
-        order: [["created_at", "DESC"]],
-        include: [
-          {
-            model: dbModels.Job,
-            as: "job",
-          },
-        ],
-      });
-
-      return res.json({ success: true, data: rows });
-    } catch (err: any) {
-      console.error("List By Worker Error:", err);
-      return res.status(500).json({ success: false, error: "Internal server error" });
     }
   };
 }

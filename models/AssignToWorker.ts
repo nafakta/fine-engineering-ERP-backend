@@ -12,7 +12,7 @@ export interface AssignToWorkerAttributes {
   assigning_date?: Date;
   serial_no?: string;
   job_id?: string;
-  status: string;
+  status?: string;
   created_at?: Date;
   updated_at?: Date;
   created_by?: string;
