@@ -153,7 +153,9 @@ export default class AssignToWorkerController {
       if (req.query.status) {
         where.status = { [Op.iLike]: `%${String(req.query.status).trim()}%` };
       } else {
-        where.status = { [Op.ne]: "rejected" };
+        where.status = {
+          [Op.or]: [{ [Op.ne]: "rejected" }, { [Op.eq]: null }],
+        };
       }
 
       const { rows, count } = await this.AssignToWorker.findAndCountAll({
@@ -511,12 +513,12 @@ export default class AssignToWorkerController {
   // LIST BY WORKER (IN-PROGRESS)
   public listByWorker = async (req: Request, res: Response) => {
     try {
-      const { worker_name } = req.body;
+      const { worker_name } = req.query;
 
       if (!worker_name) {
         return res.status(400).json({
           success: false,
-          error: "worker_name is required in the request body",
+          error: "worker_name is required as a query parameter",
         });
       }
 
@@ -528,7 +530,7 @@ export default class AssignToWorkerController {
 
       const rows = await this.AssignToWorker.findAll({
         where: {
-          worker_name: worker_name,
+          worker_name: String(worker_name),
           status: "in-progress",
         },
         order: [["created_at", "DESC"]],
