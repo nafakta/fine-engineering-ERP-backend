@@ -167,12 +167,12 @@ export default class AssignToWorkerController {
         limit,
         offset,
         order: [["created_at", "DESC"]],
-        include: [
-          {
-            model: dbModels.Job,
-            as: "job",
-          },
-        ],
+        // include: [
+        //   {
+        //     model: dbModels.Job,
+        //     as: "job",
+        //   },
+        // ],
       });
 
       return res.json({
