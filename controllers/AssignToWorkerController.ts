@@ -152,6 +152,8 @@ export default class AssignToWorkerController {
 
       if (req.query.status) {
         where.status = { [Op.iLike]: `%${String(req.query.status).trim()}%` };
+      } else {
+        where.status = { [Op.ne]: "rejected" };
       }
 
       const { rows, count } = await this.AssignToWorker.findAndCountAll({
@@ -293,6 +295,213 @@ export default class AssignToWorkerController {
       });
     } catch (err: any) {
       console.error("Delete AssignToWorker Error:", err);
+      return res
+        .status(500)
+        .json({ success: false, error: "Internal server error" });
+    }
+  };
+
+  // MOVE TO REVIEW
+  public moveToReview = async (req: Request, res: Response) => {
+    const transaction = await dbModels.sequelize.transaction();
+    try {
+      const { id } = req.params;
+      const { updated_by } = req.body;
+
+      const schema = Yup.object({
+        updated_by: Yup.string().uuid().nullable().optional(),
+      });
+      await schema.validate({ updated_by }, { abortEarly: false, stripUnknown: true });
+
+      if (!this.AssignToWorker) {
+        await transaction.rollback();
+        return res
+          .status(500)
+          .json({ success: false, error: "AssignToWorker model not initialized" });
+      }
+
+      const record = await this.AssignToWorker.findByPk(id, { transaction });
+
+      if (!record) {
+        await transaction.rollback();
+        return res
+          .status(404)
+          .json({ success: false, error: "Assignment not found" });
+      }
+
+      if (record.status !== "in-progress") {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: `Only assignments with status 'in-progress' can be moved to review. Current status is '${record.status}'.`,
+        });
+      }
+
+      await record.update({ status: "in-review", updated_by }, { transaction });
+
+      await transaction.commit();
+
+      return res.json({
+        success: true,
+        data: record,
+        message: "Assignment status updated to 'in-review' successfully",
+      });
+    } catch (err: any) {
+      await transaction.rollback();
+      console.error("Move to Review Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({
+          success: false,
+          error: "Validation error",
+          details: err.errors,
+        });
+      }
+      return res
+        .status(500)
+        .json({ success: false, error: "Internal server error" });
+    }
+  };
+
+  // REJECT ASSIGNMENT
+  public rejectAssignment = async (req: Request, res: Response) => {
+    const transaction = await dbModels.sequelize.transaction();
+    try {
+      const { id } = req.params;
+      const { updated_by } = req.body;
+
+      const schema = Yup.object({
+        updated_by: Yup.string().uuid().nullable().optional(),
+      });
+      await schema.validate({ updated_by }, { abortEarly: false, stripUnknown: true });
+
+      if (!this.AssignToWorker) {
+        await transaction.rollback();
+        return res
+          .status(500)
+          .json({ success: false, error: "AssignToWorker model not initialized" });
+      }
+
+      const record = await this.AssignToWorker.findByPk(id, { transaction });
+
+      if (!record) {
+        await transaction.rollback();
+        return res
+          .status(404)
+          .json({ success: false, error: "Assignment not found" });
+      }
+
+      if (record.status !== "in-progress") {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: `Only assignments with status 'in-progress' can be rejected. Current status is '${record.status}'.`,
+        });
+      }
+
+      await record.update({ status: "rejected", updated_by }, { transaction });
+
+      // Add quantity back to Job
+      if (record.quantity_no && record.quantity_no > 0) {
+        let job = null;
+
+        if (record.job_id) {
+          job = await dbModels.Job.findByPk(record.job_id, { transaction });
+        }
+
+        // Fallback: match serial_no (remove last 5 chars: hyphen + 4 digits)
+        if (!job && record.serial_no && record.serial_no.length > 5) {
+          const jobSerial = record.serial_no.slice(0, -5);
+          job = await dbModels.Job.findOne({
+            where: { serial_no: jobSerial },
+            transaction,
+          });
+        }
+
+        if (job) {
+          const currentQty = Number(job.qty);
+          const restoreQty = Number(record.quantity_no);
+          await job.update({ qty: currentQty + restoreQty }, { transaction });
+        }
+      }
+
+      await transaction.commit();
+
+      return res.json({
+        success: true,
+        data: record,
+        message: "Assignment rejected and quantity restored to job successfully",
+      });
+    } catch (err: any) {
+      await transaction.rollback();
+      console.error("Reject Assignment Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({
+          success: false,
+          error: "Validation error",
+          details: err.errors,
+        });
+      }
+      return res
+        .status(500)
+        .json({ success: false, error: "Internal server error" });
+    }
+  };
+
+  // MOVE TO READY FOR QC
+  public moveToReadyForQC = async (req: Request, res: Response) => {
+    const transaction = await dbModels.sequelize.transaction();
+    try {
+      const { id } = req.params;
+      const { updated_by } = req.body;
+
+      const schema = Yup.object({
+        updated_by: Yup.string().uuid().nullable().optional(),
+      });
+      await schema.validate({ updated_by }, { abortEarly: false, stripUnknown: true });
+
+      if (!this.AssignToWorker) {
+        await transaction.rollback();
+        return res
+          .status(500)
+          .json({ success: false, error: "AssignToWorker model not initialized" });
+      }
+
+      const record = await this.AssignToWorker.findByPk(id, { transaction });
+
+      if (!record) {
+        await transaction.rollback();
+        return res
+          .status(404)
+          .json({ success: false, error: "Assignment not found" });
+      }
+
+      if (record.status !== "in-review") {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: `Only assignments with status 'in-review' can be moved to ready-for-qc. Current status is '${record.status}'.`,
+        });
+      }
+
+      await record.update({ status: "ready-for-qc", updated_by }, { transaction });
+
+      await transaction.commit();
+
+      return res.json({
+        success: true,
+        data: record,
+        message: "Assignment status updated to 'ready-for-qc' successfully",
+      });
+    } catch (err: any) {
+      await transaction.rollback();
+      console.error("Move to Ready For QC Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({
+          success: false,
+          error: "Validation error",
+          details: err.errors,
+        });
+      }
       return res
         .status(500)
         .json({ success: false, error: "Internal server error" });

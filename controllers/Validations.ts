@@ -779,6 +779,14 @@ const paymentCreateSchema = Yup.object({
   created_by: Yup.string().uuid().nullable().optional(),
 });
 
+const ASSIGN_TO_WORKER_STATUSES = [
+  "in-progress",
+  "in-review",
+  "ready-for-qc",
+  "completed",
+  "rejected",
+];
+
 export const createAssignToWorkerSchema = Yup.object({
   jo_no: Yup.string().nullable(),
   item_no: Yup.number().nullable(),
@@ -790,7 +798,7 @@ export const createAssignToWorkerSchema = Yup.object({
   assigning_date: Yup.date().nullable(),
   serial_no: Yup.string().nullable(),
   job_id: Yup.string().uuid().nullable(),
-  status: Yup.string().nullable(),
+  status: Yup.string().oneOf(ASSIGN_TO_WORKER_STATUSES).optional(),
   created_by: Yup.string().uuid().nullable(),
 });
 
@@ -805,6 +813,6 @@ export const updateAssignToWorkerSchema = Yup.object({
   assigning_date: Yup.date().nullable(),
   serial_no: Yup.string().nullable(),
   job_id: Yup.string().uuid().nullable(),
-  status: Yup.string().nullable(),
+  status: Yup.string().oneOf(ASSIGN_TO_WORKER_STATUSES).optional(),
   updated_by: Yup.string().uuid().nullable(),
 });

@@ -12,7 +12,7 @@ export interface AssignToWorkerAttributes {
   assigning_date?: Date;
   serial_no?: string;
   job_id?: string;
-  status?: string;
+  status: string;
   created_at?: Date;
   updated_at?: Date;
   created_by?: string;
@@ -20,7 +20,7 @@ export interface AssignToWorkerAttributes {
 }
 
 export interface AssignToWorkerCreationAttributes
-  extends Optional<AssignToWorkerAttributes, "id" | "created_at" | "updated_at"> {}
+  extends Optional<AssignToWorkerAttributes, "id" | "status" | "created_at" | "updated_at"> {}
 
 export class AssignToWorker
   extends Model<AssignToWorkerAttributes, AssignToWorkerCreationAttributes>
@@ -92,8 +92,20 @@ export class AssignToWorker
           allowNull: true,
         },
         status: {
-          type: DataTypes.TEXT,
-          allowNull: true,
+          type: DataTypes.STRING,
+          allowNull: false,
+          defaultValue: "in-progress",
+          validate: {
+            isIn: [
+              [
+                "in-progress",
+                "in-review",
+                "ready-for-qc",
+                "completed",
+                "rejected",
+              ],
+            ],
+          },
         },
         created_by: {
           type: DataTypes.UUID,

@@ -53,5 +53,8 @@ router.get("/assign-to-worker", assignToWorkerController.list);
 router.get("/assign-to-worker/:id", assignToWorkerController.get);
 router.put("/assign-to-worker/:id", assignToWorkerController.update);
 router.delete("/assign-to-worker/:id", assignToWorkerController.delete);
+router.post("/assign-to-worker/:id/review", assignToWorkerController.moveToReview);
+router.post("/assign-to-worker/:id/reject", assignToWorkerController.rejectAssignment);
+router.post("/assign-to-worker/:id/ready-for-qc", assignToWorkerController.moveToReadyForQC);
 
 export default router;
