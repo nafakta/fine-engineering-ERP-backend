@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import * as Yup from "yup";
 import { Op } from "sequelize";
 import dbModels from "../models";
+import { JobType } from "../models/Job";
 import {
   createAssignToWorkerSchema,
   updateAssignToWorkerSchema,
@@ -154,6 +155,19 @@ export default class AssignToWorkerController {
         where.worker_name = { [Op.iLike]: `%${String(req.query.worker_name).trim()}%` };
       }
 
+      const include: any[] = [
+        {
+          model: dbModels.Job,
+          as: "job",
+        },
+      ];
+
+      const jobType = req.query.job_type as JobType | undefined;
+      if (jobType && ["JOB_SERVICE", "TSO_SERVICE", "KANBAN"].includes(jobType)) {
+        include[0].where = { job_type: jobType };
+        include[0].required = true;
+      }
+
       if (req.query.status) {
         where.status = { [Op.iLike]: `%${String(req.query.status).trim()}%` };
       } else {
@@ -167,12 +181,7 @@ export default class AssignToWorkerController {
         limit,
         offset,
         order: [["created_at", "DESC"]],
-        // include: [
-        //   {
-        //     model: dbModels.Job,
-        //     as: "job",
-        //   },
-        // ],
+        include,
       });
 
       return res.json({
