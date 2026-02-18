@@ -155,19 +155,6 @@ export default class AssignToWorkerController {
         where.worker_name = { [Op.iLike]: `%${String(req.query.worker_name).trim()}%` };
       }
 
-      const include: any[] = [
-        {
-          model: dbModels.Job,
-          as: "job",
-        },
-      ];
-
-      const jobType = req.query.job_type as JobType | undefined;
-      if (jobType && ["JOB_SERVICE", "TSO_SERVICE", "KANBAN"].includes(jobType)) {
-        include[0].where = { job_type: jobType };
-        include[0].required = true;
-      }
-
       if (req.query.status) {
         where.status = { [Op.iLike]: `%${String(req.query.status).trim()}%` };
       } else {
@@ -176,13 +163,25 @@ export default class AssignToWorkerController {
         };
       }
 
-      const { rows, count } = await this.AssignToWorker.findAndCountAll({
+      const queryOptions: any = {
         where,
         limit,
         offset,
         order: [["created_at", "DESC"]],
-        include,
-      });
+      };
+
+      const jobType = req.query.job_type as JobType | undefined;
+      if (jobType && ["JOB_SERVICE", "TSO_SERVICE", "KANBAN"].includes(jobType)) {
+        queryOptions.include = [{
+          model: dbModels.Job,
+          as: "job",
+          where: { job_type: jobType },
+          required: true,
+          attributes: [] // This prevents Job data from being included in the response
+        }];
+      }
+
+      const { rows, count } = await this.AssignToWorker.findAndCountAll(queryOptions);
 
       return res.json({
         success: true,
