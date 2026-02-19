@@ -10,7 +10,7 @@ import { initPermissionModel } from "./Permission";
 import { initRolePermissionModel } from "./RolePermission";
 import { initSystemUserSecretModel } from "./SystemUserSecret";
 
-
+import { Worker as WorkerModel } from "./Worker";
 
 import initCategoryModel from "./Category";
 import { initJobModel } from "./Job";
@@ -33,6 +33,7 @@ const dbModels: any = {
   Permission: initPermissionModel(sequelize),
   RolePermission: initRolePermissionModel(sequelize),
   SystemUserSecret: initSystemUserSecretModel(sequelize),
+  Worker: WorkerModel.initModel(sequelize),
 
   Category: initCategoryModel(sequelize),
   Job: initJobModel(sequelize),
@@ -141,6 +142,7 @@ export const {
   PendingMaterial,
   PoService,
   AssignToWorker,
+  Worker,
   // Add other models you need
 } = dbModels;
 

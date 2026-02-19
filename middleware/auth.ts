@@ -2,65 +2,32 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "../config/jwt";
 
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
-    const header = req.headers.authorization || "";
+export function requireWorkerAuth(req: Request, res: Response, next: NextFunction) {
+  const header = req.headers.authorization || "";
+  if (!header.startsWith("Bearer ")) {
+    return res.status(401).json({ success: false, msg: "Unauthorized" });
+  }
 
-    console.log("🔐 Auth Debug - Authorization Header:", header);
-    console.log(
-        "🔐 Auth Debug - JWT_SECRET:",
-        JWT_SECRET ? `Set (length: ${JWT_SECRET.length})` : "Not set"
-    );
+  const token = header.slice(7);
 
-    if (!header.startsWith("Bearer ")) {
-        console.log("❌ No Bearer token found");
-        return res
-            .status(401)
-            .json({ success: false, msg: "Unauthorized", data: {} });
+  try {
+    const payload = jwt.verify(token, JWT_SECRET) as any;
+
+    if (payload.type !== "WORKER") {
+      return res.status(401).json({ success: false, msg: "Unauthorized - not worker token" });
     }
 
-    const token = header.slice(7);
-    console.log(
-        "🔐 Auth Debug - Token received:",
-        token.substring(0, 20) + "..."
-    );
+    (req as any).worker = {
+      workerId: payload.workerId ?? payload.id ?? null,
+      worker_name: payload.worker_name ?? null,
+    };
 
-    try {
-        const payload = jwt.verify(token, JWT_SECRET) as any;
-        console.log("✅ JWT Verified Successfully - Decoded payload:", payload);
-
-        // 🔑 Normalize ID
-        const userId =
-            payload.userId || payload.system_user_id || payload.id || null;
-
-        (req as any).user = {
-            userId,                 // ✅ primary field you will use
-            system_user_id: userId, // ✅ kept for backward compatibility
-            email: payload.email,
-            role: payload.role,
-            secretKey: payload.secretKey,
-        };
-
-        if (!userId) {
-            console.log("❌ No userId found in token");
-            return res.status(401).json({
-                success: false,
-                msg: "Unauthorized - Invalid token payload",
-                data: {},
-            });
-        }
-
-        console.log("✅ Authenticated user:", (req as any).user);
-        next();
-    } catch (err: any) {
-        console.error("❌ JWT Verification Failed:", {
-            error: err.message,
-            secretUsed: JWT_SECRET ? `Set (length: ${JWT_SECRET.length})` : "Not set",
-            tokenPrefix: token.substring(0, 20) + "...",
-        });
-        return res.status(401).json({
-            success: false,
-            msg: "Unauthorized - Invalid token",
-            data: {},
-        });
+    if (!(req as any).worker.worker_name) {
+      return res.status(401).json({ success: false, msg: "Unauthorized - invalid worker token" });
     }
+
+    next();
+  } catch (e: any) {
+    return res.status(401).json({ success: false, msg: "Unauthorized - Invalid token" });
+  }
 }
