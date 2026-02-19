@@ -404,11 +404,11 @@ export default class AssignToWorkerController {
           .json({ success: false, error: "Assignment not found" });
       }
 
-      if (record.status !== "in-progress") {
+      if (record.status !== "in-review") {
         await transaction.rollback();
         return res.status(400).json({
           success: false,
-          error: `Only assignments with status 'in-progress' can be rejected. Current status is '${record.status}'.`,
+          error: `Only assignments with status 'in-review' can be rejected. Current status is '${record.status}'.`,
         });
       }
 
