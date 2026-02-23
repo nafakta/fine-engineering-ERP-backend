@@ -414,6 +414,8 @@ export default class JobController {
           { tso_no: { [Op.iLike]: `%${q}%` } },
           { job_no: { [Op.iLike]: `%${q}%` } },
           { jo_number: { [Op.iLike]: `%${q}%` } },
+          { chalan_no: { [Op.iLike]: `%${q}%` } },
+          { reason: { [Op.iLike]: `%${q}%` } },
         ];
 
         where[Op.or] = orConditions;
@@ -945,6 +947,8 @@ export default class JobController {
       updated_by: Yup.string().uuid().nullable(),
     });
 
+    const transaction = await dbModels.sequelize.transaction();
+
     try {
       const payload = req.body || {};
       const body = await schema.validate(
@@ -952,34 +956,139 @@ export default class JobController {
         { stripUnknown: true }
       );
 
-      if (!this.Job) {
+      if (!this.Job || !dbModels.AssignToWorker) {
+        await transaction.rollback();
         return res.status(500).json({
           success: false,
-          error: "Job model not initialized",
+          error: "Job or AssignToWorker model not initialized",
         });
       }
 
-      const job = await this.Job.findByPk(body.id);
+      const job = await this.Job.findByPk(body.id, { transaction });
 
       if (!job) {
+        await transaction.rollback();
         return res.status(404).json({
           success: false,
           error: "Job not found",
         });
       }
 
-      await job.update({
-        rejected: true,
-        updated_by: body.updated_by,
+      await job.update(
+        {
+          rejected: true,
+          updated_by: body.updated_by,
+        },
+        { transaction }
+      );
+
+      // Also reject all worker assignments for this job and restore quantity
+      const assignments = await dbModels.AssignToWorker.findAll({
+        where: { job_id: body.id },
+        transaction,
       });
+
+      let totalQtyToRestore = 0;
+      for (const assignment of assignments) {
+        // Only restore quantity for assignments that are not already rejected or completed
+        if (assignment.status !== "rejected" && assignment.status !== "completed") {
+          totalQtyToRestore += Number(assignment.quantity_no || 0);
+        }
+        await assignment.update({ status: "rejected", updated_by: body.updated_by }, { transaction });
+      }
+
+      if (totalQtyToRestore > 0) {
+        await job.increment("qty", { by: totalQtyToRestore, transaction });
+      }
+
+      await transaction.commit();
 
       return res.json({
         success: true,
-        message: "Job rejected successfully",
+        message: "Job rejected and associated worker assignments updated.",
         data: job,
       });
     } catch (err: any) {
+      await transaction.rollback();
       console.error("Reject Job Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({
+          success: false,
+          error: "Validation error",
+          details: err.errors,
+        });
+      }
+      return res.status(500).json({
+        success: false,
+        error: "Internal server error",
+      });
+    }
+  };
+
+  // -------------------------
+  // UPDATE DISPATCH DETAILS
+  // POST /api/v1/jobs/dispatch
+  // -------------------------
+  public updateDispatchDetails = async (req: Request, res: Response) => {
+    const schema = Yup.object({
+      job_id: Yup.string().uuid().required("Job ID is required"),
+      dispatch_date: Yup.date().required("Dispatch date is required"),
+      chalan_no: Yup.string().required("Chalan number is required"),
+      updated_by: Yup.string().uuid().nullable(),
+    });
+
+    const transaction = await dbModels.sequelize.transaction();
+
+    try {
+      const body = await schema.validate(req.body, { stripUnknown: true });
+
+      if (!this.Job || !dbModels.AssignToWorker) {
+        await transaction.rollback();
+        return res.status(500).json({
+          success: false,
+          error: "Job or AssignToWorker model not initialized",
+        });
+      }
+
+      const job = await this.Job.findByPk(body.job_id, { transaction });
+
+      if (!job) {
+        await transaction.rollback();
+        return res.status(404).json({
+          success: false,
+          error: "Job not found",
+        });
+      }
+
+      await job.update(
+        {
+          dispatch_date: body.dispatch_date,
+          chalan_no: body.chalan_no,
+          status: true,
+          updated_by: body.updated_by,
+        },
+        { transaction }
+      );
+
+      // Also update the status of all worker assignments for this job to 'completed'
+      await dbModels.AssignToWorker.update(
+        { status: "completed", updated_by: body.updated_by },
+        {
+          where: { job_id: body.job_id },
+          transaction,
+        }
+      );
+
+      await transaction.commit();
+
+      return res.json({
+        success: true,
+        message: "Job dispatch details and worker assignments updated successfully.",
+        data: job,
+      });
+    } catch (err: any) {
+      await transaction.rollback();
+      console.error("Update Dispatch Details Error:", err);
       if (err instanceof Yup.ValidationError) {
         return res.status(400).json({
           success: false,
