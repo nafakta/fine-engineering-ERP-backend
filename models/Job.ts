@@ -9,7 +9,8 @@ import {
 } from "sequelize";
 
 // Define the allowed job types for better type safety
-export type JobType = 'JOB_SERVICE' | 'TSO_SERVICE' | 'KANBAN';
+export type JobType = "JOB_SERVICE" | "TSO_SERVICE" | "KANBAN";
+export type JobStatus = "in-process" | "completed" | "not-ok";
 
 export class Job extends Model<
   InferAttributes<Job>,
@@ -42,7 +43,7 @@ export class Job extends Model<
   declare client_name: string | null;
   declare assign_to: string | null;
   declare assign_date: Date | null;
-  declare status: CreationOptional<boolean>;
+  declare status: JobStatus;
   declare urgent: CreationOptional<boolean>;
   declare urgent_due_date: Date | null;
   declare is_approved: CreationOptional<boolean>;
@@ -65,7 +66,7 @@ export const initJobModel = (sequelize: Sequelize) => {
         type: DataTypes.TEXT,
         allowNull: false,
         validate: {
-          isIn: [['JOB_SERVICE', 'TSO_SERVICE', 'KANBAN']],
+          isIn: [["JOB_SERVICE", "TSO_SERVICE", "KANBAN"]],
         },
       },
       job_category: { type: DataTypes.TEXT, allowNull: true },
@@ -108,9 +109,12 @@ export const initJobModel = (sequelize: Sequelize) => {
       assign_to: { type: DataTypes.TEXT, allowNull: true },
       assign_date: { type: DataTypes.DATEONLY, allowNull: true },
       status: {
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: false,
+        defaultValue: "in-process",
+        validate: {
+          isIn: [["in-process", "completed", "not-ok"]],
+        },
       },
       urgent: {
         type: DataTypes.BOOLEAN,
