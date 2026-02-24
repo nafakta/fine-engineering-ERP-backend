@@ -113,7 +113,7 @@ export default class AssignToWorkerController {
 
   // LIST
  // WORKER LIST - ONLY LOGGED IN WORKER
-public workerList = async (req: Request, res: Response) => {
+ public workerList = async (req: Request, res: Response) => {
   try {
     if (!this.AssignToWorker) {
       return res.status(500).json({ success: false, error: "AssignToWorker model not initialized" });
@@ -133,9 +133,8 @@ public workerList = async (req: Request, res: Response) => {
     const offset = (page - 1) * limit;
 
     const where: any = {
-      worker_name: { [Op.iLike]: workerName }, // EXACT worker only
+      worker_name: { [Op.iLike]: workerName },
     };
-
     if (status) where.status = status;
 
     const { rows, count } = await this.AssignToWorker.findAndCountAll({
@@ -143,11 +142,29 @@ public workerList = async (req: Request, res: Response) => {
       limit,
       offset,
       order: [["created_at", "DESC"]],
+      include: [
+        {
+          model: dbModels.Job,
+          as: "job",
+          required: false,
+          attributes: ["item_description", "moc", "item_no"],
+        },
+      ],
+    });
+
+    const data = rows.map((r: any) => {
+      const j = r.toJSON();
+      return {
+        ...j,
+        item_description: j.job?.item_description ?? null,
+        moc: j.job?.moc ?? null,
+        job_item_no: j.job?.item_no ?? null,
+      };
     });
 
     return res.json({
       success: true,
-      data: rows,
+      data,
       meta: { page, limit, total: count, totalPages: Math.ceil(count / limit) },
     });
   } catch (err) {
