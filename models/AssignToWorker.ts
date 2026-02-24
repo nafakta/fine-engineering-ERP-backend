@@ -102,6 +102,7 @@ export class AssignToWorker
                 "in-review",
                 "ready-for-qc",
                 "completed",
+                "not-ok",
                 "rejected",
               ],
             ],

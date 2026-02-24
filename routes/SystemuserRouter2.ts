@@ -29,6 +29,9 @@ router.post("/jobs/mark-urgent-by-jo-number", jobController.markUrgentByJoNumber
 router.post("/jobs/:id/assign", jobController.assignJob);
 router.post("/jobs/:id/approve", jobController.approveJob);
 router.post("/jobs/:id/reject", jobController.rejectJob);
+router.post("/jobs/:id/not-ok", jobController.markAsNotOk);
+router.post("/jobs/:id/rework", jobController.reworkJob);
+router.post("/jobs/dispatch", jobController.updateDispatchDetails);
 
 router.post("/categories", categoryController.create);
 router.get("/categories", categoryController.list);
