@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import * as Yup from "yup";
-import { Op } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import dbModels from "../models";
-import { JobType, JobStatus } from "../models/Job"; // Import the types
+import { JobType, JobStatus, Job } from "../models/Job"; // Import the types
 
 export default class JobController {
   private get Job() {
@@ -1080,53 +1080,16 @@ export default class JobController {
         });
       }
 
-      // Find all job IDs to update (group by jo_number if available)
-      let jobIdsToUpdate = [job.id];
-      let relatedJobs = [job];
-
-      if (job.jo_number) {
-        relatedJobs = await this.Job.findAll({
-          where: { jo_number: job.jo_number },
-          transaction,
-        });
-        jobIdsToUpdate = relatedJobs.map((j: any) => j.id);
-      }
-
-      // Check 1: All jobs must have qty = 0
-      const pendingJobs = relatedJobs.filter((j: any) => Number(j.qty) > 0);
-      if (pendingJobs.length > 0) {
-        const totalPendingQty = pendingJobs.reduce((sum: number, j: any) => sum + Number(j.qty || 0), 0);
-        const joNumber = job.jo_number || job.job_no;
+      const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc"]);
+      if (!validationResult.success) {
         await transaction.rollback();
         return res.status(400).json({
           success: false,
-          error: `${totalPendingQty} quantity not assigned to workers for Job Order ${joNumber}.`,
+          error: validationResult.error,
         });
       }
 
-      // Check 2: Sum of qty_history must match sum of assigned worker quantity
-      const totalHistoryQty = relatedJobs.reduce((sum: number, j: any) => sum + Number(j.qty_history || 0), 0);
-
-      const assignments = await dbModels.AssignToWorker.findAll({
-        where: {
-          job_id: { [Op.in]: jobIdsToUpdate },
-          status: "ready-for-qc",
-        },
-        attributes: ["quantity_no"],
-        transaction,
-      });
-
-      const totalAssignedQty = assignments.reduce((sum: number, a: any) => sum + Number(a.quantity_no || 0), 0);
-
-      if (totalHistoryQty !== totalAssignedQty) {
-        const difference = totalHistoryQty - totalAssignedQty;
-        const joNumber = job.jo_number || job.job_no;
-        await transaction.rollback();
-        return res.status(400).json({
-          success: false,
-          error: `${difference}/${totalHistoryQty} remaining to be QC for ${joNumber}`,//Dispatch mismatch for Job Order ${joNumber}. Total required quantity is ${totalHistoryQty}, but only ${totalAssignedQty} is ready for QC. A quantity of ${difference} is not yet ready for dispatch.
-        });
-      }
+      const jobIdsToUpdate = validationResult.jobIdsToUpdate!;
 
       await this.Job.update(
         {
@@ -1211,20 +1174,30 @@ export default class JobController {
         });
       }
 
-      await job.update(
+      const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc", "not-ok"]);
+      if (!validationResult.success) {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: validationResult.error,
+        });
+      }
+      const jobIdsToUpdate = validationResult.jobIdsToUpdate!;
+
+      await this.Job.update(
         {
           status: "not-ok",
           reason: body.reason,
           updated_by: body.updated_by,
         },
-        { transaction }
+        { where: { id: { [Op.in]: jobIdsToUpdate } }, transaction }
       );
 
       // Also update the status of all worker assignments for this job to 'not-ok'
       await dbModels.AssignToWorker.update(
         { status: "not-ok", updated_by: body.updated_by },
         {
-          where: { job_id: body.id },
+          where: { job_id: { [Op.in]: jobIdsToUpdate } },
           transaction,
         }
       );
@@ -1280,23 +1253,37 @@ export default class JobController {
         return res.status(404).json({ success: false, error: "Job not found" });
       }
 
-      const reworkQty = job.qty_history;
-      if (reworkQty === null || reworkQty === undefined || isNaN(Number(reworkQty))) {
+      const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc", "not-ok"]);
+      if (!validationResult.success) {
         await transaction.rollback();
         return res.status(400).json({
           success: false,
-          error: "Cannot rework job: quantity history is not available or invalid.",
+          error: validationResult.error,
         });
       }
+      const jobIdsToUpdate = validationResult.jobIdsToUpdate!;
 
-      await job.update(
-        { qty: reworkQty, status: "in-process", updated_by: body.updated_by },
-        { transaction }
-      );
+      // Fetch all related jobs to loop through them for individual updates
+      const relatedJobs = await this.Job.findAll({ where: { id: { [Op.in]: jobIdsToUpdate } }, transaction });
+
+      for (const relatedJob of relatedJobs) {
+        const reworkQty = relatedJob.qty_history;
+        if (reworkQty === null || reworkQty === undefined || isNaN(Number(reworkQty))) {
+          await transaction.rollback();
+          return res.status(400).json({
+            success: false,
+            error: `Cannot rework job ${relatedJob.job_no}: quantity history is not available or invalid.`,
+          });
+        }
+        await relatedJob.update(
+          { qty: reworkQty, status: "in-process", updated_by: body.updated_by },
+          { transaction }
+        );
+      }
 
       await dbModels.AssignToWorker.update(
         { status: "rejected", updated_by: body.updated_by },
-        { where: { job_id: body.id }, transaction }
+        { where: { job_id: { [Op.in]: jobIdsToUpdate } }, transaction }
       );
 
       await transaction.commit();
@@ -1311,4 +1298,61 @@ export default class JobController {
       return res.status(500).json({ success: false, error: "Internal server error" });
     }
   };
+
+  private async validateJobGroupState(
+    job: Job,
+    transaction: Transaction,
+    validAssignmentStatuses: string[]
+  ): Promise<{ success: boolean; error?: string; jobIdsToUpdate?: string[] }> {
+    // --- Validation: Check qty_history vs assigned ---
+    let jobIdsToUpdate = [job.id];
+    let relatedJobs: Job[] = [job];
+
+    if (job.jo_number) {
+      relatedJobs = await this.Job.findAll({
+        where: { jo_number: job.jo_number },
+        transaction,
+      });
+      jobIdsToUpdate = relatedJobs.map((j) => j.id);
+    }
+
+    // Check 1: All jobs must have qty = 0
+    const pendingJobs = relatedJobs.filter((j) => Number(j.qty) > 0);
+    if (pendingJobs.length > 0) {
+      const totalPendingQty = pendingJobs.reduce((sum, j) => sum + Number(j.qty || 0), 0);
+      const joNumber = job.jo_number || job.job_no;
+      return {
+        success: false,
+        error: `${totalPendingQty} quantity not assigned to workers for Job Order ${joNumber}.`,
+      };
+    }
+
+    // Check 2: Sum of qty_history must match sum of assigned worker quantity
+    const totalHistoryQty = relatedJobs.reduce((sum, j) => sum + Number(j.qty_history || 0), 0);
+
+    const whereStatus: any =
+      validAssignmentStatuses.length === 1 ? validAssignmentStatuses[0] : { [Op.or]: validAssignmentStatuses };
+
+    const assignments = await dbModels.AssignToWorker.findAll({
+      where: {
+        job_id: { [Op.in]: jobIdsToUpdate },
+        status: whereStatus,
+      },
+      attributes: ["quantity_no"],
+      transaction,
+    });
+
+    const totalAssignedQty = assignments.reduce((sum: number, a: any) => sum + Number(a.quantity_no || 0), 0);
+
+    if (totalHistoryQty !== totalAssignedQty) {
+      const difference = totalHistoryQty - totalAssignedQty;
+      const joNumber = job.jo_number || job.job_no;
+      return {
+        success: false,
+        error: `${difference}/${totalHistoryQty} remaining to be QC for ${joNumber}`,
+      };
+    }
+
+    return { success: true, jobIdsToUpdate };
+  }
 }
