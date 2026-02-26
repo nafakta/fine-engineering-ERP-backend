@@ -1029,11 +1029,16 @@ export default class JobController {
   // -------------------------
   public updateDispatchDetails = async (req: Request, res: Response) => {
     const schema = Yup.object({
-      job_id: Yup.string().uuid().required("Job ID is required"),
+      job_id: Yup.string().uuid().optional(),
+      assignment_id: Yup.string().uuid().optional(),
       dispatch_date: Yup.date().required("Dispatch date is required"),
       chalan_no: Yup.string().required("Chalan number is required"),
       updated_by: Yup.string().uuid().nullable(),
-    });
+    }).test(
+      "id-required",
+      "Either job_id or assignment_id must be provided.",
+      (value) => !!value.job_id || !!value.assignment_id
+    );
 
     const transaction = await dbModels.sequelize.transaction();
 
@@ -1048,7 +1053,24 @@ export default class JobController {
         });
       }
 
-      const job = await this.Job.findByPk(body.job_id, { transaction });
+      let jobId: string;
+
+      if (body.assignment_id) {
+        const assignment = await dbModels.AssignToWorker.findByPk(body.assignment_id, { transaction });
+        if (!assignment || !assignment.job_id) {
+          await transaction.rollback();
+          return res.status(404).json({
+            success: false,
+            error: "Assignment not found or is not linked to a job.",
+          });
+        }
+        jobId = assignment.job_id;
+      } else {
+        // We can be sure body.job_id exists because of the .test() validation
+        jobId = body.job_id!;
+      }
+
+      const job = await this.Job.findByPk(jobId, { transaction });
 
       if (!job) {
         await transaction.rollback();
@@ -1058,21 +1080,67 @@ export default class JobController {
         });
       }
 
-      await job.update(
+      // Find all job IDs to update (group by jo_number if available)
+      let jobIdsToUpdate = [job.id];
+      let relatedJobs = [job];
+
+      if (job.jo_number) {
+        relatedJobs = await this.Job.findAll({
+          where: { jo_number: job.jo_number },
+          transaction,
+        });
+        jobIdsToUpdate = relatedJobs.map((j: any) => j.id);
+      }
+
+      // Check 1: All jobs must have qty = 0
+      const pendingJobs = relatedJobs.filter((j: any) => Number(j.qty) > 0);
+      if (pendingJobs.length > 0) {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: `Cannot dispatch. The following jobs still have pending quantity: ${pendingJobs.map((j: any) => j.job_no).join(", ")}`,
+        });
+      }
+
+      // Check 2: Sum of qty_history must match sum of assigned worker quantity
+      const totalHistoryQty = relatedJobs.reduce((sum: number, j: any) => sum + Number(j.qty_history || 0), 0);
+
+      const assignments = await dbModels.AssignToWorker.findAll({
+        where: {
+          job_id: { [Op.in]: jobIdsToUpdate },
+          status: "ready-for-qc",
+        },
+        attributes: ["quantity_no"],
+        transaction,
+      });
+
+      const totalAssignedQty = assignments.reduce((sum: number, a: any) => sum + Number(a.quantity_no || 0), 0);
+
+      if (totalHistoryQty !== totalAssignedQty) {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: `Dispatch mismatch. Total Job History Qty (${totalHistoryQty}) does not match Total Assigned Worker Qty (${totalAssignedQty}).`,
+        });
+      }
+
+      await this.Job.update(
         {
           dispatch_date: body.dispatch_date,
           chalan_no: body.chalan_no,
           status: "completed",
           updated_by: body.updated_by,
         },
-        { transaction }
+        { where: { id: { [Op.in]: jobIdsToUpdate } }, transaction }
       );
 
-      // Also update the status of all worker assignments for this job to 'completed'
       await dbModels.AssignToWorker.update(
         { status: "completed", updated_by: body.updated_by },
         {
-          where: { job_id: body.job_id },
+          where: {
+            job_id: { [Op.in]: jobIdsToUpdate },
+            status: { [Op.ne]: "rejected" },
+          },
           transaction,
         }
       );
