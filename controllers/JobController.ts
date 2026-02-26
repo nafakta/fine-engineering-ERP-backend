@@ -1100,7 +1100,7 @@ export default class JobController {
         await transaction.rollback();
         return res.status(400).json({
           success: false,
-          error: `Cannot dispatch. A total of ${totalPendingQty} quantity is still pending (not assigned to workers) for Job Order ${joNumber}.`,
+          error: `${totalPendingQty} quantity not assigned to workers for Job Order ${joNumber}.`,
         });
       }
 
@@ -1124,7 +1124,7 @@ export default class JobController {
         await transaction.rollback();
         return res.status(400).json({
           success: false,
-          error: `Dispatch mismatch for Job Order ${joNumber}. Total required quantity is ${totalHistoryQty}, but only ${totalAssignedQty} is ready for QC. A quantity of ${difference} is not yet ready for dispatch.`,
+          error: `${difference}/${totalHistoryQty} remaining to be QC for ${joNumber}`,//Dispatch mismatch for Job Order ${joNumber}. Total required quantity is ${totalHistoryQty}, but only ${totalAssignedQty} is ready for QC. A quantity of ${difference} is not yet ready for dispatch.
         });
       }
 
