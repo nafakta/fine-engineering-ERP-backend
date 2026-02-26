@@ -1095,10 +1095,12 @@ export default class JobController {
       // Check 1: All jobs must have qty = 0
       const pendingJobs = relatedJobs.filter((j: any) => Number(j.qty) > 0);
       if (pendingJobs.length > 0) {
+        const totalPendingQty = pendingJobs.reduce((sum: number, j: any) => sum + Number(j.qty || 0), 0);
+        const joNumber = job.jo_number || job.job_no;
         await transaction.rollback();
         return res.status(400).json({
           success: false,
-          error: `Cannot dispatch. The following jobs still have pending quantity: ${pendingJobs.map((j: any) => j.job_no).join(", ")}`,
+          error: `Cannot dispatch. A total of ${totalPendingQty} quantity is still pending (not assigned to workers) for Job Order ${joNumber}.`,
         });
       }
 
@@ -1117,10 +1119,12 @@ export default class JobController {
       const totalAssignedQty = assignments.reduce((sum: number, a: any) => sum + Number(a.quantity_no || 0), 0);
 
       if (totalHistoryQty !== totalAssignedQty) {
+        const difference = totalHistoryQty - totalAssignedQty;
+        const joNumber = job.jo_number || job.job_no;
         await transaction.rollback();
         return res.status(400).json({
           success: false,
-          error: `Dispatch mismatch. Total Job History Qty (${totalHistoryQty}) does not match Total Assigned Worker Qty (${totalAssignedQty}).`,
+          error: `Dispatch mismatch for Job Order ${joNumber}. Total required quantity is ${totalHistoryQty}, but only ${totalAssignedQty} is ready for QC. A quantity of ${difference} is not yet ready for dispatch.`,
         });
       }
 

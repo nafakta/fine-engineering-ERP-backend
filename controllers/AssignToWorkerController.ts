@@ -346,6 +346,10 @@ public getReviewAssignmentsPublic = async (req: Request, res: Response) => {
         where.job_id = req.query.job_id;
       }
 
+      if (req.query.worker_id) {
+        where.worker_id = req.query.worker_id;
+      }
+
       if (req.query.worker_name) {
         where.worker_name = { [Op.iLike]: `%${String(req.query.worker_name).trim()}%` };
       }

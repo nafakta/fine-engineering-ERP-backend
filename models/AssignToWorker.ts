@@ -8,6 +8,7 @@ export interface AssignToWorkerAttributes {
   machine_size?: string;
   machine_code?: string;
   worker_name?: string;
+  worker_id?: string;
   quantity_no?: number;
   assigning_date?: Date;
   serial_no?: string;
@@ -33,6 +34,7 @@ export class AssignToWorker
   public machine_size!: string;
   public machine_code!: string;
   public worker_name!: string;
+  public worker_id!: string;
   public quantity_no!: number;
   public assigning_date!: Date;
   public serial_no!: string;
@@ -73,6 +75,10 @@ export class AssignToWorker
         },
         worker_name: {
           type: DataTypes.TEXT,
+          allowNull: true,
+        },
+        worker_id: {
+          type: DataTypes.UUID,
           allowNull: true,
         },
         quantity_no: {
