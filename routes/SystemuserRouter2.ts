@@ -32,6 +32,8 @@ router.post("/jobs/:id/reject", jobController.rejectJob);
 router.post("/jobs/:id/not-ok", jobController.markAsNotOk);
 router.post("/jobs/:id/rework", jobController.reworkJob);
 router.post("/jobs/dispatch", jobController.updateDispatchDetails);
+router.post("/jobs/:id/backToQc", jobController.markAsReadyForQc);
+router.post("/jobs/:id/reject-not-ok", jobController.rejectNotOkJob);
 
 router.post("/categories", categoryController.create);
 router.get("/categories", categoryController.list);

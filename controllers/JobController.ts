@@ -1029,7 +1029,7 @@ export default class JobController {
   // -------------------------
   public updateDispatchDetails = async (req: Request, res: Response) => {
     const schema = Yup.object({
-      job_id: Yup.string().uuid().optional(),
+      job_id: Yup.string().uuid().required("Job ID is required"),
       assignment_id: Yup.string().uuid().optional(),
       dispatch_date: Yup.date().required("Dispatch date is required"),
       chalan_no: Yup.string().required("Chalan number is required"),
@@ -1280,7 +1280,7 @@ export default class JobController {
         });
       }
 
-      const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc"]);
+      const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc", "not-ok"]);
       if (!validationResult.success) {
         await transaction.rollback();
         return res.status(400).json({
@@ -1319,6 +1319,180 @@ export default class JobController {
     } catch (err: any) {
       await transaction.rollback();
       console.error("Rework Job Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({ success: false, error: "Validation error", details: err.errors });
+      }
+      return res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  };
+
+  // -------------------------
+  // MARK AS READY FOR QC (REVERT NOT-OK)
+  // POST /api/v1/jobs/:id/ready-for-qc
+  // -------------------------
+  public markAsReadyForQc = async (req: Request, res: Response) => {
+    const schema = Yup.object({
+      id: Yup.string().uuid().required("Job ID is required"),
+      updated_by: Yup.string().uuid().nullable(),
+    });
+
+    const transaction = await dbModels.sequelize.transaction();
+
+    try {
+      const payload = req.body || {};
+      const body = await schema.validate(
+        { ...payload, id: req.params.id || payload.id },
+        { stripUnknown: true }
+      );
+
+      if (!this.Job || !dbModels.AssignToWorker) {
+        await transaction.rollback();
+        return res.status(500).json({
+          success: false,
+          error: "Job or AssignToWorker model not initialized",
+        });
+      }
+
+      const job = await this.Job.findByPk(body.id, { transaction });
+
+      if (!job) {
+        await transaction.rollback();
+        return res.status(404).json({ success: false, error: "Job not found" });
+      }
+
+      // Find all job IDs to update (group by jo_number if available)
+      let jobIdsToUpdate = [job.id];
+      if (job.jo_number) {
+        const relatedJobs = await this.Job.findAll({
+          where: { jo_number: job.jo_number },
+          transaction,
+        });
+        jobIdsToUpdate = relatedJobs.map((j: any) => j.id);
+      }
+
+      // Clear reason on Job
+      await this.Job.update(
+        {
+          reason: null,
+          updated_by: body.updated_by,
+        },
+        { where: { id: { [Op.in]: jobIdsToUpdate } }, transaction }
+      );
+
+      // Update assignments from 'not-ok' to 'ready-for-qc'
+      await dbModels.AssignToWorker.update(
+        { status: "ready-for-qc", updated_by: body.updated_by },
+        {
+          where: {
+            job_id: { [Op.in]: jobIdsToUpdate },
+            status: "not-ok",
+          },
+          transaction,
+        }
+      );
+
+      await transaction.commit();
+
+      return res.json({
+        success: true,
+        message: "Job and assignments marked as 'ready-for-qc' successfully",
+        data: job,
+      });
+    } catch (err: any) {
+      await transaction.rollback();
+      console.error("Mark as Ready-For-QC Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({ success: false, error: "Validation error", details: err.errors });
+      }
+      return res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  };
+
+  // -------------------------
+  // REJECT NOT-OK JOB
+  // POST /api/v1/jobs/:id/reject-not-ok
+  // -------------------------
+  public rejectNotOkJob = async (req: Request, res: Response) => {
+    const schema = Yup.object({
+      id: Yup.string().uuid().required("Job ID is required"),
+      updated_by: Yup.string().uuid().nullable(),
+    });
+
+    const transaction = await dbModels.sequelize.transaction();
+
+    try {
+      const payload = req.body || {};
+      const body = await schema.validate(
+        { ...payload, id: req.params.id || payload.id },
+        { stripUnknown: true }
+      );
+
+      if (!this.Job || !dbModels.AssignToWorker) {
+        await transaction.rollback();
+        return res.status(500).json({
+          success: false,
+          error: "Job or AssignToWorker model not initialized",
+        });
+      }
+
+      const job = await this.Job.findByPk(body.id, { transaction });
+
+      if (!job) {
+        await transaction.rollback();
+        return res.status(404).json({ success: false, error: "Job not found" });
+      }
+
+      // Check status: must be 'in-process'
+      if (job.status !== 'in-process') {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: `Only jobs with status 'in-process' can be rejected. Current status is '${job.status}'.`,
+        });
+      }
+
+      // Find all job IDs to update (group by jo_number if available)
+      let jobIdsToUpdate = [job.id];
+      if (job.jo_number) {
+        const relatedJobs = await this.Job.findAll({
+          where: { jo_number: job.jo_number },
+          transaction,
+        });
+        jobIdsToUpdate = relatedJobs.map((j: any) => j.id);
+      }
+
+      // Update Job: set rejected = true
+      await this.Job.update(
+        {
+          status: "rejected",
+          rejected: true,
+          updated_by: body.updated_by,
+        },
+        { where: { id: { [Op.in]: jobIdsToUpdate } }, transaction }
+      );
+
+      // Update AssignToWorker: set status to 'rejected' ONLY where current status is 'not-ok'
+      await dbModels.AssignToWorker.update(
+        { status: "rejected", updated_by: body.updated_by },
+        {
+          where: {
+            job_id: { [Op.in]: jobIdsToUpdate },
+            status: "not-ok",
+          },
+          transaction,
+        }
+      );
+
+      await transaction.commit();
+
+      return res.json({
+        success: true,
+        message: "Job marked as rejected and 'not-ok' assignments updated to 'rejected'.",
+        data: job,
+      });
+    } catch (err: any) {
+      await transaction.rollback();
+      console.error("Reject Not-Ok Job Error:", err);
       if (err instanceof Yup.ValidationError) {
         return res.status(400).json({ success: false, error: "Validation error", details: err.errors });
       }
