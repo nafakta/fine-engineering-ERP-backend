@@ -1080,6 +1080,15 @@ export default class JobController {
         });
       }
 
+      // Add a status check to ensure the job is in the correct state
+      if (job.status !== 'in-process') {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: `Only jobs with status 'in-process' can be dispatched. Current status is '${job.status}'.`,
+        });
+      }
+
       const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc"]);
       if (!validationResult.success) {
         await transaction.rollback();
@@ -1174,7 +1183,16 @@ export default class JobController {
         });
       }
 
-      const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc", "not-ok"]);
+      // Add a status check to ensure the job is in the correct state
+      if (job.status !== 'in-process') {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: `Only jobs with status 'in-process' can be marked as not-ok. Current status is '${job.status}'.`,
+        });
+      }
+
+      const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc"]);
       if (!validationResult.success) {
         await transaction.rollback();
         return res.status(400).json({
@@ -1253,7 +1271,16 @@ export default class JobController {
         return res.status(404).json({ success: false, error: "Job not found" });
       }
 
-      const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc", "not-ok"]);
+      // Add a status check to ensure the job is in the correct state
+      if (job.status !== 'in-process') {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: `Only jobs with status 'in-process' can be reworked. Current status is '${job.status}'.`,
+        });
+      }
+
+      const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc"]);
       if (!validationResult.success) {
         await transaction.rollback();
         return res.status(400).json({
