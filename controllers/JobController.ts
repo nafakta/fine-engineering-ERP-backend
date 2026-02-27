@@ -1081,13 +1081,13 @@ export default class JobController {
       }
 
       // Add a status check to ensure the job is in the correct state
-      if (job.status !== 'in-process') {
-        await transaction.rollback();
-        return res.status(400).json({
-          success: false,
-          error: `Only jobs with status 'in-process' can be dispatched. Current status is '${job.status}'.`,
-        });
-      }
+      // if (job.status !== 'in-process') {
+      //   await transaction.rollback();
+      //   return res.status(400).json({
+      //     success: false,
+      //     error: `Only jobs with status 'in-process' can be dispatched. Current status is '${job.status}'.`,
+      //   });
+      // }
 
       const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc"]);
       if (!validationResult.success) {
