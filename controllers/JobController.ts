@@ -1204,7 +1204,7 @@ export default class JobController {
 
       await this.Job.update(
         {
-          status: "not-ok",
+          //status: "not-ok",
           reason: body.reason,
           updated_by: body.updated_by,
         },
