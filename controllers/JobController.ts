@@ -1184,13 +1184,13 @@ export default class JobController {
       }
 
       // Add a status check to ensure the job is in the correct state
-      if (job.status !== 'in-process') {
-        await transaction.rollback();
-        return res.status(400).json({
-          success: false,
-          error: `Only jobs with status 'in-process' can be marked as not-ok. Current status is '${job.status}'.`,
-        });
-      }
+      // if (job.status !== 'in-process') {
+      //   await transaction.rollback();
+      //   return res.status(400).json({
+      //     success: false,
+      //     error: `Only jobs with status 'in-process' can be marked as not-ok. Current status is '${job.status}'.`,
+      //   });
+      // }
 
       const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc"]);
       if (!validationResult.success) {
@@ -1272,13 +1272,13 @@ export default class JobController {
       }
 
       // Add a status check to ensure the job is in the correct state
-      if (job.status !== 'in-process') {
-        await transaction.rollback();
-        return res.status(400).json({
-          success: false,
-          error: `Only jobs with status 'in-process' can be reworked. Current status is '${job.status}'.`,
-        });
-      }
+      // if (job.status !== 'in-process') {
+      //   await transaction.rollback();
+      //   return res.status(400).json({
+      //     success: false,
+      //     error: `Only jobs with status 'in-process' can be reworked. Current status is '${job.status}'.`,
+      //   });
+      // }
 
       const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc", "not-ok"]);
       if (!validationResult.success) {
@@ -1443,13 +1443,13 @@ export default class JobController {
       }
 
       // Check status: must be 'in-process'
-      if (job.status !== 'in-process') {
-        await transaction.rollback();
-        return res.status(400).json({
-          success: false,
-          error: `Only jobs with status 'in-process' can be rejected. Current status is '${job.status}'.`,
-        });
-      }
+      // if (job.status !== 'in-process') {
+      //   await transaction.rollback();
+      //   return res.status(400).json({
+      //     success: false,
+      //     error: `Only jobs with status 'in-process' can be rejected. Current status is '${job.status}'.`,
+      //   });
+      // }
 
       // Find all job IDs to update (group by jo_number if available)
       let jobIdsToUpdate = [job.id];
