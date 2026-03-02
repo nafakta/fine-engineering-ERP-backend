@@ -61,6 +61,7 @@ export default class JobController {
       client_name: Yup.string().nullable(),
       assign_to: Yup.string().nullable(),
       assign_date: Yup.date().nullable(),
+      urgent_due_date: Yup.date().nullable(),
       urgent: Yup.boolean().default(false),
       is_approved: Yup.boolean().default(false),
       rejected: Yup.boolean().default(false),
@@ -92,6 +93,29 @@ export default class JobController {
             success: false,
             error: `A job with TSO number '${body.tso_no}' already exists.`,
           });
+        }
+      }
+
+      // If a job with the same job_no, tso_no, or jo_number is urgent, make this one urgent too.
+      const orConditions: any[] = [];
+      if (body.job_no) orConditions.push({ job_no: body.job_no });
+      if (body.tso_no) orConditions.push({ tso_no: body.tso_no });
+      if (body.jo_number) orConditions.push({ jo_number: body.jo_number });
+
+      if (orConditions.length > 0) {
+        const urgentJob = await this.Job.findOne({
+          where: {
+            [Op.or]: orConditions,
+            urgent: true,
+          },
+          transaction,
+        });
+
+        if (urgentJob) {
+          body.urgent = true;
+          if (urgentJob.urgent_due_date) {
+            body.urgent_due_date = urgentJob.urgent_due_date;
+          }
         }
       }
 
@@ -212,6 +236,7 @@ export default class JobController {
         client_name: Yup.string().nullable(),
         assign_to: Yup.string().nullable(),
         assign_date: Yup.date().nullable(),
+        urgent_due_date: Yup.date().nullable(),
         urgent: Yup.boolean().default(false),
         is_approved: Yup.boolean().default(false),
         rejected: Yup.boolean().default(false),
@@ -246,6 +271,29 @@ export default class JobController {
             success: false,
             error: `A job with TSO number '${common_data.tso_no}' already exists.`,
           });
+        }
+      }
+
+      // If a job with the same job_no, tso_no, or jo_number is urgent, make all new jobs urgent.
+      const orConditions: any[] = [];
+      if (common_data.job_no) orConditions.push({ job_no: common_data.job_no });
+      if (common_data.tso_no) orConditions.push({ tso_no: common_data.tso_no });
+      if (common_data.jo_number) orConditions.push({ jo_number: common_data.jo_number });
+
+      if (orConditions.length > 0) {
+        const urgentJob = await this.Job.findOne({
+          where: {
+            [Op.or]: orConditions,
+            urgent: true,
+          },
+          transaction,
+        });
+
+        if (urgentJob) {
+          common_data.urgent = true;
+          if (urgentJob.urgent_due_date) {
+            common_data.urgent_due_date = urgentJob.urgent_due_date;
+          }
         }
       }
 
