@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import * as Yup from "yup";
-import { Op } from "sequelize";
+import { Op, Transaction } from "sequelize";
 import dbModels from "../models";
-import { JobType, JobStatus } from "../models/Job"; // Import the types
+import { JobType, JobStatus, Job } from "../models/Job"; // Import the types
 
 export default class JobController {
   private get Job() {
@@ -1030,10 +1030,15 @@ export default class JobController {
   public updateDispatchDetails = async (req: Request, res: Response) => {
     const schema = Yup.object({
       job_id: Yup.string().uuid().required("Job ID is required"),
+      assignment_id: Yup.string().uuid().optional(),
       dispatch_date: Yup.date().required("Dispatch date is required"),
       chalan_no: Yup.string().required("Chalan number is required"),
       updated_by: Yup.string().uuid().nullable(),
-    });
+    }).test(
+      "id-required",
+      "Either job_id or assignment_id must be provided.",
+      (value) => !!value.job_id || !!value.assignment_id
+    );
 
     const transaction = await dbModels.sequelize.transaction();
 
@@ -1048,7 +1053,24 @@ export default class JobController {
         });
       }
 
-      const job = await this.Job.findByPk(body.job_id, { transaction });
+      let jobId: string;
+
+      if (body.assignment_id) {
+        const assignment = await dbModels.AssignToWorker.findByPk(body.assignment_id, { transaction });
+        if (!assignment || !assignment.job_id) {
+          await transaction.rollback();
+          return res.status(404).json({
+            success: false,
+            error: "Assignment not found or is not linked to a job.",
+          });
+        }
+        jobId = assignment.job_id;
+      } else {
+        // We can be sure body.job_id exists because of the .test() validation
+        jobId = body.job_id!;
+      }
+
+      const job = await this.Job.findByPk(jobId, { transaction });
 
       if (!job) {
         await transaction.rollback();
@@ -1058,21 +1080,43 @@ export default class JobController {
         });
       }
 
-      await job.update(
+      // Add a status check to ensure the job is in the correct state
+      // if (job.status !== 'in-process') {
+      //   await transaction.rollback();
+      //   return res.status(400).json({
+      //     success: false,
+      //     error: `Only jobs with status 'in-process' can be dispatched. Current status is '${job.status}'.`,
+      //   });
+      // }
+
+      const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc"]);
+      if (!validationResult.success) {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: validationResult.error,
+        });
+      }
+
+      const jobIdsToUpdate = validationResult.jobIdsToUpdate!;
+
+      await this.Job.update(
         {
           dispatch_date: body.dispatch_date,
           chalan_no: body.chalan_no,
           status: "completed",
           updated_by: body.updated_by,
         },
-        { transaction }
+        { where: { id: { [Op.in]: jobIdsToUpdate } }, transaction }
       );
 
-      // Also update the status of all worker assignments for this job to 'completed'
       await dbModels.AssignToWorker.update(
         { status: "completed", updated_by: body.updated_by },
         {
-          where: { job_id: body.job_id },
+          where: {
+            job_id: { [Op.in]: jobIdsToUpdate },
+            status: { [Op.ne]: "rejected" },
+          },
           transaction,
         }
       );
@@ -1139,20 +1183,39 @@ export default class JobController {
         });
       }
 
-      await job.update(
+      // Add a status check to ensure the job is in the correct state
+      // if (job.status !== 'in-process') {
+      //   await transaction.rollback();
+      //   return res.status(400).json({
+      //     success: false,
+      //     error: `Only jobs with status 'in-process' can be marked as not-ok. Current status is '${job.status}'.`,
+      //   });
+      // }
+
+      const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc"]);
+      if (!validationResult.success) {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: validationResult.error,
+        });
+      }
+      const jobIdsToUpdate = validationResult.jobIdsToUpdate!;
+
+      await this.Job.update(
         {
-          status: "not-ok",
+          //status: "not-ok",
           reason: body.reason,
           updated_by: body.updated_by,
         },
-        { transaction }
+        { where: { id: { [Op.in]: jobIdsToUpdate } }, transaction }
       );
 
       // Also update the status of all worker assignments for this job to 'not-ok'
       await dbModels.AssignToWorker.update(
         { status: "not-ok", updated_by: body.updated_by },
         {
-          where: { job_id: body.id },
+          where: { job_id: { [Op.in]: jobIdsToUpdate } },
           transaction,
         }
       );
@@ -1208,23 +1271,46 @@ export default class JobController {
         return res.status(404).json({ success: false, error: "Job not found" });
       }
 
-      const reworkQty = job.qty_history;
-      if (reworkQty === null || reworkQty === undefined || isNaN(Number(reworkQty))) {
+      // Add a status check to ensure the job is in the correct state
+      // if (job.status !== 'in-process') {
+      //   await transaction.rollback();
+      //   return res.status(400).json({
+      //     success: false,
+      //     error: `Only jobs with status 'in-process' can be reworked. Current status is '${job.status}'.`,
+      //   });
+      // }
+
+      const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc", "not-ok"]);
+      if (!validationResult.success) {
         await transaction.rollback();
         return res.status(400).json({
           success: false,
-          error: "Cannot rework job: quantity history is not available or invalid.",
+          error: validationResult.error,
         });
       }
+      const jobIdsToUpdate = validationResult.jobIdsToUpdate!;
 
-      await job.update(
-        { qty: reworkQty, status: "in-process", updated_by: body.updated_by },
-        { transaction }
-      );
+      // Fetch all related jobs to loop through them for individual updates
+      const relatedJobs = await this.Job.findAll({ where: { id: { [Op.in]: jobIdsToUpdate } }, transaction });
+
+      for (const relatedJob of relatedJobs) {
+        const reworkQty = relatedJob.qty_history;
+        if (reworkQty === null || reworkQty === undefined || isNaN(Number(reworkQty))) {
+          await transaction.rollback();
+          return res.status(400).json({
+            success: false,
+            error: `Cannot rework job ${relatedJob.job_no}: quantity history is not available or invalid.`,
+          });
+        }
+        await relatedJob.update(
+          { qty: reworkQty, status: "in-process", updated_by: body.updated_by },
+          { transaction }
+        );
+      }
 
       await dbModels.AssignToWorker.update(
         { status: "rejected", updated_by: body.updated_by },
-        { where: { job_id: body.id }, transaction }
+        { where: { job_id: { [Op.in]: jobIdsToUpdate } }, transaction }
       );
 
       await transaction.commit();
@@ -1239,4 +1325,235 @@ export default class JobController {
       return res.status(500).json({ success: false, error: "Internal server error" });
     }
   };
+
+  // -------------------------
+  // MARK AS READY FOR QC (REVERT NOT-OK)
+  // POST /api/v1/jobs/:id/ready-for-qc
+  // -------------------------
+  public markAsReadyForQc = async (req: Request, res: Response) => {
+    const schema = Yup.object({
+      id: Yup.string().uuid().required("Job ID is required"),
+      updated_by: Yup.string().uuid().nullable(),
+    });
+
+    const transaction = await dbModels.sequelize.transaction();
+
+    try {
+      const payload = req.body || {};
+      const body = await schema.validate(
+        { ...payload, id: req.params.id || payload.id },
+        { stripUnknown: true }
+      );
+
+      if (!this.Job || !dbModels.AssignToWorker) {
+        await transaction.rollback();
+        return res.status(500).json({
+          success: false,
+          error: "Job or AssignToWorker model not initialized",
+        });
+      }
+
+      const job = await this.Job.findByPk(body.id, { transaction });
+
+      if (!job) {
+        await transaction.rollback();
+        return res.status(404).json({ success: false, error: "Job not found" });
+      }
+
+      // Find all job IDs to update (group by jo_number if available)
+      let jobIdsToUpdate = [job.id];
+      if (job.jo_number) {
+        const relatedJobs = await this.Job.findAll({
+          where: { jo_number: job.jo_number },
+          transaction,
+        });
+        jobIdsToUpdate = relatedJobs.map((j: any) => j.id);
+      }
+
+      // Clear reason on Job
+      await this.Job.update(
+        {
+          reason: null,
+          updated_by: body.updated_by,
+        },
+        { where: { id: { [Op.in]: jobIdsToUpdate } }, transaction }
+      );
+
+      // Update assignments from 'not-ok' to 'ready-for-qc'
+      await dbModels.AssignToWorker.update(
+        { status: "ready-for-qc", updated_by: body.updated_by },
+        {
+          where: {
+            job_id: { [Op.in]: jobIdsToUpdate },
+            status: "not-ok",
+          },
+          transaction,
+        }
+      );
+
+      await transaction.commit();
+
+      return res.json({
+        success: true,
+        message: "Job and assignments marked as 'ready-for-qc' successfully",
+        data: job,
+      });
+    } catch (err: any) {
+      await transaction.rollback();
+      console.error("Mark as Ready-For-QC Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({ success: false, error: "Validation error", details: err.errors });
+      }
+      return res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  };
+
+  // -------------------------
+  // REJECT NOT-OK JOB
+  // POST /api/v1/jobs/:id/reject-not-ok
+  // -------------------------
+  public rejectNotOkJob = async (req: Request, res: Response) => {
+    const schema = Yup.object({
+      id: Yup.string().uuid().required("Job ID is required"),
+      updated_by: Yup.string().uuid().nullable(),
+    });
+
+    const transaction = await dbModels.sequelize.transaction();
+
+    try {
+      const payload = req.body || {};
+      const body = await schema.validate(
+        { ...payload, id: req.params.id || payload.id },
+        { stripUnknown: true }
+      );
+
+      if (!this.Job || !dbModels.AssignToWorker) {
+        await transaction.rollback();
+        return res.status(500).json({
+          success: false,
+          error: "Job or AssignToWorker model not initialized",
+        });
+      }
+
+      const job = await this.Job.findByPk(body.id, { transaction });
+
+      if (!job) {
+        await transaction.rollback();
+        return res.status(404).json({ success: false, error: "Job not found" });
+      }
+
+      // Check status: must be 'in-process'
+      // if (job.status !== 'in-process') {
+      //   await transaction.rollback();
+      //   return res.status(400).json({
+      //     success: false,
+      //     error: `Only jobs with status 'in-process' can be rejected. Current status is '${job.status}'.`,
+      //   });
+      // }
+
+      // Find all job IDs to update (group by jo_number if available)
+      let jobIdsToUpdate = [job.id];
+      if (job.jo_number) {
+        const relatedJobs = await this.Job.findAll({
+          where: { jo_number: job.jo_number },
+          transaction,
+        });
+        jobIdsToUpdate = relatedJobs.map((j: any) => j.id);
+      }
+
+      // Update Job: set rejected = true
+      await this.Job.update(
+        {
+          status: "rejected",
+          rejected: true,
+          updated_by: body.updated_by,
+        },
+        { where: { id: { [Op.in]: jobIdsToUpdate } }, transaction }
+      );
+
+      // Update AssignToWorker: set status to 'rejected' ONLY where current status is 'not-ok'
+      await dbModels.AssignToWorker.update(
+        { status: "rejected", updated_by: body.updated_by },
+        {
+          where: {
+            job_id: { [Op.in]: jobIdsToUpdate },
+            status: "not-ok",
+          },
+          transaction,
+        }
+      );
+
+      await transaction.commit();
+
+      return res.json({
+        success: true,
+        message: "Job marked as rejected and 'not-ok' assignments updated to 'rejected'.",
+        data: job,
+      });
+    } catch (err: any) {
+      await transaction.rollback();
+      console.error("Reject Not-Ok Job Error:", err);
+      if (err instanceof Yup.ValidationError) {
+        return res.status(400).json({ success: false, error: "Validation error", details: err.errors });
+      }
+      return res.status(500).json({ success: false, error: "Internal server error" });
+    }
+  };
+
+  private async validateJobGroupState(
+    job: Job,
+    transaction: Transaction,
+    validAssignmentStatuses: string[]
+  ): Promise<{ success: boolean; error?: string; jobIdsToUpdate?: string[] }> {
+    // --- Validation: Check qty_history vs assigned ---
+    let jobIdsToUpdate = [job.id];
+    let relatedJobs: Job[] = [job];
+
+    if (job.jo_number) {
+      relatedJobs = await this.Job.findAll({
+        where: { jo_number: job.jo_number },
+        transaction,
+      });
+      jobIdsToUpdate = relatedJobs.map((j) => j.id);
+    }
+
+    // Check 1: All jobs must have qty = 0
+    const pendingJobs = relatedJobs.filter((j) => Number(j.qty) > 0);
+    if (pendingJobs.length > 0) {
+      const totalPendingQty = pendingJobs.reduce((sum, j) => sum + Number(j.qty || 0), 0);
+      const joNumber = job.jo_number || job.job_no;
+      return {
+        success: false,
+        error: `${totalPendingQty} quantity not assigned to workers for Job Order ${joNumber}.`,
+      };
+    }
+
+    // Check 2: Sum of qty_history must match sum of assigned worker quantity
+    const totalHistoryQty = relatedJobs.reduce((sum, j) => sum + Number(j.qty_history || 0), 0);
+
+    const whereStatus: any =
+      validAssignmentStatuses.length === 1 ? validAssignmentStatuses[0] : { [Op.or]: validAssignmentStatuses };
+
+    const assignments = await dbModels.AssignToWorker.findAll({
+      where: {
+        job_id: { [Op.in]: jobIdsToUpdate },
+        status: whereStatus,
+      },
+      attributes: ["quantity_no"],
+      transaction,
+    });
+
+    const totalAssignedQty = assignments.reduce((sum: number, a: any) => sum + Number(a.quantity_no || 0), 0);
+
+    if (totalHistoryQty !== totalAssignedQty) {
+      const difference = totalHistoryQty - totalAssignedQty;
+      const joNumber = job.jo_number || job.job_no;
+      return {
+        success: false,
+        error: `${difference}/${totalHistoryQty} remaining to be QC for ${joNumber}`,
+      };
+    }
+
+    return { success: true, jobIdsToUpdate };
+  }
 }

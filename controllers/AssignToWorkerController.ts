@@ -358,6 +358,13 @@ export default class AssignToWorkerController {
 //       if (req.query.review_for) {
 //         where.review_for = req.query.review_for;
 //       }
+      // if (req.query.worker_id) {
+      //   where.worker_id = req.query.worker_id;
+      // }
+
+      // if (req.query.worker_name) {
+      //   where.worker_name = { [Op.iLike]: `%${String(req.query.worker_name).trim()}%` };
+      // }
 
 //       if (req.query.status) {
 //         where.status = { [Op.iLike]: `%${String(req.query.status).trim()}%` };
