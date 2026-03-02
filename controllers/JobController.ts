@@ -1129,13 +1129,13 @@ export default class JobController {
       }
 
       // Add a status check to ensure the job is in the correct state
-      // if (job.status !== 'in-process') {
-      //   await transaction.rollback();
-      //   return res.status(400).json({
-      //     success: false,
-      //     error: `Only jobs with status 'in-process' can be dispatched. Current status is '${job.status}'.`,
-      //   });
-      // }
+      if (job.status !== 'in-process') {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: `Only jobs with status 'in-process' can be dispatched. Current status is '${job.status}'.`,
+        });
+      }
 
       const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc"]);
       if (!validationResult.success) {
@@ -1232,13 +1232,13 @@ export default class JobController {
       }
 
       // Add a status check to ensure the job is in the correct state
-      // if (job.status !== 'in-process') {
-      //   await transaction.rollback();
-      //   return res.status(400).json({
-      //     success: false,
-      //     error: `Only jobs with status 'in-process' can be marked as not-ok. Current status is '${job.status}'.`,
-      //   });
-      // }
+      if (job.status !== 'in-process') {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: `Only jobs with status 'in-process' can be marked as not-ok. Current status is '${job.status}'.`,
+        });
+      }
 
       const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc"]);
       if (!validationResult.success) {
@@ -1252,7 +1252,6 @@ export default class JobController {
 
       await this.Job.update(
         {
-          //status: "not-ok",
           reason: body.reason,
           updated_by: body.updated_by,
         },
@@ -1263,7 +1262,10 @@ export default class JobController {
       await dbModels.AssignToWorker.update(
         { status: "not-ok", updated_by: body.updated_by },
         {
-          where: { job_id: { [Op.in]: jobIdsToUpdate } },
+          where: {
+            job_id: { [Op.in]: jobIdsToUpdate },
+            status: "ready-for-qc", // Only update assignments that are ready for QC
+          },
           transaction,
         }
       );
@@ -1320,13 +1322,13 @@ export default class JobController {
       }
 
       // Add a status check to ensure the job is in the correct state
-      // if (job.status !== 'in-process') {
-      //   await transaction.rollback();
-      //   return res.status(400).json({
-      //     success: false,
-      //     error: `Only jobs with status 'in-process' can be reworked. Current status is '${job.status}'.`,
-      //   });
-      // }
+      if (job.status !== 'not-ok') {
+        await transaction.rollback();
+        return res.status(400).json({
+          success: false,
+          error: `Only jobs with status 'not-ok' can be reworked. Current status is '${job.status}'.`,
+        });
+      }
 
       const validationResult = await this.validateJobGroupState(job, transaction, ["ready-for-qc", "not-ok"]);
       if (!validationResult.success) {
@@ -1596,6 +1598,7 @@ export default class JobController {
     if (totalHistoryQty !== totalAssignedQty) {
       const difference = totalHistoryQty - totalAssignedQty;
       const joNumber = job.jo_number || job.job_no;
+      const requiredState = validAssignmentStatuses.join(" or ");
       return {
         success: false,
         error: `${difference}/${totalHistoryQty} remaining to be QC for ${joNumber}`,
