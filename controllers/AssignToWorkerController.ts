@@ -1214,7 +1214,7 @@ public getReviewWelding = async (req: Request, res: Response) => {
         });
       }
 
-      await record.update({ status: "rejected", updated_by }, { transaction });
+      await record.update({ status: "machine", updated_by }, { transaction });
 
       // Add quantity back to Job
       if (record.quantity_no && record.quantity_no > 0) {
