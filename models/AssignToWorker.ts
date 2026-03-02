@@ -115,6 +115,7 @@ export class AssignToWorker
               "completed",
               "not-ok",
               "rejected",
+              "machine",  // Add this line
             ]],
           },
         },
