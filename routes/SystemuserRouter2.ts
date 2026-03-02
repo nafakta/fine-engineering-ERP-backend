@@ -5,6 +5,7 @@ import PendingMaterialController from "../controllers/PendingMaterialController"
 import PoServiceController from "../controllers/PoServiceController";
 import AssignToWorkerController from "../controllers/AssignToWorkerController";
 import WorkerAuthController from "../controllers/WorkerAuthController";
+import MaterialMovements from "../controllers/MaterialMovements";
 import { upload } from "../multerconfig";
 import { requireWorkerAuth } from "../middleware/auth";
 
@@ -15,6 +16,7 @@ const pendingMaterialController = new PendingMaterialController();
 const poServiceController = new PoServiceController();
 const assignToWorkerController = new AssignToWorkerController();
 const workerAuthController = new WorkerAuthController();
+const materialMovementController = new MaterialMovements();
 
 // Define routes for the unified Job API
 router.post("/jobs", jobController.create);
@@ -62,16 +64,36 @@ router.get("/assign-to-worker/:id", assignToWorkerController.get);
 router.get("/assign-to-worker", assignToWorkerController.list);
 router.put("/assign-to-worker/:id", assignToWorkerController.update);
 router.delete("/assign-to-worker/:id", assignToWorkerController.delete);
-router.get("/worker/assignments",requireWorkerAuth, assignToWorkerController.workerList);
-router.post("/worker/assignments/:id/review",requireWorkerAuth, assignToWorkerController.moveToReview);
+router.get("/worker/assignments", requireWorkerAuth, assignToWorkerController.workerList);
+router.post("/worker/assignments/:id/review", requireWorkerAuth, assignToWorkerController.moveToReview);
 router.post("/assign-to-worker/:id/reject", assignToWorkerController.rejectAssignment);
 router.post("/assign-to-worker/:id/ready-for-qc", assignToWorkerController.moveToReadyForQC);
 router.post("/worker/register", workerAuthController.register);
 router.post("/worker/login", workerAuthController.login);
 router.get("/worker/me", requireWorkerAuth, workerAuthController.me);
 router.get(
-    "/public/review-assignments",
-    assignToWorkerController.getReviewAssignmentsPublic
-  );
+  "/public/review-assignments",
+  assignToWorkerController.getReviewAssignmentsPublic
+);
+router.post("/assign-to-worker/:id/machine", assignToWorkerController.moveToMachine);
+router.post("/assign-to-worker/:id/assign-vendor", assignToWorkerController.assignVendor);
+// QC Welding outgoing/incoming
+router.post("/assign-to-worker/:id/qc-outgoing-welding", assignToWorkerController.qcOutgoingWelding);
+router.post("/assign-to-worker/:id/qc-incoming-welding", assignToWorkerController.qcIncomingWelding);
 
+// QC Vendor outgoing/incoming
+router.post("/assign-to-worker/:id/qc-outgoing-vendor", assignToWorkerController.qcOutgoingVendor);
+router.post("/assign-to-worker/:id/qc-incoming-vendor", assignToWorkerController.qcIncomingVendor);
+
+
+// QC outgoing (for qc-welding and qc-vendor)
+router.post("/assign-to-worker/:id/qc-outgoing", assignToWorkerController.qcOutgoing);
+router.post("/assign-to-worker/:id/welding", assignToWorkerController.moveToWelding);
+router.post("/assign-to-worker/:id/vendor", assignToWorkerController.moveToVendor);
+router.post("/assign-to-worker/:id/qc-incoming", assignToWorkerController.qcIncoming);
+router.get("/review/welding", assignToWorkerController.getReviewWelding);
+router.get("/review/vendor", assignToWorkerController.getReviewVendor);
+
+router.get("/material-movement", materialMovementController.list);
+router.get("/material-movement/summary", materialMovementController.machineSummary);
 export default router;
