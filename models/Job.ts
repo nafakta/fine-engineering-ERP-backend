@@ -113,7 +113,7 @@ export const initJobModel = (sequelize: Sequelize) => {
         allowNull: false,
         defaultValue: "in-process",
         validate: {
-          isIn: [["in-process", "completed", "not-ok"]],
+          isIn: [["in-process", "completed", "not-ok", "rejected"]],
         },
       },
       urgent: {

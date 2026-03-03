@@ -1322,11 +1322,11 @@ export default class JobController {
       }
 
       // Add a status check to ensure the job is in the correct state
-      if (job.status !== 'not-ok') {
+      if (job.status !== 'in-process') {
         await transaction.rollback();
         return res.status(400).json({
           success: false,
-          error: `Only jobs with status 'not-ok' can be reworked. Current status is '${job.status}'.`,
+          error: `Only jobs with status 'in-process' can be reworked. Current status is '${job.status}'.`,
         });
       }
 
@@ -1353,13 +1353,13 @@ export default class JobController {
           });
         }
         await relatedJob.update(
-          { qty: reworkQty, status: "in-process", updated_by: body.updated_by },
+          { qty: reworkQty, updated_by: body.updated_by },
           { transaction }
         );
       }
 
       await dbModels.AssignToWorker.update(
-        { status: "rejected", updated_by: body.updated_by },
+        { status: "machine", updated_by: body.updated_by },
         { where: { job_id: { [Op.in]: jobIdsToUpdate } }, transaction }
       );
 
