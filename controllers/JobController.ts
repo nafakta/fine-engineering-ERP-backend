@@ -1359,7 +1359,7 @@ export default class JobController {
       }
 
       await dbModels.AssignToWorker.update(
-        { status: "machine", updated_by: body.updated_by },
+        { status: "rejected", updated_by: body.updated_by },
         { where: { job_id: { [Op.in]: jobIdsToUpdate } }, transaction }
       );
 
