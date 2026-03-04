@@ -89,10 +89,10 @@ router.post("/assign-to-worker/:id/qc-incoming-vendor", assignToWorkerController
 
 
 // QC outgoing (for qc-welding and qc-vendor)
-router.post("/assign-to-worker/:id/qc-outgoing", assignToWorkerController.qcOutgoing);
+// router.post("/assign-to-worker/:id/qc-outgoing", assignToWorkerController.qcOutgoing);
 router.post("/assign-to-worker/:id/welding", assignToWorkerController.moveToWelding);
 router.post("/assign-to-worker/:id/vendor", assignToWorkerController.moveToVendor);
-router.post("/assign-to-worker/:id/qc-incoming", assignToWorkerController.qcIncoming);
+// router.post("/assign-to-worker/:id/qc-incoming", assignToWorkerController.qcIncoming);
 router.get("/review/welding", assignToWorkerController.getReviewWelding);
 router.get("/review/vendor", assignToWorkerController.getReviewVendor);
 
