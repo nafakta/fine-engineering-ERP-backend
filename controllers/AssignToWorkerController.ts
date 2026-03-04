@@ -542,221 +542,152 @@ export default class AssignToWorkerController {
     // ✅ QC OUTGOING
     // POST /assign-to-worker/:id/qc-outgoing
     // Used for both vendor & welding outgoing
-    public qcOutgoing = async (req: Request, res: Response) => {
-      const t = await dbModels.sequelize.transaction();
-      try {
-        const schema = Yup.object({
-          qc_date: Yup.string().required("qc_date is required"),
-          qc_quantity: Yup.number().required("qc_quantity is required").min(1),
-          gatepass_no: Yup.string().required("gatepass_no is required"),
-        });
-  
-        const body = await schema.validate(req.body, {
-          abortEarly: false,
-          stripUnknown: true,
-        });
-  
-        const id = req.params.id;
-  
-        const row = await this.AssignToWorker.findByPk(id, { transaction: t });
-        if (!row) {
-          await t.rollback();
-          return res.status(404).json({ success: false, error: "Item not found" });
-        }
-  
-        // ⚠️ Outgoing is allowed only if current status is qc-vendor or qc-welding
-        if (row.status !== "qc-vendor" && row.status !== "qc-welding") {
-          await t.rollback();
-          return res.status(400).json({
-            success: false,
-            error: `qc-outgoing allowed only from qc-vendor/qc-welding. Current status=${row.status}`,
-          });
-        }
-  
-        // ✅ Next status after outgoing
-        const nextStatus = row.status === "qc-vendor" ? "in-vendor" : "in-welding";
-  
-        await row.update(
-          {
-            qc_date: body.qc_date,
-            qc_quantity: body.qc_quantity,
-            gatepass_no: body.gatepass_no,
-            status: nextStatus,
-            // keep review_for null here (incoming decides)
-            review_for: null,
-          },
-          { transaction: t }
-        );
-  
-        await t.commit();
-        return res.json({ success: true, data: row });
-      } catch (err: any) {
-        await t.rollback();
-        return res.status(500).json({
-          success: false,
-          error: err?.message || "Internal server error",
-        });
-      }
-    };
+ public qcOutgoing = async (req: Request, res: Response) => {
+  const t = await dbModels.sequelize.transaction();
+  try {
+    const schema = Yup.object({
+      qc_date: Yup.string().required("qc_date is required"),
+      qc_quantity: Yup.number().required("qc_quantity is required").min(1),
+      gatepass_no: Yup.string().trim().nullable().optional(),
+    });
+
+    const body = await schema.validate(req.body, { abortEarly: false, stripUnknown: true });
+
+    const id = req.params.id;
+    const row = await this.AssignToWorker.findByPk(id, { transaction: t });
+
+    if (!row) {
+      await t.rollback();
+      return res.status(404).json({ success: false, error: "Item not found" });
+    }
+
+    // Only allowed from qc-welding / qc-vendor
+    if (row.status !== "qc-welding" && row.status !== "qc-vendor") {
+      await t.rollback();
+      return res.status(400).json({
+        success: false,
+        error: `qc-outgoing allowed only from qc-welding/qc-vendor. Current status=${row.status}`,
+      });
+    }
+
+    const outgoingQty = Number(body.qc_quantity);
+    const totalAssigned = Number(row.quantity_no ?? 0);
+
+    if (outgoingQty > totalAssigned) {
+      await t.rollback();
+      return res.status(400).json({
+        success: false,
+        error: `Outgoing qty cannot exceed assigned qty. Assigned=${totalAssigned}`,
+      });
+    }
+
+    const nextStatus = row.status === "qc-welding" ? "in-welding" : "in-vendor";
+    const nextReviewFor = row.status === "qc-welding" ? "welding" : "vendor";
+
+    await row.update(
+      {
+        qc_outgoing_date: body.qc_date,
+        gatepass_no: body.gatepass_no || row.gatepass_no || null,
+
+        qc_outgoing_qty: outgoingQty,     // ✅ store outgoing
+        qc_incoming_qty: 0,               // ✅ reset incoming for this cycle
+
+        status: nextStatus,
+        review_for: nextReviewFor,
+      },
+      { transaction: t }
+    );
+
+    await t.commit();
+    return res.json({ success: true, data: row });
+  } catch (err: any) {
+    await t.rollback();
+    return res.status(500).json({ success: false, error: err?.message || "Internal server error" });
+  }
+};
   
     // ✅ QC INCOMING
     // POST /assign-to-worker/:id/qc-incoming
     // MUST be called only when status is in-vendor or in-welding
     // It moves item into in-review and sets review_for correctly
-    public qcIncoming = async (req: Request, res: Response) => {
-      const t = await dbModels.sequelize.transaction();
-      try {
-        const schema = Yup.object({
-          qc_date: Yup.string().required("qc_date is required"),
-          qc_quantity: Yup.number()
-            .typeError("qc_quantity must be a number")
-            .required("qc_quantity is required")
-            .integer("qc_quantity must be an integer")
-            .min(1, "qc_quantity must be >= 1"),
-        });
-    
-        const body = await schema.validate(req.body, {
-          abortEarly: false,
-          stripUnknown: true,
-        });
-    
-        const id = req.params.id;
-    
-        if (!this.AssignToWorker) {
-          await t.rollback();
-          return res.status(500).json({ success: false, error: "AssignToWorker model not initialized" });
-        }
-    
-        const row = await this.AssignToWorker.findByPk(id, { transaction: t });
-        if (!row) {
-          await t.rollback();
-          return res.status(404).json({ success: false, error: "Item not found" });
-        }
-    
-        // ✅ allowed only from these statuses
-        let nextReviewFor: "vendor" | "welding" | null = null;
-        if (row.status === "in-vendor") nextReviewFor = "vendor";
-        if (row.status === "in-welding") nextReviewFor = "welding";
-    
-        if (!nextReviewFor) {
-          await t.rollback();
-          return res.status(400).json({
-            success: false,
-            error: `qc-incoming allowed only from in-vendor/in-welding. Current status=${row.status}`,
-          });
-        }
-    
-        const currentQty = Number(row.quantity_no ?? 0);
-        const incomingQty = Number(body.qc_quantity ?? 0);
-    
-        if (currentQty <= 0) {
-          await t.rollback();
-          return res.status(400).json({ success: false, error: "Current assignment quantity is 0" });
-        }
-    
-        if (incomingQty > currentQty) {
-          await t.rollback();
-          return res.status(400).json({
-            success: false,
-            error: `Incoming qty cannot be greater than pending qty. Pending=${currentQty}`,
-          });
-        }
-    
-        // ✅ CASE 1: FULL INCOMING -> same row moved to review
-        if (incomingQty === currentQty) {
-          await row.update(
-            {
-              qc_date: body.qc_date,
-              qc_quantity: incomingQty,
-    
-              status: "in-review",
-              review_for: nextReviewFor,
-            },
-            { transaction: t }
-          );
-    
-          await t.commit();
-          return res.json({
-            success: true,
-            data: row,
-            message: `Full incoming received (${incomingQty}). Moved to in-review (${nextReviewFor}).`,
-          });
-        }
-    
-        // ✅ CASE 2: PARTIAL INCOMING -> SPLIT
-        const remainingQty = currentQty - incomingQty;
-    
-        // 1) keep original row pending with remaining qty (stays in-vendor / in-welding)
-        await row.update(
-          {
-            quantity_no: remainingQty,
-            // do NOT overwrite qc fields here, because this row is still pending
-            // qc_date: null,
-            // qc_quantity: null,
-            // gatepass_no: null,
-            status: row.status, // stays as in-vendor or in-welding
-          },
-          { transaction: t }
-        );
-    
-        // 2) create new row for incoming qty -> move to review
-        const reviewRowPayload = {
-          jo_no: row.jo_no,
-          item_no: row.item_no,
-          machine_category: row.machine_category,
-          machine_size: row.machine_size,
-          machine_code: row.machine_code,
-    
-          worker_name: row.worker_name,
-          worker_id: row.worker_id,
-    
-          serial_no: row.serial_no,
-          job_id: row.job_id,
-          assigning_date: row.assigning_date,
-    
-          vendor_name: row.vendor_name,
-    
-          quantity_no: incomingQty,
-    
-          qc_date: body.qc_date,
-          qc_quantity: incomingQty,
-    
-          status: "in-review",
-          review_for: nextReviewFor,
-    
-          created_by: row.created_by,
-          updated_by: row.updated_by,
-        };
-    
-        const reviewRow = await this.AssignToWorker.create(reviewRowPayload, { transaction: t });
-    
-        await t.commit();
-    
-        return res.json({
-          success: true,
-          data: {
-            remaining_pending: row,
-            moved_to_review: reviewRow,
-          },
-          message: `Partial incoming received (${incomingQty}). Remaining ${remainingQty} still pending in ${row.status}.`,
-        });
-      } catch (err: any) {
-        await t.rollback();
-    
-        if (err instanceof Yup.ValidationError) {
-          return res.status(400).json({
-            success: false,
-            error: "Validation error",
-            details: err.errors,
-          });
-        }
-    
-        return res.status(500).json({
-          success: false,
-          error: err?.message || "Internal server error",
-        });
-      }
-    };
+   public qcIncoming = async (req: Request, res: Response) => {
+  const t = await dbModels.sequelize.transaction();
+  try {
+    const schema = Yup.object({
+      qc_date: Yup.string().required("qc_date is required"),
+      qc_quantity: Yup.number().required("qc_quantity is required").min(1),
+    });
+
+    const body = await schema.validate(req.body, { abortEarly: false, stripUnknown: true });
+    const id = req.params.id;
+
+    const row = await this.AssignToWorker.findByPk(id, { transaction: t });
+    if (!row) {
+      await t.rollback();
+      return res.status(404).json({ success: false, error: "Item not found" });
+    }
+
+    // must be returning from welding/vendor
+    const isVendor = row.status === "in-vendor";
+    const isWelding = row.status === "in-welding";
+
+    if (!isVendor && !isWelding) {
+      await t.rollback();
+      return res.status(400).json({
+        success: false,
+        error: `qc-incoming allowed only from in-vendor/in-welding. Current status=${row.status}`,
+      });
+    }
+
+    const outgoingTotal = Number(row.qc_outgoing_qty ?? 0);
+    if (outgoingTotal <= 0) {
+      await t.rollback();
+      return res.status(400).json({ success: false, error: "Outgoing qty is not set. Fill QC Outgoing first." });
+    }
+
+    const inc = Number(body.qc_quantity);
+    const incomingBefore = Number(row.qc_incoming_qty ?? 0);
+    const incomingAfter = incomingBefore + inc;
+
+    if (incomingAfter > outgoingTotal) {
+      await t.rollback();
+      return res.status(400).json({
+        success: false,
+        error: `Incoming total cannot exceed outgoing qty. Outgoing=${outgoingTotal}, CurrentIncoming=${incomingBefore}`,
+      });
+    }
+
+    const reviewFor = isVendor ? "vendor" : "welding";
+
+    // If fully received → move to in-review, else stay in-vendor/in-welding
+    const nextStatus = incomingAfter === outgoingTotal ? "in-review" : row.status;
+
+    await row.update(
+      {
+        qc_incoming_date: body.qc_date,
+        qc_incoming_qty: incomingAfter,
+        status: nextStatus,
+        review_for: incomingAfter === outgoingTotal ? reviewFor : row.review_for,
+      },
+      { transaction: t }
+    );
+
+    await t.commit();
+    return res.json({
+      success: true,
+      data: row,
+      meta: {
+        outgoingTotal,
+        incomingAfter,
+        pending: outgoingTotal - incomingAfter,
+        fullyReceived: incomingAfter === outgoingTotal,
+      },
+    });
+  } catch (err: any) {
+    await t.rollback();
+    return res.status(500).json({ success: false, error: err?.message || "Internal server error" });
+  }
+};
 
   public qcOutgoingVendor = async (req: Request, res: Response) => {
     const row = await this.AssignToWorker.findByPk(req.params.id);
