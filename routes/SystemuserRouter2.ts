@@ -96,8 +96,11 @@ router.post("/assign-to-worker/:id/vendor", assignToWorkerController.moveToVendo
 router.get("/review/welding", assignToWorkerController.getReviewWelding);
 router.get("/review/vendor", assignToWorkerController.getReviewVendor);
 
+// dropdown options for dependent selects
+router.get("/material-movement/options", materialMovementController.options);
+
+// list data for table (paginated + filters)
 router.get("/material-movement", materialMovementController.list);
-router.get("/material-movement/summary", materialMovementController.machineSummary);
 router.post("/assign-to-worker/:id/qc-outgoing",qcOutgoing);
 router.post("/assign-to-worker/:id/qc-incoming",qcIncoming);
 
