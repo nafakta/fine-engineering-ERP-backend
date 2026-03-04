@@ -6,6 +6,8 @@ import PoServiceController from "../controllers/PoServiceController";
 import AssignToWorkerController from "../controllers/AssignToWorkerController";
 import WorkerAuthController from "../controllers/WorkerAuthController";
 import MaterialMovements from "../controllers/MaterialMovements";
+import { qcOutgoing, qcIncoming } from "../controllers/qcController";
+
 import { upload } from "../multerconfig";
 import { requireWorkerAuth } from "../middleware/auth";
 
@@ -96,4 +98,7 @@ router.get("/review/vendor", assignToWorkerController.getReviewVendor);
 
 router.get("/material-movement", materialMovementController.list);
 router.get("/material-movement/summary", materialMovementController.machineSummary);
+router.post("/assign-to-worker/:id/qc-outgoing",qcOutgoing);
+router.post("/assign-to-worker/:id/qc-incoming",qcIncoming);
+
 export default router;
