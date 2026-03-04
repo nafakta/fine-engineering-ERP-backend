@@ -604,7 +604,7 @@ export default class AssignToWorkerController {
     await t.rollback();
     return res.status(500).json({ success: false, error: err?.message || "Internal server error" });
   }
-}; 
+};
   
     // ✅ QC INCOMING
     // POST /assign-to-worker/:id/qc-incoming
